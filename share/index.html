@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>編成共有 | Trickcal Manager</title>
+  <meta name="description" content="Trickcal Managerの編成共有">
+  <link rel="icon" href="/ico.webp?v=f347347e68e894b7" type="image/webp">
+  <script>
+    (() => {
+      const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)').matches;
+      document.documentElement.dataset.theme = prefersLight ? 'light' : 'dark';
+    })();
+  </script>
+  <link rel="stylesheet" href="/formation-share-prototype.css?v=f347347e68e894b7">
+  <link rel="canonical" href="https://trickcal.irlab.dev/share/">
+  <meta property="og:url" content="https://trickcal.irlab.dev/share/">
+  <script>(() => { const indexAliases = ["/share/index.html"]; if (indexAliases.includes(location.pathname)) location.replace("/share/" + (location.search || '') + (location.hash || '')); })();</script>
+  <script>window.TRICKCAL_PUBLIC_SITE_CONFIG={"schemaVersion":1,"profile":"new","origin":"https://trickcal.irlab.dev","basePath":"/","assetBasePath":"/","assetVersion":"f347347e68e894b7","routes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"peerRoutes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"serviceWorker":{"script":"service-worker.js","scope":"/"},"serviceWorkerPolicy":{"source":"service-worker.js","cacheName":"trickcal-manager","navigationStrategy":"network-first","assetStrategy":"stale-while-revalidate","excludedPathPrefixes":["/transfer/","/recovery/","/storage-transfer.html","/storage-recovery.html","/trickcal-manager/transfer/","/trickcal-manager/recovery/","/trickcal-manager/storage-transfer.html","/trickcal-manager/storage-recovery.html"]}};</script>
+  <script src="/public-site-runtime.js?v=f347347e68e894b7"></script>
+</head>
+<body class="formation-share-page">
+  <header class="share-topbar">
+    <div class="share-topbar-brand">
+      <span class="share-kicker">TRICKCAL MANAGER</span>
+      <h1>編成共有</h1>
+    </div>
+    <div class="share-topbar-actions">
+      <button type="button" class="theme-button" id="theme-toggle" aria-label="テーマ切替" aria-pressed="true">
+        <span aria-hidden="true">☼</span><span class="theme-button-label">ライト</span>
+      </button>
+      <a href="/manager/?recover=20260912" class="back-link">ステータス管理へ</a>
+    </div>
+  </header>
+
+  <main class="share-shell">
+    <section id="share-error" class="share-panel share-error" hidden role="alert" aria-live="assertive">
+      <h2>共有編成を表示できません</h2>
+      <p id="share-error-message">URLの内容を確認してください。</p>
+      <a href="/manager/?recover=20260912" class="back-link">ステータス管理へ戻る</a>
+    </section>
+
+    <div id="share-content">
+      <section class="share-panel formation-preview-panel" aria-labelledby="formation-preview-title">
+        <div class="panel-heading">
+          <div class="formation-heading-title">
+            <h2 id="formation-preview-title">編成配置</h2>
+          </div>
+          <div class="formation-heading-tools">
+            <span id="formation-total-cost" class="formation-total-cost" aria-label="総合コスト"></span>
+          </div>
+        </div>
+        <div id="formation-grid" class="formation-grid" aria-live="polite"></div>
+      </section>
+
+      <section class="share-support-grid">
+        <div class="share-support-top">
+          <article class="share-panel support-panel spell-panel" aria-labelledby="spell-title">
+            <div class="panel-heading compact-heading">
+              <h2 id="spell-title">スペル</h2>
+              <span id="spell-count" class="support-count"></span>
+            </div>
+            <div id="spell-list" class="support-card-list"></div>
+          </article>
+
+          <article class="share-panel support-panel master-power-panel" aria-labelledby="power-title">
+            <div class="panel-heading compact-heading">
+              <h2 id="power-title">教主の権能</h2>
+              <span id="power-count" class="support-count"></span>
+            </div>
+            <div id="master-power" class="master-power-list"></div>
+          </article>
+        </div>
+
+        <article id="global-enhancement-panel" class="share-panel support-panel global-enhancement-panel" aria-labelledby="global-enhancement-title">
+          <div class="panel-heading compact-heading">
+            <h2 id="global-enhancement-title">全体強化数値</h2>
+          </div>
+          <div id="global-enhancement-list" class="global-enhancement-list" aria-live="polite"></div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <aside id="share-action-bar" class="share-action-bar" aria-label="共有操作">
+    <span id="share-image-state" class="share-image-state" aria-live="polite">画像は未生成です。</span>
+    <div class="share-action-buttons">
+      <button type="button" id="share-image-generate" class="share-action-button share-action-generate">画像を生成</button>
+      <button type="button" id="share-image-copy" class="share-action-button share-action-copy" disabled>画像をコピー</button>
+      <button type="button" id="share-image-save" class="share-action-button share-action-save" disabled>画像を保存</button>
+      <button type="button" id="share-url-copy" class="share-action-button share-action-url">URLをコピー</button>
+    </div>
+  </aside>
+
+  <script src="/formation-share-display-data.js?v=f347347e68e894b7"></script>
+  <script src="/formation-share-catalog.js?v=f347347e68e894b7"></script>
+  <script src="/formation-share-codec.js?v=f347347e68e894b7"></script>
+  <script src="/formation-share.js?v=f347347e68e894b7"></script>
+  <script src="/formation-share-image.js?v=f347347e68e894b7"></script>
+  <script src="/formation-share-page-actions.js?v=f347347e68e894b7"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>敵ステータス確認 | Trickcal Manager</title>
+  <script src="/storage-registry.js?v=f347347e68e894b7"></script>
+  <script src="/storage-runtime.js?v=f347347e68e894b7"></script>
+  <script src="/storage-bootstrap.js?v=f347347e68e894b7"></script>
+  <link rel="stylesheet" href="/enemy-status.css?v=f347347e68e894b7">
+  <script>(() => { const indexAliases = ["/data/enemies/index.html"]; if (indexAliases.includes(location.pathname)) location.replace("/data/enemies/" + (location.search || '') + (location.hash || '')); })();</script>
+  <script>window.TRICKCAL_PUBLIC_SITE_CONFIG={"schemaVersion":1,"profile":"new","origin":"https://trickcal.irlab.dev","basePath":"/","assetBasePath":"/","assetVersion":"f347347e68e894b7","routes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"peerRoutes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"serviceWorker":{"script":"service-worker.js","scope":"/"},"serviceWorkerPolicy":{"source":"service-worker.js","cacheName":"trickcal-manager","navigationStrategy":"network-first","assetStrategy":"stale-while-revalidate","excludedPathPrefixes":["/transfer/","/recovery/","/storage-transfer.html","/storage-recovery.html","/trickcal-manager/transfer/","/trickcal-manager/recovery/","/trickcal-manager/storage-transfer.html","/trickcal-manager/storage-recovery.html"]}};</script>
+  <script src="/public-site-runtime.js?v=f347347e68e894b7"></script>
+</head>
+<body>
+  <header class="enemy-status-header">
+    <div>
+      <p class="eyebrow">Trickcal Manager</p>
+      <h1>敵ステータス確認</h1>
+    </div>
+    <div class="header-actions">
+      <a href="/calc/?recover=20260912">ダメージ計算へ</a>
+      <button type="button" id="enemy-status-theme" aria-label="テーマ切替">
+        <svg class="enemy-ui-icon enemy-theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path></svg>
+        <svg class="enemy-ui-icon enemy-theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.5 14.1A8.5 8.5 0 0 1 9.9 3.5 8.5 8.5 0 1 0 20.5 14.1Z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="enemy-status-shell">
+    <aside class="enemy-browser" aria-label="敵プリセット一覧">
+      <div class="enemy-browser-controls">
+        <label>
+          <span>検索</span>
+          <input id="enemy-status-search" type="search" placeholder="敵名・コンテンツ名">
+        </label>
+        <label>
+          <span>分類</span>
+          <select id="enemy-status-group">
+            <option value="all">すべて</option>
+          </select>
+        </label>
+      </div>
+      <div id="enemy-status-count" class="enemy-count"></div>
+      <div id="enemy-status-list" class="enemy-list"></div>
+    </aside>
+
+    <section id="enemy-status-detail" class="enemy-detail" aria-live="polite">
+      <div class="empty-state">敵プリセットを選択してください。</div>
+    </section>
+  </main>
+
+  <footer class="site-rights-footer">
+    <div class="site-rights-summary">非公式ファンサイト｜© EPIDGames Inc.｜日本版提供：BILIBILI HK LIMITED｜ゲーム内コンテンツの権利は各権利者に帰属します。</div>
+    <details class="site-rights-details">
+      <summary>権利表記・免責事項</summary>
+      <div>
+        <p>当サイトは『トリッカル・もちもちほっペ大作戦』の非公式ファンサイトであり、EPIDGames Inc.およびBILIBILI HK LIMITEDとは関係ありません。</p>
+        <p>ゲーム内の名称、画像、文章、その他のコンテンツに関する権利は、EPIDGames Inc.をはじめとする各権利者に帰属します。日本版はBILIBILI HK LIMITEDにより提供されています。</p>
+        <p>掲載情報は独自の調査・検証に基づくものであり、その正確性や完全性を保証するものではありません。当サイトの内容について、ゲーム公式および関係各社へのお問い合わせはご遠慮ください。</p>
+      </div>
+    </details>
+  </footer>
+
+  <script src="/enemy-presets.js?v=f347347e68e894b7"></script>
+  <script src="/enemy-status.js?v=f347347e68e894b7"></script>
+</body>
+</html>
