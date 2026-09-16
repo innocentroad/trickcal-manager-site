@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "47c694cd90ada4eb",
-  "sourceCommit": "73ec79f11f131df460d6ea16ce7e62a5047f817f",
+  "candidateId": "c0d317acfc25d02a",
+  "sourceCommit": "63761ce05967fc504e9750fbe74341950002cad5",
   "profile": "new",
-  "contentDigest": "1407729a7743241d31f03a947212a72b51713a9e9588b0a21791ca00798efcdb",
-  "outputDigest": "d8f84665dc0991d4",
+  "contentDigest": "8f9b3d6ad8a7d27eaa4cbbd10feed01a3e21f2f1d68676c67f4615188b4d2fdc",
+  "outputDigest": "be222504d463b193",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -34,11 +34,11 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "10e2dc1912ac78c6a99ef7636471f09fc7cc16869d3676ad876dd02b9d5e5c29"
+      "sha256": "75add0bb05ce8f97cb88fcc22f16b64f27de8cd5aadf6b2ad834a745e0daf22c"
     },
     {
       "path": "calc/index.html",
-      "sha256": "b1c047eb306b9946aea3488b58737c5d663ac3c39f28a526f2f83aafcf18a5bb"
+      "sha256": "ea617d17c66b868904b6d6d2ef664fa0025656bd7eac6f2bc0a59776178256c0"
     },
     {
       "path": "cards.js",
@@ -50,15 +50,15 @@
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "fed315a4f02a249275e283812838e4763ad729e271172dc98ad1d21932464a04"
+      "sha256": "70c47587efe120a39dfcab9ce23992584e8f27a763dc56a79ab9e795764d9f26"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "82a1e61f94884e9ecd566d13f507ca0772e583577aeade7023b6c1a7660ef83f"
+      "sha256": "4cbfefece82dabb69cd0410de420d152504ffa482aa90b389924bda52d63668b"
     },
     {
       "path": "data/index.html",
-      "sha256": "8840514d4c55eea698200524e269e9fe19487d0062055f1e1b2f89e347cb6ef5"
+      "sha256": "31efad96b0d290272c587c1eba917137a8de0522208e80767ae9cda2853e72f1"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -4206,7 +4206,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "8a86f691ebf45e51b2e770dab0ebf9adb1c271bf3ff322c76cbe09071c20f51e"
+      "sha256": "22b5c6fa4d557597aec97994aa35bda3eef94ad55547db578f89f62e44b55539"
     },
     {
       "path": "public-release-config.js",
@@ -4214,7 +4214,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "70a75a8eac4acb40f2b49f69aed2f2b0185d551d83a5421c82a244ee98bc0d58"
+      "sha256": "9975bd4d09b74f3d951ca986fbab72b7dbd4e4fb7de3969208ed2970312f024f"
     },
     {
       "path": "public-site-runtime.js",
@@ -4234,7 +4234,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "5487d1438b52b4ef0916b503efbd8b266c73afcb3a4856c70a9d3f6f62c4f60e"
+      "sha256": "3142eafbf85e1ab41dd72fe2dff452d57d8cfcde2d88bab476d0a4cafc33bc25"
     },
     {
       "path": "robots.txt",
@@ -4242,11 +4242,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "101cce4ba0d1849b0beef03efc3975eec1d3c8a785c1b7888ffd4c3aac3c9e89"
+      "sha256": "9a7e732e6f1308b1ae3bf62d26017570cd0dd76d7583f7c26e749755f2bc15bf"
     },
     {
       "path": "share/index.html",
-      "sha256": "f8d0d1fbbd67a59f509c5ecaa6ca388f70ac88e7b64f5da37bfd821950e01884"
+      "sha256": "1af25b347631e4832f2fb260c67b941d0a8dcb9bfc9dee1ea340a67eaf44e2b7"
     },
     {
       "path": "shared-topbar.css",
@@ -4262,7 +4262,7 @@
     },
     {
       "path": "stat-dashboard.css",
-      "sha256": "df9439eac2a2e9d3b91697e37ac855abf83ea40fe06f220ef9129c24b2b11bc3"
+      "sha256": "c8daa30f8ee141cffb730541fe92a9cd80b98a9d5ac0180e17c912b48b2bc33d"
     },
     {
       "path": "stat-dashboard.html",
@@ -4294,7 +4294,7 @@
     },
     {
       "path": "storage-bootstrap.js",
-      "sha256": "8b00770f1ddb8e50b202a53cf1c290f57094a295db5d32b237327038f345ddc2"
+      "sha256": "93f74a0810783990b3c3b4a0335b268c71de586999bf6136906f2a084b88863d"
     },
     {
       "path": "storage-recovery.html",
@@ -4330,7 +4330,7 @@
     },
     {
       "path": "transfer/index.html",
-      "sha256": "a8181007575d934bfe0db517961ed17a1de2f834fc5543517ec4a585bf08a01e"
+      "sha256": "44d046ec6a0e7ddd24f3fe8ac924dbbcb51a4435a292a08c1ef56bec17ee9d1c"
     }
   ]
 }
