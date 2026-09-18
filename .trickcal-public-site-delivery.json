@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "857395a26ad71669",
-  "sourceCommit": "e23ee0024c9872a48d43b2c91c7281748ce24042",
+  "candidateId": "95de929a1e205768",
+  "sourceCommit": "d5e9ad5b138a0464bbb9933f1b85d4154263f526",
   "profile": "new",
-  "contentDigest": "0127658afed59e1614fed8ec1536e5ab11944ce55eff908ab58c3a3c9fdbb7d6",
-  "outputDigest": "e137f2acf5ac30b1",
+  "contentDigest": "acd5fb5d7ac26bbaad3491747b5b3a2cd58c8fcc505b42248669407699f5e6b2",
+  "outputDigest": "b83585f1bd9e081f",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -42,7 +42,7 @@
     },
     {
       "path": "calc/index.html",
-      "sha256": "dadfbf74ffacd3872e115c06c846925a6818158b7109aeab2926795803aa3002"
+      "sha256": "9651eb8c098786d7069e1e19e42089db7a47ed1b4bd1d4846a63b85b063782c3"
     },
     {
       "path": "cards.js",
@@ -58,11 +58,11 @@
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "6378e7473d4817b49a92a8d8a056a0b9da58d6d8b64ddd40b5fa903249e48938"
+      "sha256": "d045357c2d7f7f45e9268a5506d7fd64de1288f4f605912d9f2401499f3ea773"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "56786c9b00e2f331a60dbd7ce23d26d6d333446e3636a41e3dc89f76e660c1ef"
+      "sha256": "88a2d518d1b9bf9ad74bc8553b5ba0ad908bbf2ef0e887482b6a7efe4b7df190"
     },
     {
       "path": "data/index.html",
@@ -4246,7 +4246,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "c8f959e27898d38b57fd7257b2f7cb2f538acf157a3fc4dccb7361f0ab5b82e7"
+      "sha256": "1dec77a021e6f80e888338e715eaf53651fc82a77bddddce613455e949fd4712"
     },
     {
       "path": "public-release-config.js",
@@ -4254,7 +4254,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "c838b01b70a236dc487453539e2442a903f739c3aab011e7470520fbf24b7613"
+      "sha256": "b3ed90fdfefa56f7aa350bd8361f15ad72c0ed9e3181cfa011fb421090c41e86"
     },
     {
       "path": "public-site-runtime.js",
@@ -4290,7 +4290,7 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "553f8ad4db119817e07e6df5845182e5b7585d50b068f0742944e1dbc4eafb52"
+      "sha256": "f26bf040b467290c7265d63fa57173a1df8ed0f5653079703c444be197386e2e"
     },
     {
       "path": "share/index.html",
