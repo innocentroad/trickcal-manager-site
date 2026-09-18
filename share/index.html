@@ -5,34 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>編成共有 | Trickcal Manager</title>
   <meta name="description" content="Trickcal Managerの編成共有">
-  <link rel="icon" href="/ico.webp?v=d60bbf10c69b0f08" type="image/webp">
+  <link rel="icon" href="/ico.webp?v=f12652a0ebc1c5ff" type="image/webp">
   <script>
     (() => {
+      let savedTheme = '';
+      try { savedTheme = window.localStorage?.getItem('trickcal_theme') || ''; } catch (_) { /* no-op */ }
       const prefersLight = window.matchMedia?.('(prefers-color-scheme: light)').matches;
-      document.documentElement.dataset.theme = prefersLight ? 'light' : 'dark';
+      document.documentElement.dataset.theme = savedTheme === 'light' || savedTheme === 'dark'
+        ? savedTheme
+        : (prefersLight ? 'light' : 'dark');
     })();
   </script>
-  <link rel="stylesheet" href="/formation-share-prototype.css?v=d60bbf10c69b0f08">
-  <link rel="canonical" href="https://trickcal.irlab.dev/share/">\n  <meta property="og:url" content="https://trickcal.irlab.dev/share/">
+  <link rel="stylesheet" href="/shared-topbar.css?v=f12652a0ebc1c5ff">
+  <link rel="stylesheet" href="/announcements.css?v=f12652a0ebc1c5ff">
+  <link rel="stylesheet" href="/formation-share-prototype.css?v=f12652a0ebc1c5ff">
+  <link rel="canonical" href="https://trickcal.irlab.dev/share/">
+  <meta property="og:url" content="https://trickcal.irlab.dev/share/">
   <script>(() => { const indexAliases = ["/share/index.html"]; if (indexAliases.includes(location.pathname)) location.replace("/share/" + (location.search || '') + (location.hash || '')); })();</script>
-  <script>window.TRICKCAL_PUBLIC_SITE_CONFIG={"schemaVersion":1,"profile":"new","origin":"https://trickcal.irlab.dev","basePath":"/","assetBasePath":"/","assetVersion":"d60bbf10c69b0f08","routes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","apostles":"/data/apostles/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"peerRoutes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","apostles":"/data/apostles/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"serviceWorker":{"script":"service-worker.js","scope":"/"},"serviceWorkerPolicy":{"source":"service-worker.js","cacheName":"trickcal-manager","navigationStrategy":"network-first","assetStrategy":"stale-while-revalidate","imageStrategy":"cache-first-versioned","excludedPathPrefixes":["/transfer/","/recovery/","/storage-transfer.html","/storage-recovery.html","/trickcal-manager/transfer/","/trickcal-manager/recovery/","/trickcal-manager/storage-transfer.html","/trickcal-manager/storage-recovery.html"]}};</script>
-  <script src="/public-site-runtime.js?v=d60bbf10c69b0f08"></script>
+  <script>window.TRICKCAL_PUBLIC_SITE_CONFIG={"schemaVersion":1,"profile":"new","origin":"https://trickcal.irlab.dev","basePath":"/","assetBasePath":"/","assetVersion":"f12652a0ebc1c5ff","routes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","apostles":"/data/apostles/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"peerRoutes":{"home":"/","manager":"/manager/","calc":"/calc/","dps":"/calc/dps/","share":"/share/","data":"/data/","apostles":"/data/apostles/","enemies":"/data/enemies/","board":"/data/boards/","transfer":"/transfer/","recovery":"/recovery/"},"serviceWorker":{"script":"service-worker.js","scope":"/"},"serviceWorkerPolicy":{"source":"service-worker.js","cacheName":"trickcal-manager","navigationStrategy":"network-first","assetStrategy":"stale-while-revalidate","imageStrategy":"cache-first-versioned","excludedPathPrefixes":["/transfer/","/recovery/","/storage-transfer.html","/storage-recovery.html","/trickcal-manager/transfer/","/trickcal-manager/recovery/","/trickcal-manager/storage-transfer.html","/trickcal-manager/storage-recovery.html"]}};</script>
+  <script src="/public-site-runtime.js?v=f12652a0ebc1c5ff"></script>
 </head>
 <body class="formation-share-page">
-  <header class="share-topbar">
-    <div class="share-topbar-brand">
-      <span class="share-kicker">TRICKCAL MANAGER</span>
-      <h1>編成共有</h1>
-    </div>
-    <div class="share-topbar-actions">
-      <button type="button" class="theme-button" id="theme-toggle" aria-label="テーマ切替" aria-pressed="true">
-        <span aria-hidden="true">☼</span><span class="theme-button-label">ライト</span>
-      </button>
-      <a href="/manager/?recover=20260912" class="back-link">ステータス管理へ</a>
-    </div>
-  </header>
+  <div
+    class="dashboard-top-control-bar"
+    data-shared-topbar-page="share"
+    data-shared-topbar-manager-href="/manager/?view=settings&recover=20260912"
+    data-shared-topbar-calc-href="/calc/?recover=20260912"
+  >
+    <div data-shared-topbar-common></div>
+  </div>
 
   <main class="share-shell">
+    <header class="share-page-heading">
+      <h1>編成共有</h1>
+    </header>
     <section id="share-error" class="share-panel share-error" hidden role="alert" aria-live="assertive">
       <h2>共有編成を表示できません</h2>
       <p id="share-error-message">URLの内容を確認してください。</p>
@@ -91,11 +97,15 @@
     </div>
   </aside>
 
-  <script src="/formation-share-display-data.js?v=d60bbf10c69b0f08"></script>
-  <script src="/formation-share-catalog.js?v=d60bbf10c69b0f08"></script>
-  <script src="/formation-share-codec.js?v=d60bbf10c69b0f08"></script>
-  <script src="/formation-share.js?v=d60bbf10c69b0f08"></script>
-  <script src="/formation-share-image.js?v=d60bbf10c69b0f08"></script>
-  <script src="/formation-share-page-actions.js?v=d60bbf10c69b0f08"></script>
+  <script src="/shared-topbar.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/announcements-release-config.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/announcements-data.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/announcements.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/formation-share-display-data.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/formation-share-catalog.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/formation-share-codec.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/formation-share.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/formation-share-image.js?v=f12652a0ebc1c5ff"></script>
+  <script src="/formation-share-page-actions.js?v=f12652a0ebc1c5ff"></script>
 </body>
 </html>
