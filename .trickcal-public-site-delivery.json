@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "9fa9315c737e7713",
-  "sourceCommit": "c7668d48730074dd8278412d8901e9d537428f3b",
+  "candidateId": "ef470ed47b5b1890",
+  "sourceCommit": "004d6c9a52b7690666f7ceaf4d6ae553bde1bd63",
   "profile": "new",
-  "contentDigest": "2cd343ccb62e6609f2485468a39e8b3004b6138a8a53e6e8c6c53822e6556e2b",
-  "outputDigest": "12f9bd010a976083",
+  "contentDigest": "cc55a01e9c5930eff359a02845d36470acaa686e21eb81ededeef282919fc7c3",
+  "outputDigest": "d8a75ebf9893ff51",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -38,11 +38,11 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "7676d82b01fad73771c174b935491244475b7539be04cb36af9ff993badf113f"
+      "sha256": "7f775e28874d5739f9823adff2f72133acfd5ec223a7ea1ed3fe9eefce67e9fa"
     },
     {
       "path": "calc/index.html",
-      "sha256": "8188ff7090010ef72fd53f6435a725822e9bbad05424deaa6653ec82794ae771"
+      "sha256": "6aa7c3cd7f63fffc2a0a9a3b3618e53648c7822facd074b755814202b1adc708"
     },
     {
       "path": "cards.js",
@@ -54,19 +54,19 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "5fa721fcd019698edc221f6167682dc5d7173373c7525946892ad1fb63c1200a"
+      "sha256": "fcc64687e7c6ee661cfed90846932e5720b0458f780285315a077f0bea4b994c"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "c7174ad5a97303b524efee88d152039c42378b7d228182202c050570bbdb4337"
+      "sha256": "739049cf0a96a7bb026c1f5e1c79143e88c6a7ad76585af1cea31a8d0cfdae59"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "6548f5c9bbf6459056819b3a1ee72b54979ff5f2bb2f6cc6a1dcafff47f9fcc8"
+      "sha256": "54debd426f3643281f447f3c2967170ca37936af1b319bf0a9f00a66be91ce76"
     },
     {
       "path": "data/index.html",
-      "sha256": "01f1a1a7607a4a9455edf16f8361bb1ea386ab10b2465975aa4421fe87eb8730"
+      "sha256": "fbf1e8385bfab8e5f87ef6ee88665bef3b525e0b1247c79a9374395e9fb0e2e1"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -94,7 +94,7 @@
     },
     {
       "path": "enemy-status.css",
-      "sha256": "d056c71f1ad48bfd616f8bb20fe9e98e24534901da8dc73e95801381ec32d053"
+      "sha256": "80903935591b65f673cd077f608c1c81a77f513c73d7cefd2725e4893a036452"
     },
     {
       "path": "enemy-status.html",
@@ -170,7 +170,7 @@
     },
     {
       "path": "image-preload.js",
-      "sha256": "70ab1b6f0065d1ec496762c6fc589cbe3874efab90502eb55015ce5afed76283"
+      "sha256": "608a35874a605ad3c4b04e0fefae5564372e50c8d00af7e30bba1dad1941ca11"
     },
     {
       "path": "img/★1共同教団証.webp",
@@ -741,48 +741,24 @@
       "sha256": "26253ae75ab2d98519ef5d3b968198bad4eeaffe76d3e5184e82b85913a5908f"
     },
     {
-      "path": "img/Card/権能_ヌルゲーシールド.mp4",
-      "sha256": "180f14e0a76d271b7395babcdc2b7c10f94a04b0dc11de26f824a2c22df70b5d"
-    },
-    {
       "path": "img/Card/権能_ヌルゲーシールド.webp",
       "sha256": "e8e89b040e36c2c473026ffb6050553b3ac1e1d92a50677a607db01b5dc46397"
-    },
-    {
-      "path": "img/Card/権能_ポップピンスター.mp4",
-      "sha256": "18c8bac38df411ea13fc752c53f3de29d5ea55b74340c210e25768bbca4dd3bb"
     },
     {
       "path": "img/Card/権能_ポップピンスター.webp",
       "sha256": "d3046bcd0f2e428f91279017862f86b7f60f6ddab4195e49e1157624817f5c0a"
     },
     {
-      "path": "img/Card/権能_ボディブロー.mp4",
-      "sha256": "d09d0c99fcc3563d67703d637e655bf3b4cf10d505d12511fd8e312bd88e5718"
-    },
-    {
       "path": "img/Card/権能_ボディブロー.webp",
       "sha256": "830d79dddb0bb5e724d99f22e9fe40d22855c4cbda918b6624e3ad172e0d7cd3"
-    },
-    {
-      "path": "img/Card/権能_マジ天罰.mp4",
-      "sha256": "8f840c40916a9e54b5f0242115a5df6e875c2af369d38dc930fa244681d588b9"
     },
     {
       "path": "img/Card/権能_マジ天罰.webp",
       "sha256": "1d6bfe8948fae17c8e831f49756be8a891d94d6f92037814fdd0d96cd444d769"
     },
     {
-      "path": "img/Card/権能_安心毛布.mp4",
-      "sha256": "2e56266a6592181388f71f3a62ec07182049649a2f1a46c60adebc23efd7a64a"
-    },
-    {
       "path": "img/Card/権能_安心毛布.webp",
       "sha256": "ab5c1a327b94d5fa39973bfe6aa8efde9f16e57bcb88bc808eaf85e41ce61496"
-    },
-    {
-      "path": "img/Card/権能_急発進.mp4",
-      "sha256": "bc192729bb080744ef19a3fa33b989f5533f4916456033c264e85fe32e3abfbc"
     },
     {
       "path": "img/Card/権能_急発進.webp",
@@ -4246,7 +4222,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "0cb01fd20903c1c3e84dca2362a40ab490a22a2544f28d796292e80b3cd2d7f0"
+      "sha256": "50f61d37378b8dd8b8d5b8eafcb9216d6387980fa94dd883d917c3ebcb10e432"
     },
     {
       "path": "public-release-config.js",
@@ -4254,7 +4230,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "661a844ffbefc157954fa0b233d40ef3c8dc11e9d6899f907343359500c37978"
+      "sha256": "0480b8b7eff6906f936f2bebf514ec2d8f37e30e466fb44fa85c17bb7151cb92"
     },
     {
       "path": "public-site-runtime.js",
@@ -4262,7 +4238,7 @@
     },
     {
       "path": "public/apostle-data.css",
-      "sha256": "7700b40840f80f9aeb9cc14d09e9462ac274f9aeef45c2a4e672e17d89978a2b"
+      "sha256": "9caa09192d943a6a59fd4038b2752b222bcb904b4002e41734990699b614ce76"
     },
     {
       "path": "public/apostle-data.js",
@@ -4270,7 +4246,7 @@
     },
     {
       "path": "public/board-layout-preview.css",
-      "sha256": "197923754626567ffe46d895c8688d4c2ee0758fd339590fe984ec6432e7ec61"
+      "sha256": "2503eb80b4e90d4488d031dd5a2de4df238ab76687fbe007bb7b541469743914"
     },
     {
       "path": "public/board-layout-preview.html",
@@ -4278,11 +4254,11 @@
     },
     {
       "path": "public/board-layout-preview.js",
-      "sha256": "c27923a86855d30fdc46cdfa204411db9e3fdae6781eece0a45567e268ff340b"
+      "sha256": "fca7d0f98dcf462099882d0d977eab049e3d63e711c11cfee63b8f3f3f186b44"
     },
     {
       "path": "recovery/index.html",
-      "sha256": "b8548886ef6401c0a06694a6d240701dd8b65c84bd1fa2c02b68ae737d0c4661"
+      "sha256": "40b84b2ed4f9e2e802aa76a7a93a1c1a3916b268414c92b374978e1dee86181d"
     },
     {
       "path": "robots.txt",
@@ -4290,19 +4266,19 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "7977e1b92b95eb52a5faeee5fe583f0b7159399b0acaaebd0604ce73d695db25"
+      "sha256": "d093a53f3e56d59728ba49e58758f088130df7be491c73580d667e332b60941b"
     },
     {
       "path": "share/index.html",
-      "sha256": "1ebed42da1729a4178c043c8af6831224fb07552409ff90a551f8c5c2f867fa8"
+      "sha256": "4d1524fbb56cb9b569201e2388613639c8882f5c9a5d8fa040b7c505661f528b"
     },
     {
       "path": "shared-topbar.css",
-      "sha256": "42aa1891b72cf779c4471eb39deb350819458c4305d640028d81edd0ecb866f4"
+      "sha256": "40905316251bc986fb437d28c52802f76794c6a9428aee1f830d62e89abb4242"
     },
     {
       "path": "shared-topbar.js",
-      "sha256": "db0023fcbc1f9fb666cb60afaf17e5f742cb4b3096f701b272ffac44851f2079"
+      "sha256": "112a6f0e1bbeab229a8eb17377c72800f7818a6a7600a4883edcca274508358c"
     },
     {
       "path": "sitemap.xml",
@@ -4314,7 +4290,7 @@
     },
     {
       "path": "stat-dashboard.css",
-      "sha256": "c8daa30f8ee141cffb730541fe92a9cd80b98a9d5ac0180e17c912b48b2bc33d"
+      "sha256": "a7df33a9b5335352db54af5c911d0b108c00ebb09ec5adf4823492648a4969a3"
     },
     {
       "path": "stat-dashboard.html",
@@ -4334,7 +4310,7 @@
     },
     {
       "path": "stat-prototype.js",
-      "sha256": "f30a3988c5e9c605a1248357f5077bc73ad3da2c0067a036b5c6a2a556e4689a"
+      "sha256": "65bed2f9f3d3e90c46e70f34842f3ef06e0c637c7052f8d04a5a4a3b7db7bb2e"
     },
     {
       "path": "statData.js",
@@ -4382,7 +4358,7 @@
     },
     {
       "path": "transfer/index.html",
-      "sha256": "7d7711f92081970038733ba982583634f73089c7acbd83ba61d66014fcd63950"
+      "sha256": "db01758402cc1a5238aba147c79c8b7c5e85c1de58a42bad29d38f3c6aed7f63"
     }
   ]
 }
