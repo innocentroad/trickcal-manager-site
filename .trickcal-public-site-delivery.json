@@ -1,13 +1,17 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "ef470ed47b5b1890",
-  "sourceCommit": "004d6c9a52b7690666f7ceaf4d6ae553bde1bd63",
+  "candidateId": "1911a1521fe85b27",
+  "sourceCommit": "0e9a3bf1655cb9bc02613ca66df80d9f9d39f885",
   "profile": "new",
-  "contentDigest": "cc55a01e9c5930eff359a02845d36470acaa686e21eb81ededeef282919fc7c3",
-  "outputDigest": "d8a75ebf9893ff51",
+  "contentDigest": "895119ad05b0c45355bcfdeaa282273e0e15cfbd9a0fd8c3f49ae76bd9c2d0f6",
+  "outputDigest": "405d2e1d6c225baf",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
+    {
+      "path": "announcement-history-data.js",
+      "sha256": "1895b49925fcf287728c2488eba8f0b6260937abb2ddbb44b22da37876fb680c"
+    },
     {
       "path": "announcements-data.js",
       "sha256": "e42202ac866a6b7c167ffe7c29af00ae61bd507a4e096ab2c892d6e6865be4df"
@@ -18,11 +22,11 @@
     },
     {
       "path": "announcements.css",
-      "sha256": "1a7ec52da567623be467e5ca024012653225c99d7e449921bedaddc64d58eacd"
+      "sha256": "5e9157cbfb4ebdcb76a437d379832e6c9c7c2bf4bc85a4e334d8cc50ee4e0de9"
     },
     {
       "path": "announcements.js",
-      "sha256": "b6b57381fb9ecd339ae730186ad0925cd4059a19a69db2dc979d776aafcc9d41"
+      "sha256": "97ce4db555f48cf8b34c0c835ef6eeb97adfe02ab285e41920137bcbd2388b16"
     },
     {
       "path": "apostle-data.html",
@@ -38,11 +42,11 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "7f775e28874d5739f9823adff2f72133acfd5ec223a7ea1ed3fe9eefce67e9fa"
+      "sha256": "8fefd3b5b5278d1f3aad67b8f42676de4bc4c684bd3f38ceb4b4b5006b303bf6"
     },
     {
       "path": "calc/index.html",
-      "sha256": "6aa7c3cd7f63fffc2a0a9a3b3618e53648c7822facd074b755814202b1adc708"
+      "sha256": "ea22d18e948338414eb0e04cf8a8bd5455c41deb5b678f065c35775314da7422"
     },
     {
       "path": "cards.js",
@@ -54,19 +58,19 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "fcc64687e7c6ee661cfed90846932e5720b0458f780285315a077f0bea4b994c"
+      "sha256": "835ade364c290eff68e1a8b8d8ad8adb5ffc2d1155325925eae27cc73fb91793"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "739049cf0a96a7bb026c1f5e1c79143e88c6a7ad76585af1cea31a8d0cfdae59"
+      "sha256": "4bf036b8305f12d0580f7febff23161b9423975cddb9dcddfbcd24c1019298e6"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "54debd426f3643281f447f3c2967170ca37936af1b319bf0a9f00a66be91ce76"
+      "sha256": "fb3ecce26ac582d53ad1d741be5d5ec4fd09945dd2d7eb626a9c7407d60757a5"
     },
     {
       "path": "data/index.html",
-      "sha256": "fbf1e8385bfab8e5f87ef6ee88665bef3b525e0b1247c79a9374395e9fb0e2e1"
+      "sha256": "60e0af4c237ceef39b4a17461dcd347e7578e1f12e73390cb5e95e6ad9696171"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -114,7 +118,7 @@
     },
     {
       "path": "formation-damage-calc.js",
-      "sha256": "e5dba3e09072c12e2b98492d6b61b9c9b8d21096896c76ba6fd5d75c85bb624f"
+      "sha256": "96fe8a3664844830d0f60d56b7110210e494c1bda8b615596777012cbfcc1f8b"
     },
     {
       "path": "formation-damage-dps-prototype.css",
@@ -138,7 +142,7 @@
     },
     {
       "path": "formation-share-create.js",
-      "sha256": "34c27123fb617c501fe3615c2f3804213d15820698ccc0128390aa1cd01122ff"
+      "sha256": "a800de8c14f18d96797d5a9814638f0b8a187ae838327b098258e45b81a49861"
     },
     {
       "path": "formation-share-display-data.js",
@@ -4222,7 +4226,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "50f61d37378b8dd8b8d5b8eafcb9216d6387980fa94dd883d917c3ebcb10e432"
+      "sha256": "7fa03d9da89cfb5ea28d5a1f193db0a3bc1f598f56f717c041147953a3b094ec"
     },
     {
       "path": "public-release-config.js",
@@ -4230,7 +4234,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "0480b8b7eff6906f936f2bebf514ec2d8f37e30e466fb44fa85c17bb7151cb92"
+      "sha256": "d466ad614572132ab9fc4fd95ded5441b7aa072010e254fb7ec3b292a8dbfb69"
     },
     {
       "path": "public-site-runtime.js",
@@ -4258,7 +4262,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "40b84b2ed4f9e2e802aa76a7a93a1c1a3916b268414c92b374978e1dee86181d"
+      "sha256": "19aca332dce4caf6833917b9993f753584b1ffed0b7bcb4de1a079b6ffcfa699"
     },
     {
       "path": "robots.txt",
@@ -4266,11 +4270,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "d093a53f3e56d59728ba49e58758f088130df7be491c73580d667e332b60941b"
+      "sha256": "f9ee703d1766f865de007bfef44bd082f4660e038c2eb3f10d3fcc31d6d989b9"
     },
     {
       "path": "share/index.html",
-      "sha256": "4d1524fbb56cb9b569201e2388613639c8882f5c9a5d8fa040b7c505661f528b"
+      "sha256": "4f7835ac52b09ac07cacacc2d4ca357aae39a7ff674ecea600f344302758333c"
     },
     {
       "path": "shared-topbar.css",
@@ -4278,7 +4282,7 @@
     },
     {
       "path": "shared-topbar.js",
-      "sha256": "112a6f0e1bbeab229a8eb17377c72800f7818a6a7600a4883edcca274508358c"
+      "sha256": "4fa63d0e158d29d01acd712be7ca5b1f7720e510ad4b9d6efa020284c28f1497"
     },
     {
       "path": "sitemap.xml",
@@ -4290,7 +4294,7 @@
     },
     {
       "path": "stat-dashboard.css",
-      "sha256": "a7df33a9b5335352db54af5c911d0b108c00ebb09ec5adf4823492648a4969a3"
+      "sha256": "8daff51a9a35d77fcdc655477ea5d9b1ab2c822a3be5a31fac79df4ee89472a2"
     },
     {
       "path": "stat-dashboard.html",
@@ -4306,11 +4310,11 @@
     },
     {
       "path": "stat-prototype.css",
-      "sha256": "e2cd24772bdda523a4753424378f06e6ef41dab3c51555a975ab227e953a0f3b"
+      "sha256": "0f02a85f98e5ecd80322cb5db7d6ff3d9a844dd70ecb70d664fb3144a4a682eb"
     },
     {
       "path": "stat-prototype.js",
-      "sha256": "65bed2f9f3d3e90c46e70f34842f3ef06e0c637c7052f8d04a5a4a3b7db7bb2e"
+      "sha256": "25bca99ea34f559f55eb2da83c5e94408f12f36674838cbd2a1571f091db2604"
     },
     {
       "path": "statData.js",
@@ -4322,7 +4326,7 @@
     },
     {
       "path": "storage-bootstrap.js",
-      "sha256": "93f74a0810783990b3c3b4a0335b268c71de586999bf6136906f2a084b88863d"
+      "sha256": "9ebbcf1c34ec6242adc6db0014d2187f9f14c289b14dcde408836590b927e8bd"
     },
     {
       "path": "storage-recovery.html",
@@ -4358,7 +4362,7 @@
     },
     {
       "path": "transfer/index.html",
-      "sha256": "db01758402cc1a5238aba147c79c8b7c5e85c1de58a42bad29d38f3c6aed7f63"
+      "sha256": "6db635855af449c202339811c64c8d374c2e5b5f8a7fbc5c4b68ea573af277e0"
     }
   ]
 }
