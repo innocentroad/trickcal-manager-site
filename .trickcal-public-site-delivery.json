@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "be9009c3d14f909a",
-  "sourceCommit": "4a251c56d2da54c8d14db7ac930144ca34d98b19",
+  "candidateId": "c92151ac342a7116",
+  "sourceCommit": "a30f74a3a6f011098cd7aaacce162e0220256579",
   "profile": "new",
-  "contentDigest": "6f42490c0e65e3d38242651cf4f181f33364d37e2fa1f3340382b1922e08e70c",
-  "outputDigest": "f99b4fc40ee719bc",
+  "contentDigest": "8493662c17b34ff67f44def1d6bd33fb7d11e30d3630cb4efdf14f8b2e972113",
+  "outputDigest": "83474b58b5a7f9d7",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -42,11 +42,11 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "39c95bb77c4c63d372fc9c2d23e74701bb95e2f0a622a51d258985df0dfe3f0e"
+      "sha256": "b94afae67582d1a0efe22242948cf2314a56d886c59423374472782f99698bfe"
     },
     {
       "path": "calc/index.html",
-      "sha256": "9646bcb107b91f31c8676c291800bbabe60363d9c1fd21b99e4c85e6b4bb2164"
+      "sha256": "7e62e8ae078fa0a75b4dd12bed392b73bbd40a91461e11a228fed5c8c0e57d8e"
     },
     {
       "path": "cards.js",
@@ -58,19 +58,19 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "ec10020635f1b7c3f6cc0740e08487fdd2ef2b2a7fca430c7cc0f2b6c87943a2"
+      "sha256": "fed6c0c2f78a5c619c9be36d19ce92f2b32aefe062fff938588b9d28dda64265"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "327ff0dfb56a3f269e91540e934e6edd99a9dec5d1ddb68de4afa816b74a3bd2"
+      "sha256": "d3dc46ff94b76f8392aacd04097059b303a0b4eb3f6eaa34ac2c3b2cd0872346"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "7c2662fc7c49114fb8e34fa6a700a7c2fb6b8ffe421f8d1456fc3a9899b6976a"
+      "sha256": "974eccd60bc6d86cbbd52ab83dc895cbd4a249d6864395e74a1e14defb7f6d2c"
     },
     {
       "path": "data/index.html",
-      "sha256": "3203098bf0648a8ebcb053736d51dd79ecd462f5b549d9d47f06877aa7e54ac0"
+      "sha256": "ce44599fd9d7513a0689d057b41d5083c90971f0628eb25543cc958bfb932e24"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -167,6 +167,10 @@
     {
       "path": "formation-share.js",
       "sha256": "4362bd97027b5d7de2d8c34fcac37526685867a5e569cd7e9185b08a10db67f2"
+    },
+    {
+      "path": "google4e94c2b3cb5b1c67.html",
+      "sha256": "9c7e05887a3e2fc9fe76786bb607ad4146c66aaf0b0b6377096a0878972fbd1e"
     },
     {
       "path": "ico.webp",
@@ -4226,7 +4230,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "8969ed26f7b887d0fc94461f2a6b1856ddebff3c796ff19974a00049261d394b"
+      "sha256": "2d66f106f5f09f88961b2f37c17a8dc6445b84feb462e5b269ae2bdb96511bb9"
     },
     {
       "path": "public-release-config.js",
@@ -4234,7 +4238,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "92d2ba6f8ecee779525765b91866dad80765953fb4056f03bb1e59caac8991f5"
+      "sha256": "74b1d74bb6a3cf155af0c49135fabd4003a03dba18a16e77f478b2b01bfc8c8c"
     },
     {
       "path": "public-site-runtime.js",
@@ -4262,7 +4266,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "d8da9fbc515928a8a4e9825e55b7a9cc931f7da8cf2d5bf2a8405f596a9b60d2"
+      "sha256": "8042c37fa2259cf759903fce93ffc9811eeec0952dd9e75c52a32f68bb84fab9"
     },
     {
       "path": "robots.txt",
@@ -4270,11 +4274,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "439225e5e5327af7b0b0455035cb37a5153ab3a9e770de77e9bf42eb506cf7c2"
+      "sha256": "21183fc36414eb10767c3ae4313502fc5070ac95c37e52d9352ca763fe1d22cc"
     },
     {
       "path": "share/index.html",
-      "sha256": "4fe824e46938f35b6bd2e63d7c7ecebbbaa4cb861d9b537d0020567725389967"
+      "sha256": "e148a2e131432fcc0bf2dcb92d3f70b68ae6a4343100af705756c6048bc331af"
     },
     {
       "path": "shared-topbar.css",
@@ -4362,7 +4366,7 @@
     },
     {
       "path": "transfer/index.html",
-      "sha256": "88123e31644d3ac847f6f2a3ef6f29a705339a01746ea0c3327a544f37c4ad44"
+      "sha256": "037d7d10be7205660dfdb120e0d2503deea24d54035aaff6aa15cff7a4b962be"
     }
   ]
 }
