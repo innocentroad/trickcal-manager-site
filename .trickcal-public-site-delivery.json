@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "a0ab238c6633ffe8",
-  "sourceCommit": "c6ccdaaaa6418286800d764fd5a05cf1ca2d5ee7",
+  "candidateId": "ffa78e9f3616275a",
+  "sourceCommit": "3061b80520e4077cfb295b2e2b896fe34ca36136",
   "profile": "new",
-  "contentDigest": "fb78266760df92fe1b960cecdda4bafd5fbbc3c703a07d7ca97ceab2ad9ae1b5",
-  "outputDigest": "c9b703cff6b4c5fa",
+  "contentDigest": "4374d8e896dc0f77cfa042b6ed8a3d710f34ec59bb8f590c3bfb2cbfedc7df7e",
+  "outputDigest": "5fa029c16fcc55ba",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -34,7 +34,7 @@
     },
     {
       "path": "apostle-skill-image-data.js",
-      "sha256": "78baab2040b0802435e13b5377b7e0b1b49a66419be82672c04c847969096a60"
+      "sha256": "ec2d748d6327d187c77098df81efbb1d48b4959f9e2f5833b69ee1cc8a3a1fd6"
     },
     {
       "path": "apostles.js",
@@ -46,11 +46,11 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "ff26fc654cbdfd347c0acd46fb40dc2f4748e4ddee40c6e09b1d43559df0e028"
+      "sha256": "5fa86cbaed9c3044df0f68304c5ea1e334fe680e90b0e92b36a44a04b5fea0eb"
     },
     {
       "path": "calc/index.html",
-      "sha256": "19e7db532fdc983cfa6795887ea074c699b762c26866fd30f97d8650506365f3"
+      "sha256": "18be91d29401b92f89a0b711bd7567f3304c7c807c5ec533ec93280b2a69c49c"
     },
     {
       "path": "cards.js",
@@ -62,19 +62,19 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "2f32be7002390b5da9967bf0a17633383b1f3a1fb8ed5aa2a4134063324f049d"
+      "sha256": "6f6726388a967f47922e49cdb360169a0ca18d660f20c91be9af5f2f6cb1b0aa"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "11a7917a66931006de062e2666c2ef4b78a9d3383dc17449d65499e9888cccb5"
+      "sha256": "41ea895edba43f55e9e8d2475a2aeb48b931df20e842ad1a7a1e5fe0d0d2d3d3"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "3c34e377b64a822c06503ebe649fdfeaf87c6e21c054b7d38f081520504a30fc"
+      "sha256": "cd6b0c181cfe185a368114f02b322c5880c26ddafb04b50870cec45b6eba301a"
     },
     {
       "path": "data/index.html",
-      "sha256": "5acbaae72b299523a0606148b0920e11ecff76696caa5d3f31cc1f9b34a3317f"
+      "sha256": "7bdbf77504095e2e1fa56953b8295c2be5aa3e4efb8a606b29e38bdd64daed03"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -1721,14 +1721,6 @@
       "sha256": "46ebf72990d83c5cd4906af8737739ce2ba895838cb6a7b8f8356394d2dff7d9"
     },
     {
-      "path": "img/Chara/Skill/Icon_AdmissionSkill_Joanne.webp",
-      "sha256": "121f6ed0df3456cc2411c4099f481f71b4c69847e3fedea9133b8a0443597ca1"
-    },
-    {
-      "path": "img/Chara/Skill/Icon_GraduateSkill_Joanne.webp",
-      "sha256": "c9baf7eac0c9154ef2cf58c6d410b0f2812adf96b2632ca005039b61c817e95c"
-    },
-    {
       "path": "img/Chara/Skill/MagicAttack.webp",
       "sha256": "b2e732aaea4cf78ef9867c0344024c25cff49d13314e1618dad80ade691ea02c"
     },
@@ -1855,6 +1847,10 @@
     {
       "path": "img/Chara/Skill/Skill_F_Jade.webp",
       "sha256": "10251f5f223026ecefa9f6928f0b7b95c082b020e99347edc8863f4178a50fbb"
+    },
+    {
+      "path": "img/Chara/Skill/Skill_F_Joanne.webp",
+      "sha256": "121f6ed0df3456cc2411c4099f481f71b4c69847e3fedea9133b8a0443597ca1"
     },
     {
       "path": "img/Chara/Skill/Skill_F_Jubee.webp",
@@ -2173,6 +2169,10 @@
       "sha256": "df207f8186dec5f0dfbb6cf612c61774c317012c80bb5c9698b748f537b5e0be"
     },
     {
+      "path": "img/Chara/Skill/Skill_P_Joanne.webp",
+      "sha256": "6a851ddb829a388ba8f84c04aa78c9ad77ee254bf03dabc4547d9bdabdddaba6"
+    },
+    {
       "path": "img/Chara/Skill/Skill_P_Jubee.webp",
       "sha256": "80c534220cf98e023df62104c049930728a31fe90ec1e5b6ab5dec516391aea5"
     },
@@ -2487,6 +2487,10 @@
     {
       "path": "img/Chara/Skill/Skill_S_Jade.webp",
       "sha256": "0ec96c345503a3786f6bb2eddecafa8a1b11b6cd3dfae4a7b9d5a9836cd05c0e"
+    },
+    {
+      "path": "img/Chara/Skill/Skill_S_Joanne.webp",
+      "sha256": "c9baf7eac0c9154ef2cf58c6d410b0f2812adf96b2632ca005039b61c817e95c"
     },
     {
       "path": "img/Chara/Skill/Skill_S_Jubee.webp",
@@ -4286,7 +4290,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "21605cbea3dc2ea3b5003dbf6dd748bd993fe0db061560e864c114fbcaf958af"
+      "sha256": "165bda837d577af336ef0336078bfed59bd4697a687ed2f197004e1f1092691c"
     },
     {
       "path": "public-release-config.js",
@@ -4294,7 +4298,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "77e759dbf352a0548a61cc5fe698e5bf9f64ec6a86f8c9888bfe4a51ba4679a8"
+      "sha256": "702cd4593d8051f69f14ec6adb6186b54b2ff8d8618e6814ebc175db69e06be6"
     },
     {
       "path": "public-site-runtime.js",
@@ -4322,7 +4326,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "9d5d5bffddc86a1ad1a828e3d8c3cb0328439ca8af12b6e1b2c52a764448f605"
+      "sha256": "c6748fdb8ab21c2455a58712ba88a882cb0700a007aaf5a68e5eec19094a0a02"
     },
     {
       "path": "research-progress.js",
@@ -4334,11 +4338,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "e804c1ef3cba521bb40005a5e53dbc51386488ed7703d101f97cf398b6762d71"
+      "sha256": "a6c39f4cb2cf544036d9a490820f844bab1fc1bd664f13db9a2670ea36efa152"
     },
     {
       "path": "share/index.html",
-      "sha256": "72975cd7b3d37448f183af4c8357835689ddfeee6fa4a9074d1d6a5feede7de4"
+      "sha256": "f42c9399e8fd3031819e595573853370463409b091f48d3e99b68e71cf030b20"
     },
     {
       "path": "shared-topbar.css",
@@ -4426,7 +4430,7 @@
     },
     {
       "path": "transfer/index.html",
-      "sha256": "c3a92a074c3a2357e4aa4731c866a0969e9218775593dd54d222c7f6d13bf074"
+      "sha256": "3a8f2b51ae00f4417767b7dcbe5ffc2f2cd69be4d1c39f73e3daf0df5c86c91d"
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
-  "candidateId": "a0ab238c6633ffe8",
-  "sourceCommit": "c6ccdaaaa6418286800d764fd5a05cf1ca2d5ee7",
+  "candidateId": "ffa78e9f3616275a",
+  "sourceCommit": "3061b80520e4077cfb295b2e2b896fe34ca36136",
   "profile": "new",
   "digest": {
-    "contentDigest": "fb78266760df92fe1b960cecdda4bafd5fbbc3c703a07d7ca97ceab2ad9ae1b5",
-    "outputDigest": "c9b703cff6b4c5fa"
+    "contentDigest": "4374d8e896dc0f77cfa042b6ed8a3d710f34ec59bb8f590c3bfb2cbfedc7df7e",
+    "outputDigest": "5fa029c16fcc55ba"
   }
 }
