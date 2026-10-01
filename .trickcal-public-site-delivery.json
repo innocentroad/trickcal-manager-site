@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "133b277386a95908",
-  "sourceCommit": "6b9f61f110d48d5d5e5fcf25f33b354465d6307d",
+  "candidateId": "984368ae055edfd0",
+  "sourceCommit": "ea4e7b3a6ceb5277b840675e0229fd2bd33d0aff",
   "profile": "new",
-  "contentDigest": "4533d4edbe27a4a169a478d03af7a8ee877a406b2d480ae118aedd9d3c3f6e9e",
-  "outputDigest": "441890fec35d74fc",
+  "contentDigest": "ca559289903885a990fba63c587d74044508b06b27d3d8759614ef52f0bf3ff7",
+  "outputDigest": "0dfecc58d9b7b3d5",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -46,11 +46,11 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "b6401bc2d955cb76c069042e76474fd565cb8eb7bdd81e4d23c05e860675fe70"
+      "sha256": "a42a5197e98a7e22005551c2ebd82699114505356d4dbac000e95373780fc44a"
     },
     {
       "path": "calc/index.html",
-      "sha256": "e2bf8b322a810dba16bba6576b98f5134bf9abc527d649b8d41fb91ef08b1ab3"
+      "sha256": "17fc8a832c3a938a558cd5eb206907050a5d2de1d029741f4bc948178e713f4b"
     },
     {
       "path": "cards.js",
@@ -62,23 +62,23 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "e7613a5ce9d1c4e7789b14d3371ebdc4db1ef7081eb666f67cf6992a56f69b12"
+      "sha256": "06c496ae6acd577bc00185ca45bed478629e9034bdadb3afc6ad908c754b60e4"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "d135842e6e2b34c75339aafc1dcdf65d814f5cd05fad1c1f70ad73b97e919178"
+      "sha256": "958743a7c3a8e58316d69ca2dab9286eba319176ee70ed02030b9f191107ce5b"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "6eac05b0a8cebd3a6c681bf12b56f0d07854341d5f7230394635244043701b0b"
+      "sha256": "9169beeeaa18ce4474afac9a2a038a1b5e6e0931120e35fbd2bea00949b973f2"
     },
     {
       "path": "data/index.html",
-      "sha256": "74e8cfc64d0e9bbddf45e242abcdbff98c1cd0450f54406d457c1e71f0b4ae21"
+      "sha256": "a0ce40c5551710542cd2ff96ec5431a83985e02ea4a82e724516c544fe839f93"
     },
     {
       "path": "data/life-jobs/index.html",
-      "sha256": "c9065678a9b1cd0a1f9725b9000033d8fa9df1fa8ca76e35bf5f243fbd9dfb2f"
+      "sha256": "a887cd73a214124ce8ee574788606f985b7d6001034597506c6bff9418dd3780"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -5066,7 +5066,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "6090efe3039896e999d5b5bcd47efd88822b1603ff32e9b360d5f30cf727b0c6"
+      "sha256": "0faf6c9844d4c68ed1d7c14872e9b412303e4380a217f1d81c8193501d0aaadf"
     },
     {
       "path": "public-release-config.js",
@@ -5074,7 +5074,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "6b4e46051a768dc249b1c4efd7efd15d0c2a6b4c6aaffc92d506dd9cd19cf710"
+      "sha256": "21c4862300d518d4b63717edc0107e6f5604200e41135be3df7444e605433cb4"
     },
     {
       "path": "public-site-runtime.js",
@@ -5114,7 +5114,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "321d13e13e81e1d2a65f78e5420b7f4195e5056d0816ad7bf74f929c111ba713"
+      "sha256": "1f2e5a00fc640ba983e5675e1a1203d913f68e1cd218ec6591dc1417efef93c8"
     },
     {
       "path": "research-progress.js",
@@ -5126,11 +5126,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "4f7a2f8a9c4d78b11db030eb7309aafca5538ea65d385c566dd4db2173b44972"
+      "sha256": "884a4a33248bf38eba362819914861ce8c005a10c3cc1f70e3143ea03cf78ba3"
     },
     {
       "path": "share/index.html",
-      "sha256": "08465ddb8c66f529d7cba1121f1141bea0c152c1d3ccde1229eb1b914e82614e"
+      "sha256": "fa9e4b4aa312e4a97dd2c0d4c1bd961bca9c0d5598783c98fbbb57229b43b904"
     },
     {
       "path": "shared-topbar.css",
@@ -5174,7 +5174,7 @@
     },
     {
       "path": "statData.js",
-      "sha256": "041b5e435512349351f7d576d406105d22fa07fd6b0949505c8cfeb31ccb17ba"
+      "sha256": "5aced9f7ded8afe929ef1725b37c958772f6fe0c44d7b0695d5fbf047e985f0b"
     },
     {
       "path": "storage-backup.js",
@@ -5218,7 +5218,7 @@
     },
     {
       "path": "transfer/index.html",
-      "sha256": "cbacb1c9d656263b6d93543b6c3d9f72b4b7a9f29a62cc11df6f86cc70388352"
+      "sha256": "cc02a531b02f035b2c9da4ee506faebbabe4fd79acf834484de159313cf49c2d"
     }
   ]
 }
