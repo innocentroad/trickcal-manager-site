@@ -482,16 +482,11 @@
     }
 
     function getGuideLinks() {
-      const oldManagerRoute = profile === PROFILE_LEGACY
-        ? routeUrl('manager', '/trickcal-manager/stat-dashboard.html')
+      const oldManager = profile === PROFILE_LEGACY
+        ? routeUrl('transfer', '/trickcal-manager/storage-transfer.html')
         : profile === PROFILE_LOCALHOST
-          ? routeUrl('manager', '/manager/')
-          : absoluteUrl('/trickcal-manager/stat-dashboard.html', peerOrigin('source', LEGACY_ORIGIN));
-      const oldManager = withQuery(oldManagerRoute, {
-        view: 'settings',
-        backup: '1',
-        notice: 'migration-guide'
-      });
+          ? peerRouteUrl('transfer', peerOrigin('source', LEGACY_ORIGIN), '/trickcal-manager/storage-transfer.html')
+          : absoluteUrl('/trickcal-manager/storage-transfer.html', peerOrigin('source', LEGACY_ORIGIN));
       const newTransfer = profile === PROFILE_NEW
         ? routeUrl('transfer', '/transfer/')
         : profile === PROFILE_LOCALHOST
@@ -984,19 +979,20 @@
       const back = appendElement(dialogBody, 'button', '一覧へ戻る', 'trickcal-announcements-back');
       back.type = 'button';
       back.addEventListener('click', () => { renderList(); focusDialogStart(); });
-      appendElement(dialogBody, 'p', '移行はファイルを使って手動で行います。自動では移りません。', 'trickcal-announcement-guide-lead');
+      appendElement(dialogBody, 'p', '旧サイトの通常画面は新サイトへ自動転送されますが、保存データは自動では移りません。移行済み・初めて利用する方は操作不要です。', 'trickcal-announcement-guide-lead');
       const steps = appendElement(dialogBody, 'ol', undefined, 'trickcal-announcement-guide-steps');
       [
-        '旧サイトで全体バックアップを保存します。',
-        '新サイトの移行ページでバックアップファイルを選びます。',
-        '内容を確認し、明示的に適用します。'
+        '旧サイトを利用していたブラウザー・プロファイルで「旧データを引き継ぐ」を開きます。',
+        '保存だけしたい場合は「バックアップを保存」を選びます。新サイトのデータは変更しません。',
+        '移行する場合は「新サイトへ転送」を選ぶか、新サイトの移行ページで保存したバックアップファイルを選びます。',
+        '新サイトの現在データを必要に応じてバックアップし、移行内容を確認してから明示的に適用します。'
       ].forEach(step => appendElement(steps, 'li', step));
       appendElement(dialogBody, 'p', '旧サイトのデータは削除されません。新サイトの対象データは上書きされます。', 'trickcal-announcement-guide-warning');
-      appendElement(dialogBody, 'p', '新サイトで読み込んだバックアップの内容を確認してから、適用を確定できます。', 'trickcal-announcement-guide-confirm');
+      appendElement(dialogBody, 'p', '新サイトで読み込んだバックアップの内容を確認してから、適用を確定できます。ファイルを選んだだけでは適用されません。', 'trickcal-announcement-guide-confirm');
       const links = getGuideLinks();
       const actions = appendElement(dialogBody, 'div', undefined, 'trickcal-announcement-guide-actions');
       const sameScreenLegacyManager = profile === PROFILE_LEGACY && page === PAGE_MANAGER;
-      const oldLink = appendElement(actions, sameScreenLegacyManager ? 'button' : 'a', sameScreenLegacyManager ? 'バックアップを保存' : '旧サイトのバックアップ画面を開く', 'trickcal-announcement-guide-link');
+      const oldLink = appendElement(actions, sameScreenLegacyManager ? 'button' : 'a', sameScreenLegacyManager ? 'バックアップを保存' : '旧データを引き継ぐ', 'trickcal-announcement-guide-link');
       if (sameScreenLegacyManager) {
         oldLink.type = 'button';
         oldLink.dataset.announcementAction = 'open-backup-menu';
@@ -1020,7 +1016,7 @@
       newLink.rel = 'noopener';
       const details = appendElement(dialogBody, 'details', undefined, 'trickcal-announcement-guide-details');
       appendElement(details, 'summary', '困った時');
-      appendElement(details, 'p', '適用前のプレビューと明示確認を使い、保存先と件数を確認してください。自動転送は実行されません。複数タブで同じサイトを開いている場合は、未保存の編集がないことを確認してから他のタブを閉じて、もう一度試してください。');
+      appendElement(details, 'p', '別のブラウザー・プロファイル・端末やプライベートモードでは、以前の保存データを読み取れません。転送先を開けない場合は、バックアップ保存とファイル読み込みを利用してください。複数タブで同じサイトを開いている場合は、未保存の編集を保存してから他のタブを閉じて再試行してください。救出ファイルは調査・復旧用で、通常のバックアップとしては読み込めません。');
       if (sameScreenLegacyManager) {
         const backupStatus = appendElement(dialogBody, 'p', '', 'trickcal-announcement-backup-status');
         backupStatus.setAttribute('role', 'status');
