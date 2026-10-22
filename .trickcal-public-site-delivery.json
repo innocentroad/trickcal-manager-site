@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "25e21b225b415c86",
-  "sourceCommit": "f29739fee1179c59d43bd40e2d0a9c899b36621a",
+  "candidateId": "2e68cb6c465e25c9",
+  "sourceCommit": "a5734a1688660896018ce2d2fe7f839aa3c941e2",
   "profile": "new",
-  "contentDigest": "687c7587b98613e6d202ba670cd4f0ef7ce0e8cdf2a194937a38c11884092e50",
-  "outputDigest": "7b9bf09e9f0db90d",
+  "contentDigest": "da70ff3ab32e714a2e12956e6b8379a4860647ed6272c33f8cb0e010f511dec6",
+  "outputDigest": "b1dbeb1f73648e7a",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -34,11 +34,11 @@
     },
     {
       "path": "apostle-skill-image-data.js",
-      "sha256": "077a771fdb891c13bd54f3a40f1ef4ea61f4f67da78037f346862de98284ee70"
+      "sha256": "1abba02082aff1b52531ca0d3005a0ee92668bb83e33c7b556750a93d9a64fa6"
     },
     {
       "path": "apostles.js",
-      "sha256": "d19443f24584119196a04e77f0a4b663cd34d87102ce77166bdc756977259c8e"
+      "sha256": "4af0b2f68dd57cdfb987c261d09827af7e4c594b720bcbaf9616f1c70c9d032d"
     },
     {
       "path": "app-cache.js",
@@ -46,15 +46,15 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "7d2530ef2641de388fef599839dddd2bcc83367bd79ea9c3b87d756119687582"
+      "sha256": "6f4df2906773bd92c38617504901a7165d9a291edc7f70d8d4fe40014f190927"
     },
     {
       "path": "calc/index.html",
-      "sha256": "936e9507944bdaf34f84ed90a1805ca5f9ab53ebc1ccb6672beeaed36483e020"
+      "sha256": "8bab143eeb7b18c17e8bf47e5a83136abd72131c7affaa024e802cfc88dfe955"
     },
     {
       "path": "cards.js",
-      "sha256": "cae5b30ecb4f8f6a7afec29255ce13d6db4b0af910dd1f4989fd829645fb18ff"
+      "sha256": "5a2102a0c3a5d02fa8a3130ef2f0e296d6c9d984e103b71ebdcc93b3b03dcbbd"
     },
     {
       "path": "combat-scenario.js",
@@ -62,23 +62,23 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "a7dae17cae0ea49c7a7332fe6e5641003645c650250f38b06160f4c918928e28"
+      "sha256": "4a6a73b05a3c2f75051bba2cc541f6df828c89bc0a06609cffc2c095df7f0527"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "2ba42dbea1596f6426049f067e64567f31f4cdcd3efdce962676dce17234b8a6"
+      "sha256": "7bcdedde71659ff5eab909c00afc2acb7eb9665ab37e5dc1ca7c3899e437ffd7"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "d47551bac5fd4f98d790f6bb241a2bb99dde500551e73a01c1e301244f5519dd"
+      "sha256": "95e9a1fd2aecbf1ebbd6452defdaa7ace7377bd0292c988269f11dc5c8410587"
     },
     {
       "path": "data/index.html",
-      "sha256": "7f2072e460b06935c59108a890156fadd28a4492bb9650f075ba2e3717b15cc1"
+      "sha256": "c196071153595588abd8d184b9049f1f26ba1a8e5f4cc8809ae39b1dd1315951"
     },
     {
       "path": "data/life-jobs/index.html",
-      "sha256": "bf63860980023b0b30ab885390853f65bd7aa3afcb2a798614fd635b2233a702"
+      "sha256": "3fb8b92cc62ea318ac1f64dcb13060e347af0a452cff7572d2f245081d0fbd57"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -102,7 +102,7 @@
     },
     {
       "path": "enemy-presets.js",
-      "sha256": "5a2d05ecd7f213ac299b24ad00ac48e5e50402ac9a167d399146e4ea2829dccf"
+      "sha256": "eb88a3cec8c2e6a5d55c2b4e79dafb5c679ddafe6fcf1de4948e81757f86e7d3"
     },
     {
       "path": "enemy-status.css",
@@ -126,7 +126,7 @@
     },
     {
       "path": "formation-damage-calc.js",
-      "sha256": "5d19f6ae00157dd82c1bd434d9518fa9c71df56f9c0d32637f9bd74aa959fbe8"
+      "sha256": "b35e5b0fcca72d6bc7da8eaa85641329bef9c62c9c3b3fb2c030423ba45617c9"
     },
     {
       "path": "formation-damage-dps-prototype.css",
@@ -150,7 +150,7 @@
     },
     {
       "path": "formation-share-catalog.js",
-      "sha256": "d4baae39ecaff54203f3cd00b8d56cd262b428772d0c1feeb9686c4d263926f5"
+      "sha256": "5e00187045e1990b98c64a4493b37d8c2728de94a9b302f9917bd76a1640e544"
     },
     {
       "path": "formation-share-codec.js",
@@ -158,11 +158,11 @@
     },
     {
       "path": "formation-share-create.js",
-      "sha256": "3631a53a8637278edcd92f093bbb26328f9adb57df1199b92433d7d9d84eca73"
+      "sha256": "15bef2ab1931bb3578a7ed555b371e2c95c29654b72b15e3b2b15351c3fa7c12"
     },
     {
       "path": "formation-share-display-data.js",
-      "sha256": "e19c5b42babde08b0bbd07da3627543b45294155c3987322634151f5416e85cb"
+      "sha256": "f97395f3cb75791f3dbef76e57ab7cead70916a322d834d95a42b613c4266252"
     },
     {
       "path": "formation-share-image.js",
@@ -407,6 +407,10 @@
     {
       "path": "img/Card/Artifact/キャロットのサトウキビ.webp",
       "sha256": "b92883030a6a67f940e482d22df40172530822849029ecda6c17f8ca86a3e923"
+    },
+    {
+      "path": "img/Card/Artifact/グウィンの小さなペンギンの友達.webp",
+      "sha256": "beb5cd4b01ce58465dae871e607a7ec8e8e2e3507a8d39f68b2de607acf1f83c"
     },
     {
       "path": "img/Card/Artifact/クロエの万能裁縫箱.webp",
@@ -1425,6 +1429,10 @@
       "sha256": "90a29785dcf56f6ad5b3390c934c58529fbace78ffe94086b4501091db964f4f"
     },
     {
+      "path": "img/Chara/Aside/AsideIcon_Guin.webp",
+      "sha256": "5f3caf63a2e3b02b26a894c50f2d9f8f3d79476c517f1d89ccf0b60783f7c30c"
+    },
+    {
       "path": "img/Chara/Aside/AsideIcon_Haley.webp",
       "sha256": "4acb147f7fa19eb8418ac6048ad6e62fb5d8629573f58dd2d5ae9a0afdddd642"
     },
@@ -1637,6 +1645,10 @@
       "sha256": "dcfb633d046c25efc74ebfb2b54430a8dfe44ba2afe63b213fc9e71b1db3683d"
     },
     {
+      "path": "img/Chara/Guin.webp",
+      "sha256": "014357f2f640aba0c182edd0dda0fdd0b77ff557ffe5e6dcc974ad52538700b6"
+    },
+    {
       "path": "img/Chara/Haley.webp",
       "sha256": "85672ac47022e3f62e6225f8a61342ecee141e02d6364251a9a07e50a9219430"
     },
@@ -1815,6 +1827,14 @@
     {
       "path": "img/Chara/Sist.webp",
       "sha256": "46ebf72990d83c5cd4906af8737739ce2ba895838cb6a7b8f8356394d2dff7d9"
+    },
+    {
+      "path": "img/Chara/Skill/Icon_AdmissionSkill_Guin.webp",
+      "sha256": "c872b4a364c8f360a02ab9a2c2cd75cabb1cce0777eecc0e2cb19629e3f2b22b"
+    },
+    {
+      "path": "img/Chara/Skill/Icon_GraduateSkill_Guin.webp",
+      "sha256": "4050e6241076725e5e4afe3796c14c7b52f160b598a02487b3327db34726c336"
     },
     {
       "path": "img/Chara/Skill/MagicAttack.webp",
@@ -2255,6 +2275,10 @@
     {
       "path": "img/Chara/Skill/Skill_P_Gabia.webp",
       "sha256": "b24c49e1c2cbc30005b128a25e097b16f774755aadd039632ddac6b4ce8c11d8"
+    },
+    {
+      "path": "img/Chara/Skill/Skill_P_Guin.webp",
+      "sha256": "08c3c00f02a66c31beb9a6a57318e73ff9e209985b043746f67382b597f43553"
     },
     {
       "path": "img/Chara/Skill/Skill_P_Haley.webp",
@@ -5062,7 +5086,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "10b3386f1733afa59dc43704006e41d1c5dcaedd35a1ad4aac5011e2bddb0e62"
+      "sha256": "a1562989d4df946042870784d608bb7a296d047fa0dee3d7c0772fcf17c9c0ff"
     },
     {
       "path": "public-release-config.js",
@@ -5070,7 +5094,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "98d7108d904df20cdf3a2473cb0e3cc618aed596e6482411a5264610d505f46f"
+      "sha256": "4017c60790e6a2fc5c6b283f7811bd9ccaacd04e26bdfeee1acc11d9be5d3360"
     },
     {
       "path": "public-site-runtime.js",
@@ -5158,7 +5182,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "23ba710e14f25e3d7f63dba7e8b39cfe10276c6d4cd996e02f7ddaaf956b4f3a"
+      "sha256": "ddfe4082d701d1fc6b8ed03ed41fe7324925a0a0625bbee4c9a62cb44faa9573"
     },
     {
       "path": "research-progress.js",
@@ -5170,11 +5194,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "0911ae70cff40d9b4d16d8a585be454a219c0e04e400c8de67aed89992499bb6"
+      "sha256": "f0e2f4f877ff5aed3a07234803c471f7e2cd0e7eb6aa0f0d26653754d28402d1"
     },
     {
       "path": "share/index.html",
-      "sha256": "7e21bd3130eb74285b8fef249c78d2ca35f44e2569091ffdc611e3b89f324df8"
+      "sha256": "039e3265bd4d6092d7e43a07959236be4052c8d9515f283705d09ca5c9627227"
     },
     {
       "path": "shared-topbar.css",
@@ -5222,7 +5246,7 @@
     },
     {
       "path": "statData.js",
-      "sha256": "2ceb6f383c2770cd1b654845939a0d4fd6517e0cd4c01f1373ccf7c631c866b6"
+      "sha256": "d1d68724ac204f695068edfb536311e2669e15a182a11a7e36cc123c295033b2"
     },
     {
       "path": "storage-backup.js",
@@ -5266,23 +5290,23 @@
     },
     {
       "path": "tool/bingo/index.html",
-      "sha256": "5fb2ef2a370ca6fdd4cab2c1271c46e39d24b4c2b360e7172f26ccc4bf4e746a"
+      "sha256": "cd9fb99624b2a48f21d8eae77ca7001358a0fe21e50fce47b2337bd5a32f789d"
     },
     {
       "path": "tool/critical/index.html",
-      "sha256": "51a5ba9e37a2e260478f3785bb5e6d71c56d29a659b7a4bc42a794ec3a98d820"
+      "sha256": "252b202be4d10618889d0b0821110c9f82bb601bd6626527a4a0e1a9441718a0"
     },
     {
       "path": "tool/growth-cost/index.html",
-      "sha256": "d9d1b16f6355632a1b0bd423f0317c26ad7dabab1d2a5e4c8d10daf2be8203c9"
+      "sha256": "8f67bea5fccfb2969bad23ecaa4074d38d2c2c498868a7a26ea4b88044e363a0"
     },
     {
       "path": "tool/pvp/index.html",
-      "sha256": "f9d2ea27c414d85e9fd66153df8f151920e81f97dfca9739f6b50b95f28aa72b"
+      "sha256": "fe7ef9b609bae213b212287a86b1b11843f8fe33f3a0093bf988a247fa135f8a"
     },
     {
       "path": "transfer/index.html",
-      "sha256": "925885e3bc2359e736ec48d552b02036a2a6c397fd2617b026054dff264953ce"
+      "sha256": "7e9b261837f143a73e436e46658a2f48236faffd821e231b52611115586feb86"
     }
   ]
 }
