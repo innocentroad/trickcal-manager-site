@@ -176,10 +176,10 @@
     return normalizeGradeBonusValue(row[key]) ?? normalizeGradeBonusValue(row.基本ステータス補正) ?? 0;
   }
 
-  function calculateBaseStat(data, base, coeff, level, star, grade, statKey, basic) {
+  function calculateBaseStat(data, base, coeff, level, star, grade, statKey, basic, includeGrade = true) {
     const levelValue = Math.max(1, Number(level) || 1);
     const starValue = normalizeApostleStar(star);
-    const gradeRate = getGradeStatBonusRate(data, grade, statKey, basic);
+    const gradeRate = includeGrade ? getGradeStatBonusRate(data, grade, statKey, basic) : 0;
     const starRate = statKey === 'spRegen' ? 0 : (starValue - 1) * 0.2;
     const levelStat = Number(base) + Number(coeff) * (levelValue - 1);
     return (levelStat * (1 + starRate)) * (1 + gradeRate);
@@ -189,7 +189,7 @@
     return Object.fromEntries(TOTAL_KEYS.map(key => [key, 0]));
   }
 
-  function calculateBaseTotals(data, basic, apostleState = {}, override = {}) {
+  function calculateBaseTotals(data, basic, apostleState = {}, override = {}, options = {}) {
     if (!data || !basic) return createEmptyTotals();
     const level = Number(override.level ?? apostleState.level) || 1;
     const star = normalizeApostleStar(override.star ?? apostleState.star ?? basic.レア度 ?? 1);
@@ -213,7 +213,7 @@
         ? { base: Number(basic.毎秒SP回復量) || 0, coeff: 0 }
         : findBaseStatValue(data, tier, group);
       if (!base) return;
-      totals[totalKey] = calculateBaseStat(data, base.base, base.coeff, level, star, grade, totalKey, basic);
+      totals[totalKey] = calculateBaseStat(data, base.base, base.coeff, level, star, grade, totalKey, basic, options.includeGrade !== false);
     });
     return totals;
   }
@@ -244,6 +244,7 @@
     if (!aside) return null;
     const totals = createEmptyTotals();
     const increases = createEmptyTotals();
+    const preGlobalTotals = createEmptyTotals();
     TOTAL_KEYS.forEach(key => {
       const read = source => Number(breakdown?.[source]?.[key]) || 0;
                                                                             
@@ -256,12 +257,13 @@
       value = read('research') + value;
       value = Number(aside.total[key] || 0) + value;
       value = (read('rankGlobal') + read('boardAdvanced')) + value;
+      preGlobalTotals[key] = value;
       const rate = Number(commonRates?.[INTERNAL_TO_SNAPSHOT[key]] ?? commonRates?.[key]) || 0;
       const factor = (1 + rate / 100) + followFraction(state, key);
       totals[key] = factor * value;
       increases[key] = totals[key] - value;
     });
-    return { totals, increases };
+    return { totals, increases, preGlobalTotals };
   }
 
   function hasCompleteBreakdown(snapshot) {

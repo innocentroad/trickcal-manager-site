@@ -7905,6 +7905,8 @@
     const levelInfo = getFdcEffectLevelInfo(effect, skillLevel);
     const value = Number(levelInfo?.value ?? effect.fixedValue);
     if (!Number.isFinite(value) || value === 0) return null;
+    const sharedCritical = window.TRICKCAL_CRITICAL_EFFECTS?.normalizeEffect(effect, value);
+    if (sharedCritical?.handled) return sharedCritical.bonuses;
     const effectType = String(effect.effectType || '');
     const effectTarget = String(effect.effectTarget || '');
     const text = `${valueKind} ${effectType} ${effectTarget}`;
