@@ -5,7 +5,7 @@
   const EFFECT_KEYS=new Set(['critP','critDmgP','critResP','critDmgResP','critRateP','critDmgAddP','critResAddP','critDmgResAddP','enemyCritResDownP','enemyCritDmgResDownP']);
   const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
   const object=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
-  function defaults(){return {inputModel:4,inputMode:'manual',composition:null,formation:null,side:'self',modes:{self:'direct',enemy:'direct'},ally:{crit:'60000',critDmg:'60000',critRes:'40000',critDmgRes:''},buffs:Object.fromEntries(KEYS.map(k=>[k,'0'])),direct:{self:{rate:'0',damage:'0'},enemy:{rate:'0',damage:'0'}},extra:{self:{rate:'0',damage:'0'},enemy:{rate:'0',damage:'0'}},cards:{card:[],formation:[]},cardDefault:'auto',enemy:{key:'',phase:0,overrides:{}},source:null,formationId:'',memberId:'',statMode:'current',grade:'saved',growth:{enabled:false,fields:Object.fromEntries(KEYS.map(k=>[k,{current:'',next:''}]))}};}
+  function defaults(){return {inputModel:4,inputMode:'manual',composition:null,formation:null,side:'self',modes:{self:'direct',enemy:'direct'},ally:{crit:'60000',critDmg:'60000',critRes:'40000',critDmgRes:'40000'},buffs:Object.fromEntries(KEYS.map(k=>[k,'0'])),direct:{self:{rate:'0',damage:'0'},enemy:{rate:'0',damage:'0'}},extra:{self:{rate:'0',damage:'0'},enemy:{rate:'0',damage:'0'}},cards:{card:[],formation:[]},cardDefault:'auto',enemy:{key:'',phase:0,overrides:{}},source:null,formationId:'',memberId:'',statMode:'current',grade:'saved',growth:{enabled:false,fields:Object.fromEntries(KEYS.map(k=>[k,{current:'',next:''}]))}};}
   function numeric(value,{blank=true,min=-1e6,max=1e12}={}){
     if(value===''&&blank)return '';
     if(!['number','string'].includes(typeof value)||String(value).trim()===''||!Number.isFinite(Number(value))||Number(value)<min||Number(value)>max)throw Error('入力の数値が不正です。');
@@ -45,6 +45,7 @@
     }
     if(!object(value.enemy)||!Number.isInteger(value.enemy.phase)||value.enemy.phase<0||value.enemy.phase>100||!object(value.enemy.overrides))throw Error('敵の指定が不正です。');
     s.enemy={key:str(value.enemy.key),phase:value.enemy.phase,overrides:{}};
+    if(s.enemy.key==='manual')s.enemy.manualGroup=str(value.enemy.manualGroup||'');
     for(const k of KEYS)if(own(value.enemy.overrides,k))s.enemy.overrides[k]=numeric(value.enemy.overrides[k],{min:0});
     if(value.source!=null){
       const source=value.source;if(!object(source)||!Number.isInteger(source.grade)||source.grade<1||source.grade>6||!object(source.bases))throw Error('読込元の値が不正です。');
@@ -166,7 +167,7 @@
   function enemyStatReductions(s){return {critRes:sumPersonal(s,'enemyCritResDownP','enemy'),critDmgRes:sumPersonal(s,'enemyCritDmgResDownP','enemy')};}
   function calculate(s,preset,index,math,{spellsDisabled=false,changed=false}={}){
     const side=s.side,keys=side==='self'?KEYS.slice(0,2):KEYS.slice(2),opposite=side==='self'?KEYS.slice(2):KEYS.slice(0,2);
-    if(!preset)return {error:'敵を選択してください。'};
+    if(!preset&&s.enemy.key!=='manual')return {error:'敵を選択してください。'};
     const read=(value,label)=>{if(value===''||value==null||!Number.isFinite(Number(value)))throw Error(`${label}を入力してください。`);return Number(value);};
     try{
       const enemy=enemyStats(preset,s.enemy.phase),ally=resolveAllyStats(s,math,{changed,index}),reductions=enemyStatReductions(s);let approximate=!!ally.approximate;delete ally.approximate;

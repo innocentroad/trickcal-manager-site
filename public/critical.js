@@ -31,9 +31,10 @@
   async function ensureApostles(){await loadScript('apostles.js');if(typeof APOSTLE_INDEX==='undefined')throw Error('使徒の効果データを読み込めませんでした。');}
   function readManager(){try{if(!storageReady)throw Error();const raw=window.TRICKCAL_STORAGE_FACADE.localStorage.getItem('trickcal_stat_prototype_v1');manager=raw?JSON.parse(raw):{};if(!manager||typeof manager!=='object'||Array.isArray(manager))throw Error();if(typeof migrateCardStateMap==='function')manager.cards=migrateCardStateMap(manager.cards||{});return manager;}catch{throw Error('管理の保存値を読み込めませんでした。');}}
   const cardById=id=>Object.prototype.hasOwnProperty.call(cardIndex,id)?cardIndex[id]:null;
+  const manualEnemy=()=>s.enemy.key==='manual';
   const preset=()=>Object.prototype.hasOwnProperty.call(ENEMY_PRESETS,s.enemy.key)?ENEMY_PRESETS[s.enemy.key]:null;
   const metadata=()=>preset()?getEnemyPresetMetadata(preset(),s.enemy.key):null;
-  const rules=()=>metadata()?.rules||{};
+  const rules=()=>{if(!manualEnemy())return metadata()?.rules||{};const type=String(s.enemy.manualGroup||'').split(':')[0];return own(ENEMY_PRESET_CONTENTS,type)?ENEMY_PRESET_CONTENTS[type].rules||{}:{};};
   const mode=()=>s.modes[s.side];
   const cardRows=()=>s.cards[mode()]||[];
   const activeCardRows=()=>mode()==='direct'?[]:cardRows();
@@ -98,7 +99,8 @@
     $('direct-inputs').innerHTML=fields;
     const enemy=core.enemyStats(preset(),s.enemy.phase);
     $('enemy-overrides').innerHTML=oppositeKeys().map(k=>inputField(core.LABELS[k],s.enemy.overrides[k]??'',`min="0" data-enemy-stat="${k}" placeholder="${esc(enemy[k]??'未設定')}"`)).join('');
-    $('enemy-stat-display').innerHTML=oppositeKeys().map(k=>{const value=own(s.enemy.overrides,k)?s.enemy.overrides[k]:enemy[k];return `<div class="enemy-stat"><span>${esc(core.LABELS[k])}</span><strong>${value==null||value===''?'—':esc(nfmt(value,2))}</strong></div>`;}).join('');
+    $('enemy-stat-display').innerHTML=oppositeKeys().map(k=>{const value=own(s.enemy.overrides,k)?s.enemy.overrides[k]:enemy[k];return manualEnemy()?inputField(core.LABELS[k],value??'',`min="0" data-enemy-stat="${k}"`):`<div class="enemy-stat" data-enemy-display="${k}"><span>${esc(core.LABELS[k])}</span><strong>${value==null||value===''?'—':esc(nfmt(value,2))}</strong></div>`;}).join('');
+    $('enemy-adjustment-controls').hidden=manualEnemy();
     const keys=activeKeys();
     $('growth-fields').innerHTML=`<div class="growth-table" role="table" aria-label="全体強化値の比較"><div class="growth-row growth-header" role="row"><span role="columnheader">項目</span><span role="columnheader">現在合計（%）</span><span role="columnheader">変更量（%）</span></div>${keys.map(k=>{const fields=s.growth.fields[k],delta=growthDelta(fields),preview=fields.current!==''&&fields.next!==''?`（${nfmt(fields.next)}%）`:'';return `<div class="growth-row" role="row" data-growth-row="${k}"><span class="growth-name" role="rowheader">${esc(core.LABELS[k])}</span><label class="growth-input-cell" role="cell"><span class="visually-hidden">${esc(core.LABELS[k])}の現在合計（%）</span><input type="number" min="0" step="any" inputmode="decimal" value="${esc(fields.current)}" data-growth="${k}" data-growth-field="current" aria-label="${esc(core.LABELS[k])}の現在合計（%）"></label><div class="growth-delta-cell" role="cell"><label class="growth-input-cell"><span class="visually-hidden">${esc(core.LABELS[k])}の変更量（%）</span><span class="growth-delta-input"><span data-growth-sign aria-hidden="true">${delta!==''&&Number(delta)>=0?'+':''}</span><input type="number" step="any" inputmode="decimal" value="${esc(delta)}" data-growth="${k}" data-growth-field="delta" aria-label="${esc(core.LABELS[k])}の変更量（%）"${fields.current===''?' disabled':''}><span data-growth-preview aria-label="変更後の合計">${preview}</span></span></label><small data-growth-feedback role="status">${fields.current===''?'現在値を入力':fields.next===''?'変更量を入力':''}</small></div></div>`;}).join('')}</div>`;
   }
@@ -114,14 +116,15 @@
       if(button.dataset.inputMode==='calculated'){button.disabled=!s.composition;button.title=s.composition?'編成・育成内訳から計算した値を表示':'編成を読み込むと自動計算を使えます';}
     });
     $('manual-input-note').hidden=calculated||legacyFormation;$('legacy-formation-note').hidden=!legacyFormation;$('stat-buff-controls').hidden=manualBattleValue;
+    $('quick-grade-wrap').hidden=!s.composition;$('quick-grade').disabled=!calculated;$('quick-grade').value=String(s.composition?.grade||'');$('quick-grade').title=calculated?'スペルなどによる学年の変化もここで調整できます':'学年を変更するには自動計算に切り替えてください';
   }
   function render(){
     document.documentElement.dataset.criticalReady='true';$('direction').textContent=s.side==='self'?'味方 → 敵':'敵 → 味方';$('direction').setAttribute('aria-label',s.side==='self'?'敵から味方への会心計算に切り替える':'味方から敵への会心計算に切り替える');
     const allyCombatRole=s.side==='self'?'attacker':'defender';$('enemy-panel').dataset.combatRole=allyCombatRole==='attacker'?'defender':'attacker';$('ally-stats-panel').dataset.combatRole=allyCombatRole;$('ally-boost-panel').dataset.combatRole=allyCombatRole;
     $('source-note').hidden=!s.source;$('source-note').textContent=s.source?(s.formation?`${s.source.name}・${s.composition?.grade||s.source.grade}年生・${s.formation.statMode==='planned'?'予定':'現在'}${s.formation.requestedStatMode!==s.formation.statMode?'（予定データなし）':''}${s.inputMode==='calculated'?'・基礎値から計算':'・手入力'}`:`${s.source.name}・${s.source.grade}年生`):'';
-    const p=preset(),meta=metadata();enemyOptions();
+    const p=preset();enemyOptions();
     $('phase-wrap').hidden=!(p?.phases?.length);$('enemy-phase').innerHTML=(p?.phases||[]).map((v,i)=>`<option value="${i}">${esc(v.name||v.label||'Phase '+i)}</option>`).join('');$('enemy-phase').value=String(s.enemy.phase);
-    const notes=[meta?.rules.disabledEffectSources?.includes('spell')?'この敵ではスペル効果は適用されません':''].filter(Boolean);$('content-note').textContent=notes.join(' / ');$('content-note').hidden=!notes.length;
+    const notes=[rules().disabledEffectSources?.includes('spell')?'この敵ではスペル効果は適用されません':''].filter(Boolean);$('content-note').textContent=notes.join(' / ');$('content-note').hidden=!notes.length;
     $('growth-enabled').checked=s.growth.enabled;
     $('growth-panel').classList.toggle('is-comparing',s.growth.enabled);$('growth-active-label').hidden=!s.growth.enabled;
     renderInputMode();buildFields();buildCompositionFields();renderPresetSummary();renderFormation();renderFormationDetails();renderResult();
@@ -360,9 +363,15 @@
   const group=(k,p)=>{const m=getEnemyPresetMetadata(p,k);return m.type+':'+m.mode;};
   const stageKey=(k,p)=>{const m=getEnemyPresetMetadata(p,k);return JSON.stringify([m.difficulty,m.world,m.stage,m.personality]);};
   let pendingGroup='',pendingStage='';
+  function contentGrade(){const type=pendingGroup.split(':')[0];return own(ENEMY_PRESET_CONTENTS,type)?Number(ENEMY_PRESET_CONTENTS[type].rules?.fixedGrade)||null:null;}
+  function setCompositionGrade(grade){
+    if(!s.composition||!Number.isInteger(grade)||grade<1||grade>6)return false;
+    s.composition.grade=grade;s.grade=String(grade);if(s.formation)s.formation.grade=grade;if(s.source)s.source.grade=grade;return true;
+  }
   function enemyOptions(){
     const groups=new Map(entries.map(([k,p])=>{const m=getEnemyPresetMetadata(p,k);return [group(k,p),m.modeLabel||m.contentLabel||'その他'];}));
     if(preset()){pendingGroup=group(s.enemy.key,preset());pendingStage=stageKey(s.enemy.key,preset());}
+    else if(manualEnemy())pendingGroup=groups.has(s.enemy.manualGroup)?s.enemy.manualGroup:'';
     $('enemy-content').innerHTML='<option value="">選択</option>'+[...groups].map(([k,v])=>`<option value="${esc(k)}">${esc(v)}</option>`).join('');$('enemy-content').value=pendingGroup;stageOptions();
   }
   function stageOptions(){
@@ -370,10 +379,10 @@
     if(pendingGroup.startsWith('eliasFrontier:'))candidates.sort(([ka,a],[kb,b])=>getEnemyPresetMetadata(b,kb).stage-getEnemyPresetMetadata(a,ka).stage);
     const stages=new Map(candidates.map(([k,p])=>{const m=getEnemyPresetMetadata(p,k);return [stageKey(k,p),[m.difficultyLabel,m.worldLabel,m.stageLabel,m.personality].filter(Boolean).join(' / ')||'通常'];}));
     if(!stages.has(pendingStage))pendingStage=stages.keys().next().value||'';
-    $('enemy-stage').innerHTML=[...stages].map(([k,label])=>`<option value="${esc(k)}">${esc(label)}</option>`).join('');$('enemy-stage').value=pendingStage;$('enemy-stage').disabled=!candidates.length;nameOptions();
+    $('enemy-stage').innerHTML=[...stages].map(([k,label])=>`<option value="${esc(k)}">${esc(label)}</option>`).join('');$('enemy-stage').value=pendingStage;$('enemy-stage').disabled=manualEnemy()||!candidates.length;nameOptions();
   }
   function nameOptions(){const candidates=entries.filter(([k,p])=>group(k,p)===pendingGroup&&stageKey(k,p)===pendingStage);
-    $('enemy-name').innerHTML='<option value="">敵を選択</option>'+candidates.map(([k,p])=>`<option value="${esc(k)}">${esc(getEnemyPresetMetadata(p,k).name)}</option>`).join('');$('enemy-name').value=candidates.some(([k])=>k===s.enemy.key)?s.enemy.key:'';$('enemy-name').disabled=!candidates.length;
+    $('enemy-name').innerHTML='<option value="">敵を選択</option><option value="manual">手入力</option>'+candidates.map(([k,p])=>`<option value="${esc(k)}">${esc(getEnemyPresetMetadata(p,k).name)}</option>`).join('');$('enemy-name').value=manualEnemy()?'manual':candidates.some(([k])=>k===s.enemy.key)?s.enemy.key:'';$('enemy-name').disabled=false;
   }
   function editPresetCard(el){const i=Number(el.dataset.cardIndex),row=modalRows?.[i];if(!row)return;const key=el.dataset.cardField;row[key]=Math.max(key==='solder'?0:1,Math.min(key==='star'?5:key==='solder'?2:99,Math.trunc(Number(el.value)||0)));if(row.star<5)row.solder=0;renderPresetRows();renderCatalog();commitPresetDraft();}
   function editArtifactSlot(el){const slot=Number(el.dataset.artifactSlot),row=modalRows?.find(item=>cardById(item.id)?.kind==='artifact'&&item.slot===slot);if(!row)return;const key=el.dataset.artifactField;row[key]=Math.max(key==='solder'?0:1,Math.min(key==='star'?5:2,Math.trunc(Number(el.value)||0)));if(row.star<5)row.solder=0;renderPresetRows();renderCatalog();commitPresetDraft();}
@@ -386,7 +395,7 @@
     if(t.dataset.ally){s.ally[t.dataset.ally]=t.value;s.source=null;$('source-note').hidden=true;}
     else if(t.dataset.buff)s.buffs[t.dataset.buff]=t.value;
     else if(t.dataset.direct){const index=t.dataset.direct==='rate'?0:1,cardBonus=cardTotals(activeCardRows())[index],personal=core.personalDirect(s,s.side),personalBonus=index?personal.damage:personal.rate;s.direct[s.side][t.dataset.direct]=String((Number(t.value)||0)-cardBonus-personalBonus);}
-    else if(t.dataset.enemyStat)s.enemy.overrides[t.dataset.enemyStat]=t.value;
+    else if(t.dataset.enemyStat){const key=t.dataset.enemyStat;s.enemy.overrides[key]=t.value;document.querySelectorAll(`[data-enemy-stat="${key}"]`).forEach(input=>{if(input!==t)input.value=t.value;});const output=$('enemy-stat-display').querySelector(`[data-enemy-display="${key}"] strong`);if(output)output.textContent=t.value===''?'—':nfmt(t.value,2);}
     else if(t.dataset.growth){const key=t.dataset.growth,field=t.dataset.growthField,values=s.growth.fields[key];if(field==='current'){values.current=t.value;updateGrowthProjection(key,{clearDelta:t.value===''});if(s.inputModel===4&&s.inputMode==='calculated'){s.composition.globalRates[key]=t.value;invalidateCompositionStat(s.composition,key);buildCompositionFields();}}else if(field==='delta')updateGrowthProjection(key);changed();return;}
     else return;changed();
   });
@@ -405,10 +414,10 @@
     if(button.dataset.remove!==undefined){modalRows.splice(Number(button.dataset.remove),1);renderPresetRows();renderCatalog();commitPresetDraft();}
   });
   $('direction').onclick=async()=>{s.side=s.side==='self'?'enemy':'self';try{await prepareMode();changed();render();}catch(e){error(e);}};
-  function changeEnemyFilter(){const oldName=metadata()?.name;const next=entries.find(([k,p])=>group(k,p)===pendingGroup&&stageKey(k,p)===pendingStage&&getEnemyPresetMetadata(p,k).name===oldName);s.enemy={key:next?.[0]||'',phase:0,overrides:{}};changed();render();}
-  $('enemy-content').onchange=()=>{pendingGroup=$('enemy-content').value;pendingStage='';stageOptions();changeEnemyFilter();};
+  function changeEnemyFilter(){if(manualEnemy())s.enemy.manualGroup=pendingGroup;else{const oldName=metadata()?.name;const next=entries.find(([k,p])=>group(k,p)===pendingGroup&&stageKey(k,p)===pendingStage&&getEnemyPresetMetadata(p,k).name===oldName);s.enemy={key:next?.[0]||'',phase:0,overrides:{}};}changed();render();}
+  $('enemy-content').onchange=()=>{pendingGroup=$('enemy-content').value;pendingStage='';stageOptions();if(s.formation)setCompositionGrade(contentGrade());changeEnemyFilter();};
   $('enemy-stage').onchange=()=>{pendingStage=$('enemy-stage').value;nameOptions();changeEnemyFilter();};
-  $('enemy-name').onchange=()=>{s.enemy={key:$('enemy-name').value,phase:0,overrides:{}};changed();render();};
+  $('enemy-name').onchange=()=>{const key=$('enemy-name').value;if(key==='manual'){const previous=core.enemyStats(preset(),s.enemy.phase);s.enemy={key,phase:0,manualGroup:pendingGroup,overrides:Object.fromEntries(core.KEYS.map(k=>[k,own(s.enemy.overrides,k)?s.enemy.overrides[k]:previous[k]==null?'':String(previous[k])]))};}else s.enemy={key,phase:0,overrides:{}};changed();render();};
   $('enemy-phase').onchange=()=>{s.enemy.phase=Number($('enemy-phase').value);s.enemy.overrides={};changed();render();};
   $('reset-enemy').onclick=()=>{s.enemy.overrides={};changed();render();};
   $('open-presets').onclick=async()=>{try{await ensureCards();try{readManager();}catch{}modalRows=structuredClone(cardRows());normalizeArtifactSlots(modalRows);initializeSpellDrafts();artifactPickerOpen=false;$('preset-warning').textContent='';setPresetKind('artifact');$('card-dialog').showModal();}catch(e){error(e);}};
@@ -417,7 +426,7 @@
   $('clear-selected-cards').onclick=()=>{if(modalKind==='spell')for(const row of modalSpellDrafts.values())row.qty=0;modalRows=modalRows.filter(row=>cardById(row.id)?.kind!==modalKind);renderPresetRows();renderCatalog();commitPresetDraft();};
   $('bulk-star').onchange=()=>{if(!$('bulk-star').value)return;for(const row of modalRows)if(cardById(row.id)?.kind===modalKind){row.star=Number($('bulk-star').value);if(row.star<5)row.solder=0;}renderPresetRows();renderCatalog();commitPresetDraft();};
   $('bulk-solder').onchange=()=>{if($('bulk-solder').value==='')return;for(const row of modalRows)if(cardById(row.id)?.kind===modalKind&&row.star===5)row.solder=Number($('bulk-solder').value);renderPresetRows();renderCatalog();commitPresetDraft();};
-  $('formation-fab').onclick=async()=>{try{await ensureStats();readManager();renderFormation();$('grade').value=String(s.formation?.grade||s.source?.grade||'');$('stat-mode').value=s.formation?.requestedStatMode||s.statMode;$('formation-dialog').showModal();}catch(e){error(e);}};
+  $('formation-fab').onclick=async()=>{try{await ensureStats();readManager();renderFormation();$('grade').value=String(s.composition?.grade||s.formation?.grade||contentGrade()||s.source?.grade||'');$('stat-mode').value=s.formation?.requestedStatMode||s.statMode;$('formation-dialog').showModal();}catch(e){error(e);}};
   $('reimport-formation').onclick=()=>$('formation-fab').click();
   async function changeInputMode(nextMode){
     if(nextMode===s.inputMode&&s.inputModel===4)return;
@@ -438,7 +447,9 @@
     }catch(e){error(e);}
   }
   document.querySelectorAll('[data-input-mode]').forEach(button=>button.addEventListener('click',()=>changeInputMode(button.dataset.inputMode)));
-  $('composition-grade').onchange=()=>{const grade=Number($('composition-grade').value);if(!Number.isInteger(grade)||grade<1||grade>6)return;s.composition.grade=grade;s.grade=String(grade);if(s.formation)s.formation.grade=grade;if(s.source)s.source.grade=grade;changed();render();};
+  const changeGrade=value=>{if(setCompositionGrade(Number(value))){changed();render();}};
+  $('composition-grade').onchange=()=>changeGrade($('composition-grade').value);
+  $('quick-grade').onchange=()=>{if(s.inputMode==='calculated')changeGrade($('quick-grade').value);};
   $('composition-follow').onchange=()=>{const enabled=$('composition-follow').checked&&s.composition.followAllowed,engine=window.TRICKCAL_SHARED_STAT_ENGINE;s.composition.follow=Object.fromEntries(core.KEYS.map(key=>[key,enabled?engine.followFraction({follow:true},key):0]));s.composition.exactTotals={};changed();render();};
   $('personal-effects').addEventListener('change',e=>{const id=e.target.dataset.personalEffect;if(!id||!s.formation)return;const row=s.formation.effects.find(item=>item.id===id);if(!row||row.status!=='resolved'||s.inputMode==='manual'&&PERSONAL_STAT_KEYS.has(row.bonusKey))return;row.enabled=e.target.checked;changed();render();});
   $('passive-level').onchange=()=>{const value=Number($('passive-level').value);commitFormationEffectSettings({skillLevels:{...s.formation?.skillLevels,passive:Number.isInteger(value)&&value>=1?value:0}});};
