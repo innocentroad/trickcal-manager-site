@@ -455,7 +455,12 @@
   $('retry-save').onclick=()=>{dirty=true;save(true);};$('reload-input').onclick=async()=>{if(dirty&&!confirm('編集中の入力を保存済みの内容へ戻しますか？'))return;await hydrate();};
   for(const dialog of [$('card-dialog'),$('artifact-picker-dialog'),$('formation-dialog'),$('card-info-dialog')]){dialog.querySelector('[data-close]').onclick=()=>dialog.close();dialog.querySelector('[data-cancel]')?.addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>{if(dialog.open)return;if(dialog.id==='card-dialog'){if($('artifact-picker-dialog').open)$('artifact-picker-dialog').close();modalRows=null;}if(dialog.id==='artifact-picker-dialog'){artifactPickerOpen=false;artifactTargetSlot=null;$('card-catalog').replaceChildren();}});dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});}
   if(boot?.ok){try{readManager();}catch{}await hydrate();await acquireLease();
-    window.TRICKCAL_STORAGE_RUNTIME_INSTANCE?.registerParticipant({flush:()=>saveNow(),freeze(){clearTimeout(timer);epoch++;frozen=true;return {ok:true};},async resume(){frozen=false;await hydrate();await acquireLease();return {ok:true};}});
+    window.TRICKCAL_STORAGE_RUNTIME_INSTANCE?.registerParticipant({flush:()=>saveNow(),freeze(){clearTimeout(timer);epoch++;frozen=true;return {ok:true};},async resume(){
+      frozen=false;
+                                                                               
+      if(dirty){await acquireLease();return saveNow();}
+      await hydrate();await acquireLease();return {ok:true};
+    }});
   }else{render();status('自動保存は利用できません。入力を書き出して保管できます。');}
   window.addEventListener('storage',e=>{if(e.key!==KEY&&e.key!==null)return;if(dirty){blocked=true;clearTimeout(timer);status('別タブで更新されました。読込か、この内容で保存を選べます。');}else hydrate();});
   window.addEventListener('pagehide',()=>{saveNow();epoch++;clearTimeout(timer);leaseRelease?.();});
