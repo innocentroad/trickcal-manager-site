@@ -109,7 +109,10 @@
     $('composition-fields').innerHTML=`<div class="composition-grid"><div class="composition-grid-head"><span>項目</span>${activeKeys().map(key=>`<span>${esc(core.LABELS[key])}</span>`).join('')}</div>${rows.map(([part,label])=>`<div class="composition-grid-row"><strong>${label}</strong>${activeKeys().map(key=>`<label class="visually-hidden">${esc(label)}・${esc(core.LABELS[key])}${part==='globalRates'?'（%）':''}</label><input type="number" min="${part==='baseBeforeGrade'||part==='globalRates'?0:-1000000000}" step="any" inputmode="decimal" value="${esc(c[part][key])}" data-composition-part="${part}" data-composition-key="${key}" aria-label="${esc(label)}・${esc(core.LABELS[key])}${part==='globalRates'?'（%）':''}">`).join('')}</div>`).join('')}</div>`;
   }
   function renderInputMode(){
-    const calculated=s.inputModel===4&&s.inputMode==='calculated',legacyFormation=s.inputModel===3&&s.inputMode==='formation',manualBattleValue=s.inputModel===4&&s.inputMode==='manual';document.querySelectorAll('[data-input-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.inputMode===(calculated||legacyFormation?'calculated':'manual'))));
+    const calculated=s.inputModel===4&&s.inputMode==='calculated',legacyFormation=s.inputModel===3&&s.inputMode==='formation',manualBattleValue=s.inputModel===4&&s.inputMode==='manual';document.querySelectorAll('[data-input-mode]').forEach(button=>{
+      button.setAttribute('aria-pressed',String(button.dataset.inputMode===(calculated||legacyFormation?'calculated':'manual')));
+      if(button.dataset.inputMode==='calculated'){button.disabled=!s.composition;button.title=s.composition?'編成・育成内訳から計算した値を表示':'編成を読み込むと自動計算を使えます';}
+    });
     $('manual-input-note').hidden=calculated||legacyFormation;$('legacy-formation-note').hidden=!legacyFormation;$('stat-buff-controls').hidden=manualBattleValue;
   }
   function render(){
@@ -309,10 +312,6 @@
   }
   function snapshotGlobalRate(snapshot,key){const value=snapshot.globalPercentRates?.[key];return typeof value==='number'&&Number.isFinite(value)&&value>=0?value:null;}
   function sumSnapshotSources(breakdown,key,sources){return sources.reduce((sum,source)=>sum+Number(breakdown?.[source]?.[key]),0);}
-  function manualComposition(){
-    const data=window.TRICKCAL_STAT_DATA,gradeRates=Object.fromEntries(core.KEYS.map(key=>[key,Object.fromEntries(Array.from({length:6},(_,i)=>[i+1,window.TRICKCAL_SHARED_STAT_ENGINE.getGradeStatBonusRate(data,i+1,key,{})]))]));
-    const empty=Object.fromEntries(core.KEYS.map(key=>[key,'']));return {kind:'manual',grade:Number(s.grade)>=1&&Number(s.grade)<=6?Number(s.grade):1,dataVersion:data.generatedAt||'',baseBeforeGrade:{...empty},ownAdditions:{...empty},globalAdditions:{...empty},globalRates:{...empty},follow:Object.fromEntries(core.KEYS.map(key=>[key,0])),followAllowed:true,gradeRates,exactTotals:{}};
-  }
   function invalidateCompositionStat(composition,key){for(const grade of Object.values(composition.exactTotals||{}))grade[key]='';}
   async function loadMember(){
     await ensureStats();await ensureCards();await ensureApostles();readManager();const f=selectedFormation(),id=s.memberId,basic=window.TRICKCAL_STAT_DATA.sheets.basicInfo.find(b=>b.id===id),unit=manager.apostles?.[id];
@@ -422,10 +421,10 @@
   $('reimport-formation').onclick=()=>$('formation-fab').click();
   async function changeInputMode(nextMode){
     if(nextMode===s.inputMode&&s.inputModel===4)return;
+    if(nextMode==='calculated'&&!s.composition)return;
     try{
       if(nextMode==='calculated'){
         if(s.inputModel===3&&s.inputMode==='formation')throw Error('旧形式の編成データは内訳がありません。編成から再読込してください。');
-        if(!s.composition){await ensureStats();s.composition=manualComposition();for(const key of core.KEYS){const current=s.growth.fields[key].current;if(current!=='')s.composition.globalRates[key]=current;}}
         s.inputModel=4;s.inputMode='calculated';await prepareMode();
       }else{
         if(s.inputModel===4&&s.inputMode==='calculated'||s.inputModel===3&&s.inputMode==='formation'){
