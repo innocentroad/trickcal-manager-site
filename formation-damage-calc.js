@@ -14,8 +14,15 @@
   const CALC_SETTINGS_KEY = 'trickcal_formation_damage_settings_v1';
   const CALC_RESULT_SAVES_KEY = 'trickcal_formation_damage_result_saves_v1';
   const CALC_SAVE_LIMIT = 50;
+  const INITIAL_STAT_INPUT_DRAFT = Object.freeze({
+    hp: '500000', physicalAtk: '60000', magicAtk: '60000',
+    physicalDef: '90000', magicDef: '90000', crit: '40000', critDmg: '40000',
+    critRes: '30000', critDmgRes: '30000'
+  });
+  const STAT_INPUT_DRAFT_KEYS = Object.freeze(Object.keys(INITIAL_STAT_INPUT_DRAFT));
   let damageSaveWriteMessage = '';
   let seasonRuleRefreshTimer = null;
+  let statDraftSaveTimer = null;
   const DAMAGE_CALCULATION_VERSION = 111;
   let enemyHitRuntime = null;
                                                                                          
@@ -370,6 +377,7 @@
     enemySourceMode: 'preset',
     pvpAffinityEnabled: false,
     pvpRank: 3001,
+    statInputState: null,
     enemyApostleId: '',
     enemyPresetKey: '',
     enemySeasonRuleKey: '',
@@ -552,7 +560,8 @@
         if (!target.getClientRects().length) return;
         const button = document.createElement('button');
         button.type = 'button';
-        button.textContent = target === dps ? 'DPS詳細' : target.parentElement?.id === 'fdc-season-rules' ? 'シーズンルール' : target.textContent.trim();
+        button.textContent = target === dps ? 'DPS詳細' : target.parentElement?.id === 'fdc-season-rules' ? 'シーズンルール'
+          : target.querySelector('.fdc-category-title')?.textContent.trim() || target.textContent.trim();
         button.addEventListener('click', () => {
           close();
           const category = target.closest('.stat-category');
@@ -668,7 +677,8 @@
         return;
       }
       if (event.key !== STAT_STORAGE_KEY) return;
-      view.enemyStatDirty = false;
+      if (isStatInputLinked('self')) view.statDirty = false;
+      if (isStatInputLinked('enemy')) view.enemyStatDirty = false;
       view.enemyGlobalPercentDirty = false;
       view.enemyResearchPreset.dirty = false;
       view.enemyIndividualOverrides = {};
@@ -782,6 +792,12 @@
         syncApplyFloatUi();
         render();
       });
+    });
+    document.addEventListener('click', event => {
+      const linkToggle = event.target.closest('[data-fdc-stat-link]');
+      if (!linkToggle) return;
+      event.preventDefault();
+      toggleStatInputLink(linkToggle.dataset.fdcStatLink === 'enemy' ? 'enemy' : 'self');
     });
     document.addEventListener('click', event => {
       const toggle = event.target.closest('[data-fdc-category-toggle]');
@@ -1319,18 +1335,34 @@
       saveCalcSettings();
       render();
     });
-    [el.inputs.selfHp, el.inputs.atk, el.inputs.selfDef, el.inputs.crit, el.inputs.critDmg, el.inputs.selfCritResBase, el.inputs.selfCritDmgResBase].forEach(input => {
+    const statInputs = [
+      ['self', el.inputs.selfHp, 'hp'], ['self', el.inputs.atk, 'attack'], ['self', el.inputs.selfDef, 'defense'],
+      ['self', el.inputs.crit, 'crit'], ['self', el.inputs.critDmg, 'critDmg'],
+      ['self', el.inputs.selfCritResBase, 'critRes'], ['self', el.inputs.selfCritDmgResBase, 'critDmgRes'],
+      ['enemy', el.inputs.enemyHp, 'hp'], ['enemy', el.inputs.enemyAtk, 'attack'], ['enemy', el.inputs.def, 'defense'],
+      ['enemy', el.inputs.enemyCrit, 'crit'], ['enemy', el.inputs.enemyCritDmg, 'critDmg'],
+      ['enemy', el.inputs.critRes, 'critRes'], ['enemy', el.inputs.critDmgRes, 'critDmgRes']
+    ];
+    statInputs.forEach(([side, input, field]) => {
       input?.addEventListener('input', () => {
-        view.statDirty = true;
+        if (isStatInputLinked(side)) {
+          if (side === 'self') view.statDirty = true;
+          else view.enemyStatDirty = true;
+        } else {
+          const context = buildContext();
+          updateManualStatDraftFromInput(side, input, field, context);
+          scheduleStatDraftSave();
+        }
         renderResult(buildContext());
       });
-    });
-    [el.inputs.enemyHp, el.inputs.enemyAtk, el.inputs.enemyCrit, el.inputs.enemyCritDmg, el.inputs.def, el.inputs.critRes, el.inputs.critDmgRes].forEach(input => {
-      input?.addEventListener('input', () => {
-        if (view.enemySourceMode === 'apostle') view.enemyStatDirty = true;
-        renderResult(buildContext());
+      input?.addEventListener('change', () => {
+        if (!isStatInputLinked(side)) {
+          updateManualStatDraftFromInput(side, input, field, buildContext());
+          flushStatDraftSave();
+        }
       });
     });
+    window.TRICKCAL_STORAGE_RUNTIME_INSTANCE?.registerParticipant?.({ flush: flushStatDraftSave });
     getEnemyCorrectionInputKeys().forEach(inputKey => {
       el.inputs[inputKey]?.addEventListener('input', () => {
         if (view.enemySourceMode !== 'apostle') return;
@@ -1442,8 +1474,13 @@
     if (el.shieldSwitch) {
       el.shieldSwitch.hidden = view.perspective !== 'enemy';
       const enabled = normalizeDefensiveShield(view.defensiveShield, view.targetId).enabled;
-      el.shieldSwitch.querySelectorAll('[data-fdc-shield-enabled]').forEach(button =>
-        button.setAttribute('aria-pressed', String((button.dataset.fdcShieldEnabled === 'true') === enabled)));
+      el.shieldSwitch.querySelectorAll('[data-fdc-shield-enabled]').forEach(button => {
+        if (button.hasAttribute('data-fdc-shield-toggle')) {
+          button.textContent = enabled ? 'シールド込み' : 'シールドなし';
+          button.dataset.fdcShieldEnabled = String(!enabled);
+          button.setAttribute('aria-pressed', String(enabled));
+        } else button.setAttribute('aria-pressed', String((button.dataset.fdcShieldEnabled === 'true') === enabled));
+      });
     }
     syncApplyFloatUi();
     renderBoardPlanBonus(context);
@@ -1467,6 +1504,8 @@
     syncEnemyGlobalPercentInputs(context);
     syncStatsFromTarget(context);
     syncStatsFromEnemyApostle(context);
+    syncStatsFromEnemyPreset(context);
+    syncStatLinkUi(context);
     syncEnemyPersonalityUi();
     syncPersonalityTypeAffinity(context);
     renderEnemySkillChoices(undefined, context);
@@ -1773,7 +1812,6 @@
 
   function syncEnemySourceUi(context = buildContext()) {
     const apostleMode = view.enemySourceMode === 'apostle';
-    if (apostleMode) view.enemyStatDirty = false;
     if (el.enemySourceMode) el.enemySourceMode.value = apostleMode ? 'apostle' : 'preset';
     if (el.pvpAffinityEnabled) el.pvpAffinityEnabled.checked = !!view.pvpAffinityEnabled;
     el.enemySourcePresetFields.forEach(field => { field.hidden = apostleMode; });
@@ -1787,10 +1825,13 @@
     if (el.enemyPersonality) el.enemyPersonality.disabled = apostleMode;
     const finalStatInputs = [el.inputs.enemyHp, el.inputs.enemyAtk, el.inputs.enemyCrit, el.inputs.enemyCritDmg, el.inputs.def, el.inputs.critRes, el.inputs.critDmgRes];
     finalStatInputs.forEach(input => {
-      if (input) input.readOnly = apostleMode;
+      if (input) input.readOnly = false;
     });
-    if (el.enemyFinalStats) el.enemyFinalStats.classList.toggle('is-final-output', apostleMode);
-    if (el.enemyFinalStatsHeading) el.enemyFinalStatsHeading.textContent = apostleMode ? '最終ステータス' : 'ステータス';
+    const linkedOutput = apostleMode && isStatInputLinked('enemy');
+    if (el.enemyFinalStats) el.enemyFinalStats.classList.toggle('is-final-output', linkedOutput);
+    const headingTitle = el.enemyFinalStatsHeading?.querySelector('.fdc-category-title');
+    if (headingTitle) headingTitle.textContent = linkedOutput ? '最終ステータス' : 'ステータス';
+    else if (el.enemyFinalStatsHeading) el.enemyFinalStatsHeading.textContent = linkedOutput ? '最終ステータス' : 'ステータス';
     renderEnemyIndividualSettings(context);
     syncEnemyResearchPresetFromState(context);
     renderEnemyBoardPresetUi(context);
@@ -1873,13 +1914,15 @@
     const enemyType = resolveEnemyDamageType(preset);
     const enemyIsMagic = enemyType === 'magic';
     const selfIsMagic = selfType === 'magic';
-    el.inputs.enemyHp.value = Math.round(Number(scaled.hp) || 0);
-    el.inputs.enemyAtk.value = Math.round(Number(enemyIsMagic ? scaled.atk_m : scaled.atk_p) || 0);
-    el.inputs.enemyCrit.value = Math.round(Number(scaled.crit) || 0);
-    el.inputs.enemyCritDmg.value = Math.round(Number(scaled.critDmg) || 0);
-    el.inputs.def.value = getEnemyPresetInputNumber(selfIsMagic ? scaled.def_m : scaled.def_p, 1);
-    el.inputs.critRes.value = getEnemyPresetInputNumber(scaled.critRes, 1);
-    el.inputs.critDmgRes.value = getEnemyPresetInputNumber(scaled.critDmgRes, 1);
+    if (isStatInputLinked('enemy')) {
+      writeCombatStatInput(el.inputs.enemyHp, scaled.hp);
+      writeCombatStatInput(el.inputs.enemyAtk, enemyIsMagic ? scaled.atk_m : scaled.atk_p);
+      writeCombatStatInput(el.inputs.enemyCrit, scaled.crit);
+      writeCombatStatInput(el.inputs.enemyCritDmg, scaled.critDmg);
+      writeCombatStatInput(el.inputs.def, selfIsMagic ? scaled.def_m : scaled.def_p);
+      writeCombatStatInput(el.inputs.critRes, scaled.critRes);
+      writeCombatStatInput(el.inputs.critDmgRes, scaled.critDmgRes);
+    }
     if (scaled.special != null) el.inputs.enemySpecial.value = formatPlainNumber(scaled.special);
     const weaknessInfo = getEnemyPresetWeaknessInfo(preset, selfType);
     if (el.inputs.enemyWeaknessP) el.inputs.enemyWeaknessP.value = formatPlainNumber(weaknessInfo.add);
@@ -2835,7 +2878,7 @@
         const presetStats=scaleEnemyPresetByPhase(getSelectedEnemyPreset(),view.enemyPhaseIndex);
         const initialPresetAtk=presetStats[initialType==='magic'?'atk_m':'atk_p'];
         const manualEnemyAtk=readNumber(el.inputs.enemyAtk)!==Math.round(initialPresetAtk);
-        if (damageType!==initialType && (view.enemyStatDirty || view.statDirty || manualEnemyAtk)) return unavailable('属性の異なる区間の手動能力値が不足しています。');
+        if (damageType!==initialType && (isStatInputManual('enemy') || isStatInputManual('self') || manualEnemyAtk)) return unavailable('属性の異なる区間の手動能力値が不足しています。');
         const presetAtk=presetStats[damageType==='magic'?'atk_m':'atk_p'];
         const baseAtk=damageType===initialType ? (el.inputs.enemyAtk.value.trim()===''?NaN:readNumber(el.inputs.enemyAtk))
           : typeof presetAtk==='number' ? Math.round(presetAtk) : NaN;
@@ -2897,7 +2940,6 @@
     }
     el.enemySkillChoices.hidden = false;
     const apostleMode = view.enemySourceMode === 'apostle';
-    if (apostleMode) view.enemyStatDirty = false;
     const currentIndex = Number.isFinite(view.enemySkillIndex) ? view.enemySkillIndex : -1;
     const rows = [{
       index: -1,
@@ -3015,7 +3057,7 @@
 
   function syncEnemyActionMetadata(previousType) {
     const preset = getSelectedEnemyPreset();
-    if (view.enemySourceMode === 'preset' && !view.enemyStatDirty && preset
+    if (view.enemySourceMode === 'preset' && isStatInputLinked('enemy') && !view.enemyStatDirty && preset
       && previousType !== resolveEnemyDamageType(preset)) {
       const stats = scaleEnemyPresetByPhase(preset, view.enemyPhaseIndex);
       el.inputs.enemyAtk.value = Math.round(Number(resolveEnemyDamageType(preset) === 'magic' ? stats.atk_m : stats.atk_p) || 0);
@@ -3065,6 +3107,10 @@
     const damageType = overrides.forceSelfAttack
       ? resolveSelfDamageType(target)
       : resolveActiveDamageType(target);
+    const statInputContext = { state, target, enemyMember, enemySnapshot, damageType };
+    if (!overrides.detached) ensureStatInputState(statInputContext);
+    const statRecalculationRequired = (isStatInputLinked('self') && !!target && !target.stats)
+      || (isStatInputLinked('enemy') && !!enemyMember && view.enemySourceMode === 'apostle' && !enemySnapshot);
     const cards = state.cards && typeof state.cards === 'object' ? state.cards : {};
     const actionCategory = typeof overrides.actionCategory === 'string'
       ? overrides.actionCategory
@@ -3125,8 +3171,7 @@
       target,
       isolatedActor: overrides.isolatedActor === true,
       automaticSelfStats: overrides.isolatedActor === true ? target?.stats : null,
-      statRecalculationRequired: (!!target && !target.stats)
-        || (!!enemyMember && view.enemySourceMode === 'apostle' && !enemySnapshot),
+      statRecalculationRequired,
       statRecalculationMessage: getStatRecalculationMessage(state, enemyMember),
       targetPlacementRequired,
       formationSelectionRequired: resonanceValidation.unselected.length > 0 || unplacedTargetSelectionRequired,
@@ -3734,6 +3779,11 @@
       savedAt: Date.now(),
       view: clonePlain({
         targetId: view.targetId || '',
+        statInputState: view.statInputState ? {
+          version: 1,
+          self: normalizeStatInputSide(view.statInputState.self),
+          enemy: normalizeStatInputSide(view.statInputState.enemy)
+        } : null,
         defensiveShield: normalizeDefensiveShield(view.defensiveShield, view.targetId),
         formationPresetId: view.formationPresetId || '',
         damageType: view.damageType || 'auto',
@@ -3825,12 +3875,22 @@
       getEnemyCorrectionInputKeys().forEach(inputKey => { delete snapshotInputs[inputKey]; });
     }
     writeDamageCalculationInputs(snapshotInputs, loadOptions);
+    const loadedContext = buildContext();
+    applyManualStatDraftToInputs('self', loadedContext);
+    applyManualStatDraftToInputs('enemy', loadedContext);
     saveCalcSettings();
     renderResult(buildContext());
   }
 
   function applyDamageSnapshotView(savedView = {}, options = {}) {
     if (options.settings) {
+      const savedStatInputState = savedView.statInputState && typeof savedView.statInputState === 'object'
+        ? savedView.statInputState : null;
+      view.statInputState = {
+        version: 1,
+        self: savedStatInputState ? normalizeStatInputSide(savedStatInputState.self, true) : normalizeStatInputSide(null, true),
+        enemy: view.statInputState?.enemy || normalizeStatInputSide(null, true)
+      };
       if (typeof savedView.targetId === 'string') view.targetId = savedView.targetId;
       view.defensiveShield = normalizeDefensiveShield(savedView.defensiveShield, view.targetId);
       if (typeof savedView.formationPresetId === 'string') view.formationPresetId = savedView.formationPresetId;
@@ -3873,6 +3933,13 @@
       view.masterPower = normalizeMasterPowerSettings(savedView.masterPower);
     }
     if (options.enemy) {
+      const savedStatInputState = savedView.statInputState && typeof savedView.statInputState === 'object'
+        ? savedView.statInputState : null;
+      view.statInputState = {
+        version: 1,
+        self: view.statInputState?.self || normalizeStatInputSide(null, true),
+        enemy: savedStatInputState ? normalizeStatInputSide(savedStatInputState.enemy, true) : normalizeStatInputSide(null, true)
+      };
       if (['auto', 'physical', 'magic'].includes(savedView.enemyDamageType)) view.enemyDamageType = savedView.enemyDamageType;
       if (typeof savedView.enemyPersonality === 'string') view.enemyPersonality = savedView.enemyPersonality;
       if (['preset', 'apostle'].includes(savedView.enemySourceMode)) view.enemySourceMode = savedView.enemySourceMode;
@@ -3997,6 +4064,9 @@
       if (!raw) return;
       const saved = JSON.parse(raw);
       if (!saved || typeof saved !== 'object') return;
+      view.statInputState = saved.statInputState && typeof saved.statInputState === 'object'
+        ? { version: 1, self: normalizeStatInputSide(saved.statInputState.self), enemy: normalizeStatInputSide(saved.statInputState.enemy) }
+        : { version: 1, self: normalizeStatInputSide(null, true), enemy: normalizeStatInputSide(null, true) };
       if (el.inputs.enemySequence) el.inputs.enemySequence.value = typeof saved.enemySequence==='string' ? saved.enemySequence : '';
       if (el.inputs.enemySkill && Object.hasOwn(saved,'enemySkill')
         && (typeof saved.enemySkill==='string'||typeof saved.enemySkill==='number'&&Number.isFinite(saved.enemySkill))) {
@@ -4089,6 +4159,11 @@
   function saveCalcSettings() {
     try {
       storageLocal.setItem(CALC_SETTINGS_KEY, JSON.stringify({
+        statInputState: view.statInputState ? {
+          version: 1,
+          self: normalizeStatInputSide(view.statInputState.self),
+          enemy: normalizeStatInputSide(view.statInputState.enemy)
+        } : null,
         targetId: view.targetId || '',
         defensiveShield: normalizeDefensiveShield(view.defensiveShield, view.targetId),
         formationPresetId: view.formationPresetId || '',
@@ -4143,8 +4218,10 @@
         enemySequence: el.inputs.enemySequence?.value || '',
         enemySkill: el.inputs.enemySkill?.value ?? ''
       }));
+      return { ok: true };
     } catch (error) {
       console.warn('Failed to save formation damage settings', error);
+      return error?.result || { ok: false, code: 'write-failed', retryable: true };
     }
   }
 
@@ -5028,46 +5105,260 @@
   }
 
   function syncStatsFromEnemyApostle(context) {
-    if (view.enemySourceMode !== 'apostle' || view.enemyStatDirty) return;
-    const member = context?.enemyMember;
-    if (!member) {
-      getEnemyCorrectionInputKeys().forEach(inputKey => {
-        if (el.inputs[inputKey]) el.inputs[inputKey].value = 0;
-      });
-      el.inputs.enemyHp.value = 0;
-      el.inputs.enemyAtk.value = 0;
-      el.inputs.enemyCrit.value = 0;
-      el.inputs.enemyCritDmg.value = 0;
-      el.inputs.def.value = 1;
-      el.inputs.critRes.value = 1;
-      el.inputs.critDmgRes.value = 1;
+    if (!isStatInputLinked('enemy')) {
+      applyManualStatDraftToInputs('enemy', context);
       return;
     }
+    if (view.enemyStatDirty || view.enemySourceMode !== 'apostle') return;
+    const member = context?.enemyMember;
+    if (!member || !context?.enemySnapshot) return;
     const stats = getEnemyStatsWithGlobalPercentOverrides(context, member);
     if (!stats) return;
     const enemyDamageType = resolveEnemyDamageType();
     const selfDamageType = resolveSelfDamageType(context?.target);
-    el.inputs.enemyHp.value = Math.round(Number(stats.hp) || 0);
-    el.inputs.enemyAtk.value = Math.round(Number(enemyDamageType === 'magic' ? stats.magicAtk : stats.physicalAtk) || 0);
-    el.inputs.enemyCrit.value = Math.round(Number(stats.crit) || 0);
-    el.inputs.enemyCritDmg.value = Math.round(Number(stats.critDmg) || 0);
-    el.inputs.def.value = Math.round(Number(selfDamageType === 'magic' ? stats.magicDef : stats.physicalDef) || 1);
-    el.inputs.critRes.value = Math.round(Number(stats.critRes) || 1);
-    el.inputs.critDmgRes.value = Math.round(Number(stats.critDmgRes) || 1);
+    writeCombatStatInput(el.inputs.enemyHp, stats.hp);
+    writeCombatStatInput(el.inputs.enemyAtk, enemyDamageType === 'magic' ? stats.magicAtk : stats.physicalAtk);
+    writeCombatStatInput(el.inputs.enemyCrit, stats.crit);
+    writeCombatStatInput(el.inputs.enemyCritDmg, stats.critDmg);
+    writeCombatStatInput(el.inputs.def, selfDamageType === 'magic' ? stats.magicDef : stats.physicalDef);
+    writeCombatStatInput(el.inputs.critRes, stats.critRes);
+    writeCombatStatInput(el.inputs.critDmgRes, stats.critDmgRes);
   }
 
   function syncStatsFromTarget(context) {
+    if (!isStatInputLinked('self')) {
+      applyManualStatDraftToInputs('self', context);
+      return;
+    }
     if (view.statDirty || !context.target || !context.target.stats) return;
-    const stats = context.target.stats || {};
-    const atk = context.damageType === 'magic' ? stats.magicAtk : stats.physicalAtk;
-    const def = resolveEnemyDamageType() === 'magic' ? stats.magicDef : stats.physicalDef;
-    el.inputs.selfHp.value = Math.round(Number(stats.hp) || 0);
-    el.inputs.atk.value = Math.round(Number(atk) || 0);
-    el.inputs.selfDef.value = Math.round(Number(def) || 1);
-    el.inputs.crit.value = Math.round(Number(stats.crit) || 0);
-    el.inputs.critDmg.value = Math.round(Number(stats.critDmg) || 0);
-    el.inputs.selfCritResBase.value = Math.round(Number(stats.critRes) || 1);
-    el.inputs.selfCritDmgResBase.value = Math.round(Number(stats.critDmgRes) || 1);
+    const stats = context.target.stats;
+    writeCombatStatInput(el.inputs.selfHp, stats.hp);
+    writeCombatStatInput(el.inputs.atk, context.damageType === 'magic' ? stats.magicAtk : stats.physicalAtk);
+    writeCombatStatInput(el.inputs.selfDef, resolveEnemyDamageType() === 'magic' ? stats.magicDef : stats.physicalDef);
+    writeCombatStatInput(el.inputs.crit, stats.crit);
+    writeCombatStatInput(el.inputs.critDmg, stats.critDmg);
+    writeCombatStatInput(el.inputs.selfCritResBase, stats.critRes);
+    writeCombatStatInput(el.inputs.selfCritDmgResBase, stats.critDmgRes);
+  }
+
+  function writeCombatStatInput(input, value) {
+    if (!input) return;
+    if (value == null || value === '') {
+      input.value = '';
+      return;
+    }
+    const numeric = Number(value);
+    input.value = Number.isFinite(numeric) ? String(Math.round(numeric)) : '';
+  }
+
+  function normalizeStatDraft(source) {
+    const draft = Object.fromEntries(STAT_INPUT_DRAFT_KEYS.map(key => [key, '']));
+    if (!source || typeof source !== 'object') return draft;
+    STAT_INPUT_DRAFT_KEYS.forEach(key => {
+      if (!Object.hasOwn(source, key)) return;
+      const value = source[key];
+      if (value === '') {
+        draft[key] = '';
+        return;
+      }
+      if ((typeof value === 'string' || typeof value === 'number') && Number.isFinite(Number(value))) {
+        draft[key] = String(value);
+      }
+    });
+    return draft;
+  }
+
+  function normalizeStatInputSide(source, fallbackLinked = true) {
+    const linked = typeof source?.linked === 'boolean' ? source.linked : fallbackLinked;
+    return { linked, manualDraft: source?.manualDraft && typeof source.manualDraft === 'object'
+      ? normalizeStatDraft(source.manualDraft) : null };
+  }
+
+  function isStatInputLinked(side) {
+    if (side === 'enemy' && view.enemySourceMode !== 'apostle') return true;
+    return view.statInputState?.[side]?.linked !== false;
+  }
+
+  function getVisibleStatDraftKeys(side, context = buildContext()) {
+    if (side === 'self') return {
+      hp: 'hp', attack: context.damageType === 'magic' ? 'magicAtk' : 'physicalAtk',
+      defense: resolveEnemyDamageType() === 'magic' ? 'magicDef' : 'physicalDef',
+      crit: 'crit', critDmg: 'critDmg', critRes: 'critRes', critDmgRes: 'critDmgRes'
+    };
+    return {
+      hp: 'hp', attack: resolveEnemyDamageType() === 'magic' ? 'magicAtk' : 'physicalAtk',
+      defense: resolveSelfDamageType(context.target) === 'magic' ? 'magicDef' : 'physicalDef',
+      crit: 'crit', critDmg: 'critDmg', critRes: 'critRes', critDmgRes: 'critDmgRes'
+    };
+  }
+
+  function getStatInputRefs(side) {
+    return side === 'self' ? {
+      hp: el.inputs.selfHp, attack: el.inputs.atk, defense: el.inputs.selfDef,
+      crit: el.inputs.crit, critDmg: el.inputs.critDmg,
+      critRes: el.inputs.selfCritResBase, critDmgRes: el.inputs.selfCritDmgResBase
+    } : {
+      hp: el.inputs.enemyHp, attack: el.inputs.enemyAtk, defense: el.inputs.def,
+      crit: el.inputs.enemyCrit, critDmg: el.inputs.enemyCritDmg,
+      critRes: el.inputs.critRes, critDmgRes: el.inputs.critDmgRes
+    };
+  }
+
+  function getLinkedStatSourceValues(side, context = {}) {
+    if (side === 'self') return context.target?.stats || null;
+    if (view.enemySourceMode === 'apostle') {
+      if (!context.enemyMember || !context.enemySnapshot) return null;
+      return getEnemyStatsWithGlobalPercentOverrides(context, context.enemyMember) || null;
+    }
+    const preset = getSelectedEnemyPreset();
+    if (!preset) return null;
+    const scaled = scaleEnemyPresetByPhase(preset, view.enemyPhaseIndex);
+    return {
+      hp: scaled.hp, physicalAtk: scaled.atk_p, magicAtk: scaled.atk_m,
+      physicalDef: scaled.def_p, magicDef: scaled.def_m, crit: scaled.crit,
+      critDmg: scaled.critDmg, critRes: scaled.critRes, critDmgRes: scaled.critDmgRes
+    };
+  }
+
+  function hasStatInputSource(side, context = {}) {
+    const source = getLinkedStatSourceValues(side, context);
+    return !!source && STAT_INPUT_DRAFT_KEYS.some(key => source[key] != null && Number.isFinite(Number(source[key])));
+  }
+
+  function createManualStatDraft(side, context = {}) {
+    const draft = { ...INITIAL_STAT_INPUT_DRAFT };
+    const source = getLinkedStatSourceValues(side, context);
+    if (source) STAT_INPUT_DRAFT_KEYS.forEach(key => {
+      if (source[key] != null && Number.isFinite(Number(source[key]))) draft[key] = String(Math.round(Number(source[key])));
+    });
+    const visibleKeys = getVisibleStatDraftKeys(side, context);
+    const refs = getStatInputRefs(side);
+    Object.entries(visibleKeys).forEach(([field, key]) => {
+      const input = refs[field];
+      if (input) draft[key] = input.value;
+    });
+    return draft;
+  }
+
+  function ensureStatInputState(context = {}) {
+    if (!view.statInputState) {
+      const selfLinked = hasStatInputSource('self', context);
+      const enemyLinked = hasStatInputSource('enemy', context);
+      view.statInputState = {
+        version: 1,
+        self: { linked: selfLinked, manualDraft: selfLinked ? null : createManualStatDraft('self', context) },
+        enemy: { linked: enemyLinked, manualDraft: enemyLinked ? null : createManualStatDraft('enemy', context) }
+      };
+      saveCalcSettings();
+      return;
+    }
+    let needsSave = false;
+    view.statInputState = {
+      version: 1,
+      self: normalizeStatInputSide(view.statInputState.self),
+      enemy: normalizeStatInputSide(view.statInputState.enemy)
+    };
+    ['self', 'enemy'].forEach(side => {
+      const state = view.statInputState[side];
+      if (!state.linked && !state.manualDraft) {
+        state.manualDraft = createManualStatDraft(side, context);
+        needsSave = true;
+      }
+    });
+    if (needsSave) saveCalcSettings();
+  }
+
+  function applyManualStatDraftToInputs(side, context = {}) {
+    if (side === 'enemy' && view.enemySourceMode !== 'apostle') return;
+    const state = view.statInputState?.[side];
+    if (!state || state.linked) return;
+    if (!state.manualDraft) state.manualDraft = createManualStatDraft(side, context);
+    const refs = getStatInputRefs(side);
+    const visibleKeys = getVisibleStatDraftKeys(side, context);
+    Object.entries(visibleKeys).forEach(([field, key]) => {
+      if (refs[field]) refs[field].value = state.manualDraft[key] ?? '';
+    });
+  }
+
+  function syncStatLinkUi(context = buildContext()) {
+    document.querySelectorAll('[data-fdc-stat-link]').forEach(button => {
+      const side = button.dataset.fdcStatLink;
+      const linked = isStatInputLinked(side);
+      const available = hasStatInputSource(side, context);
+      const visible = side !== 'enemy' || (view.enemySourceMode === 'apostle' && (available || linked));
+      button.hidden = !visible;
+      button.textContent = `ステ管理連携 ${linked ? 'ON' : 'OFF'}`;
+      button.setAttribute('aria-pressed', String(linked));
+      button.disabled = !available && !linked;
+      button.title = available
+        ? linked ? '管理データから取得します。入力値は一時的に調整できます。' : '手入力を使います。管理データを取得するには連携をONにします。'
+        : '連携元のデータがありません。使徒または敵を選択してください。';
+      const note = document.querySelector(`[data-fdc-stat-link-note="${side}"]`);
+      if (note) {
+        note.hidden = !visible || available;
+        note.textContent = visible && !available ? '元データなし' : '';
+      }
+    });
+  }
+
+  function toggleStatInputLink(side) {
+    const context = buildContext();
+    const state = view.statInputState?.[side];
+    if (!state) return;
+    if (state.linked) {
+      if (!state.manualDraft) state.manualDraft = createManualStatDraft(side, context);
+      state.linked = false;
+      if (side === 'self') view.statDirty = false;
+      else view.enemyStatDirty = false;
+    } else {
+      if (!hasStatInputSource(side, context)) return;
+      state.linked = true;
+      if (side === 'self') view.statDirty = false;
+      else view.enemyStatDirty = false;
+    }
+    saveCalcSettings();
+    render();
+  }
+
+  function updateManualStatDraftFromInput(side, input, field, context = buildContext()) {
+    const state = view.statInputState?.[side];
+    if (!state || state.linked) return;
+    if (!state.manualDraft) state.manualDraft = createManualStatDraft(side, context);
+    const draftKey = getVisibleStatDraftKeys(side, context)[field];
+    if (draftKey) state.manualDraft[draftKey] = input?.value ?? '';
+  }
+
+  function scheduleStatDraftSave() {
+    if (statDraftSaveTimer !== null) window.clearTimeout(statDraftSaveTimer);
+    statDraftSaveTimer = window.setTimeout(() => {
+      statDraftSaveTimer = null;
+      saveCalcSettings();
+    }, 220);
+  }
+
+  function flushStatDraftSave() {
+    if (statDraftSaveTimer === null) return { ok: true };
+    window.clearTimeout(statDraftSaveTimer);
+    statDraftSaveTimer = null;
+    return saveCalcSettings();
+  }
+
+  function syncStatsFromEnemyPreset(context) {
+    if (!isStatInputLinked('enemy')) {
+      applyManualStatDraftToInputs('enemy', context);
+      return;
+    }
+    if (view.enemyStatDirty || view.enemySourceMode !== 'preset') return;
+    const preset = getSelectedEnemyPreset();
+    if (!preset) return;
+    const stats = scaleEnemyPresetByPhase(preset, view.enemyPhaseIndex);
+    writeCombatStatInput(el.inputs.enemyHp, stats.hp);
+    writeCombatStatInput(el.inputs.enemyAtk, resolveEnemyDamageType(preset) === 'magic' ? stats.atk_m : stats.atk_p);
+    writeCombatStatInput(el.inputs.enemyCrit, stats.crit);
+    writeCombatStatInput(el.inputs.enemyCritDmg, stats.critDmg);
+    writeCombatStatInput(el.inputs.def, resolveSelfDamageType(context?.target) === 'magic' ? stats.def_m : stats.def_p);
+    writeCombatStatInput(el.inputs.critRes, stats.critRes);
+    writeCombatStatInput(el.inputs.critDmgRes, stats.critDmgRes);
   }
 
   function renderFormationPresetLoader(context) {
@@ -10417,9 +10708,14 @@
       category.dataset.fdcCollapsibleReady = 'true';
       const title = heading.textContent.trim();
       heading.classList.add('fdc-category-heading');
+      const side = category.id === 'fdc-self-final-stats' ? 'self'
+        : category.id === 'fdc-enemy-final-stats' ? 'enemy' : '';
       heading.innerHTML = `
-        <span>${escapeHtml(title)}</span>
-        <button type="button" class="fdc-category-toggle" data-fdc-category-toggle aria-expanded="true" aria-label="${escapeAttr(title)}を閉じる">${renderUiIcon('minus', 'ui-icon-minus')}${renderUiIcon('plus', 'ui-icon-plus')}</button>
+        <span class="fdc-category-title">${escapeHtml(title)}</span>
+        <span class="fdc-category-heading-actions">
+          ${side ? `<button type="button" class="fdc-stat-link-toggle" data-fdc-stat-link="${side}" aria-pressed="true">ステ管理連携 ON</button><small class="fdc-stat-link-note" data-fdc-stat-link-note="${side}" hidden></small>` : ''}
+          <button type="button" class="fdc-category-toggle" data-fdc-category-toggle aria-expanded="true" aria-label="${escapeAttr(title)}を閉じる">${renderUiIcon('minus', 'ui-icon-minus')}${renderUiIcon('plus', 'ui-icon-plus')}</button>
+        </span>
       `;
     });
   }
@@ -10429,7 +10725,7 @@
     category.classList.toggle('is-collapsed', collapsed);
     if (!toggle) return;
     toggle.setAttribute('aria-expanded', String(!collapsed));
-    const title = category.querySelector('.fdc-category-heading span')?.textContent || '項目';
+    const title = category.querySelector('.fdc-category-title')?.textContent || '項目';
     toggle.setAttribute('aria-label', `${title}を${collapsed ? '開く' : '閉じる'}`);
   }
 
@@ -10763,15 +11059,17 @@
                                                                                 
                                                                                
     attacker.addP -= nativeEnd.points;
-    const selfStats = context.automaticSelfStats || context.target?.stats || {};
-    const selfManual = !context.automaticSelfStats && view.statDirty;
-    const enemyStats = view.enemySourceMode === 'apostle' && !view.enemyStatDirty && context.enemyMember
+    const selfStats = context.automaticSelfStats || (isStatInputLinked('self') ? context.target?.stats : null) || {};
+    const selfManual = !context.automaticSelfStats && isStatInputManual('self');
+    const enemyStats = isStatInputLinked('enemy') && view.enemySourceMode === 'apostle' && !view.enemyStatDirty && context.enemyMember
       ? getEnemyStatsWithGlobalPercentOverrides(context, context.enemyMember) || {} : {};
     const selfMagic = context.damageType === 'magic';
     const enemyMagic = resolveEnemyDamageType() === 'magic';
     const selfValue = (input, key) => context.isolatedActor ? Number(selfStats[key])
-      : readFdcAutomaticCombatStat(input, selfStats[key], selfManual);
-    const enemyValue = (input, key) => readFdcAutomaticCombatStat(input, enemyStats[key], view.enemyStatDirty);
+      : !isStatInputLinked('self') ? readNumber(input)
+        : readFdcAutomaticCombatStat(input, selfStats[key], selfManual);
+    const enemyValue = (input, key) => !isStatInputLinked('enemy') ? readNumber(input)
+      : readFdcAutomaticCombatStat(input, enemyStats[key], view.enemyStatDirty);
     const baseAtk = isEnemyAttack ? context.enemySequenceHit?.baseAtk ?? enemyValue(el.inputs.enemyAtk, enemyMagic ? 'magicAtk' : 'physicalAtk')
       : selfValue(el.inputs.atk, selfMagic ? 'magicAtk' : 'physicalAtk');
     const baseCrit = isEnemyAttack ? enemyValue(el.inputs.enemyCrit, 'crit') : selfValue(el.inputs.crit, 'crit');
@@ -11782,6 +12080,13 @@
       view.skillLevelOverrides = sanitizeSkillLevelOverrides(scenario.effectAssumptions?.skillLevelOverrides || {});
       const battleConditions = scenario.battleConditions || {};
       const assumptions = scenario.effectAssumptions || {};
+      const scenarioStatInputState = battleConditions.statInputState && typeof battleConditions.statInputState === 'object'
+        ? battleConditions.statInputState : null;
+      view.statInputState = {
+        version: 1,
+        self: scenarioStatInputState ? normalizeStatInputSide(scenarioStatInputState.self, true) : normalizeStatInputSide(null, true),
+        enemy: scenarioStatInputState ? normalizeStatInputSide(scenarioStatInputState.enemy, true) : normalizeStatInputSide(null, true)
+      };
       for (const key of ['effectSources', 'selfSkillEffectEnabled', 'conditionalEffectEnabled',
         'conditionalEffectStackCounts', 'enemyGlobalPercentEnabled', 'enemyGlobalAdditiveEnabled',
         'enemyBoardPresetSelections', 'enemyIndividualOverrides', 'enemyRankPreset', 'enemyResearchPreset']) {
@@ -11812,13 +12117,15 @@
       view.enemyGlobalPercentDirty = !!battleConditions.enemyGlobalPercentDirty;
       writeDamageCalculationInputs(battleConditions.inputs || {});
       const context = buildContext({ detached: true });
+      applyManualStatDraftToInputs('self', context);
+      applyManualStatDraftToInputs('enemy', context);
       if (!context.target || context.target.id !== targetId) {
         return { error: '選択した比較元の編成に現在の使徒がいません' };
       }
       if (context.statRecalculationRequired) {
       return { error: context.statRecalculationMessage };
       }
-      if (!view.statDirty) writeSelfStatInputsForStats(context, context.target.stats || {});
+      if (isStatInputLinked('self') && !view.statDirty) writeSelfStatInputsForStats(context, context.target.stats || {});
       const result = calculateDamage(context);
       const singleActionSnapshot = createSingleActionComparisonSnapshot(context, result);
       const dpsSnapshot = options.includeDps === true
@@ -14022,6 +14329,7 @@
   function calculateDamageWithStatMode(context, mode) {
     const target = context.target;
     if (!target) return null;
+    if (!isStatInputLinked('self')) return calculateDamage(context);
     const apostleState = context.state?.apostles?.[target.id] || {};
     const stats = readMemberStats(apostleState, getApostle(target.id), getEffectiveGradeOverride(), mode);
     const saved = snapshotSelfStatInputs();
@@ -14058,13 +14366,13 @@
   function writeSelfStatInputsForStats(context, stats = {}) {
     const attackKey = context.damageType === 'magic' ? 'magicAtk' : 'physicalAtk';
     const defenseKey = context.damageType === 'magic' ? 'magicDef' : 'physicalDef';
-    el.inputs.selfHp.value = Math.round(Number(stats.hp) || 0);
-    el.inputs.atk.value = Math.round(Number(stats[attackKey]) || 0);
-    el.inputs.selfDef.value = Math.round(Number(stats[defenseKey]) || 1);
-    el.inputs.crit.value = Math.round(Number(stats.crit) || 0);
-    el.inputs.critDmg.value = Math.round(Number(stats.critDmg) || 0);
-    el.inputs.selfCritResBase.value = Math.round(Number(stats.critRes) || 1);
-    el.inputs.selfCritDmgResBase.value = Math.round(Number(stats.critDmgRes) || 1);
+    writeCombatStatInput(el.inputs.selfHp, stats.hp);
+    writeCombatStatInput(el.inputs.atk, stats[attackKey]);
+    writeCombatStatInput(el.inputs.selfDef, stats[defenseKey]);
+    writeCombatStatInput(el.inputs.crit, stats.crit);
+    writeCombatStatInput(el.inputs.critDmg, stats.critDmg);
+    writeCombatStatInput(el.inputs.selfCritResBase, stats.critRes);
+    writeCombatStatInput(el.inputs.selfCritDmgResBase, stats.critDmgRes);
   }
 
   function createCardRow(id, qty, cardState = {}) {
@@ -15706,6 +16014,10 @@
     return Number(input?.value) || 0;
   }
 
+  function isStatInputManual(side) {
+    return !isStatInputLinked(side) || (side === 'enemy' ? view.enemyStatDirty : view.statDirty);
+  }
+
   function readFdcAutomaticCombatStat(input, automaticValue, manual = false) {
     const displayed = readNumber(input);
                                                                               
@@ -15847,6 +16159,11 @@
         pvpAffinityEnabled: !!view.pvpAffinityEnabled,
         pvpRank: normalizePvpRank(view.pvpRank),
         inputs: readDamageCalculationInputs(),
+        statInputState: view.statInputState ? {
+          version: 1,
+          self: normalizeStatInputSide(view.statInputState.self),
+          enemy: normalizeStatInputSide(view.statInputState.enemy)
+        } : null,
         statDirty: !!view.statDirty,
         enemyStatDirty: !!view.enemyStatDirty,
         enemyGlobalPercentDirty: !!view.enemyGlobalPercentDirty
