@@ -3116,16 +3116,13 @@ body.theme-dark .fdc-floating-target.is-resonance .fdc-floating-target-portrait 
   background: var(--fdc-input); color: var(--fdc-text); font: inherit; cursor: pointer;
 }
 .fdc-enemy-preset-dialog button:focus-visible { outline: 2px solid var(--fdc-primary); outline-offset: 2px; }
-.fdc-enemy-preset-filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: .5rem; margin: .5rem 0; }
-.fdc-enemy-variant-field { margin-top: .15rem; }
+.fdc-enemy-preset-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin: .5rem 0; }
+.fdc-enemy-name-field { margin-top: .15rem; }
 .fdc-enemy-preset-dialog .fdc-field { min-width: 0; }
 .fdc-enemy-preset-dialog input, .fdc-enemy-preset-dialog select { width: 100%; min-width: 0; box-sizing: border-box; font: inherit; }
 .fdc-enemy-preset-dialog select { min-height: 2.5rem; padding: .4rem .5rem; }
 .fdc-enemy-preset-dialog select:disabled { opacity: .65; }
 .fdc-enemy-preset-field select[hidden] { display: none; }
-@media (max-width: 420px) {
-  .fdc-enemy-preset-filters { grid-template-columns: minmax(0, 1fr); }
-}
 @media (max-height: 480px) {
   .fdc-enemy-preset-dialog { padding: .5rem; }
   .fdc-enemy-preset-dialog h2 { margin-bottom: .25rem; }

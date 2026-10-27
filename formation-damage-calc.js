@@ -685,6 +685,9 @@
       const hadSkillOverrides = Object.keys(view.skillLevelOverrides || {}).length > 0;
       syncFdcSkillLevelOverridesFromManager();
       if (!hadSkillOverrides) render();
+      else window.dispatchEvent(new CustomEvent('trickcal:damage-calculator-rendered', {
+        detail: { targetId: view.targetId || '', source: 'statStorage' }
+      }));
     });
     el.reload?.addEventListener('click', () => {
       view.statDirty = false;
@@ -746,7 +749,7 @@
       const index = metrics.indexOf(view.resultMetric);
       view.resultMetric = metrics[(index + 1) % metrics.length];
       saveCalcSettings();
-      renderResult(buildContext());
+      renderResult(buildContext(), { source: 'displayMetric' });
     });
     el.cardCost?.addEventListener('click', () => toggleCardCostPanel());
     el.applyFloatToggle?.addEventListener('click', () => toggleApplyFloatPanel());
@@ -781,7 +784,7 @@
         view.resultDisplays[input.dataset.fdcResultDisplay] = !!input.checked;
         saveCalcSettings();
         syncApplyFloatUi();
-        renderResult(buildContext());
+        renderResult(buildContext(), { source: 'displayPreference' });
       });
     });
     el.applyFloatBulk.forEach(button => {
@@ -2386,7 +2389,7 @@
   function saveCustomEnemyPreset() {
     const base = getSelectedEnemyPreset();
     const rawName = (el.enemyPresetName?.value || '').trim();
-    const name = rawName || getEnemyPresetMetadata(base || {}).name || '敵プリセット';
+    const name = rawName || getEnemyPresetMetadata(base || {}).name || 'モンスター';
     const id = `custom:${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
     const damageType = resolveEnemyDamageType(base);
     const enemyAtk = readNumber(el.inputs.enemyAtk);
@@ -2463,7 +2466,10 @@
   function syncEnemyPresetManagement() {
     const key = view.enemyPresetKey || el.enemyPreset?.value || '';
     const button = document.getElementById('fdc-enemy-preset-open');
-    if (button) button.textContent = key ? formatEnemyPresetDisplayName(getEnemyPresets()[key] || {}, key) : '手動入力';
+    if (button) {
+      button.textContent = key ? formatEnemyPresetDisplayName(getEnemyPresets()[key] || {}, key) : '手動入力';
+      button.setAttribute('aria-label', `モンスターを選択：${button.textContent}`);
+    }
     if (el.enemyPresetDelete) el.enemyPresetDelete.disabled = !key.startsWith('custom:');
   }
 
@@ -2509,13 +2515,13 @@
     const variantLabel = row => [row.meta.difficultyLabel, row.meta.stageLabel].filter(Boolean).join(' / ') || '標準';
     let selectedGroupKey = currentRow?.groupKey || (currentKey ? null : '__manual__');
     let pending = currentRow?.key || (currentKey ? null : '');
-    dialog.innerHTML = `<header><h2 id="fdc-enemy-preset-title">敵を選択</h2><button type="button" data-enemy-cancel aria-label="閉じる">×</button></header>
+    dialog.innerHTML = `<header><h2 id="fdc-enemy-preset-title">モンスターを選択</h2><button type="button" data-enemy-cancel aria-label="閉じる">×</button></header>
       <label class="fdc-field"><span>検索</span><input data-enemy-search type="search" placeholder="敵名・段階・難易度"></label>
       <div class="fdc-enemy-preset-filters">
         <label class="fdc-field"><span>コンテンツ</span><select data-enemy-content><option value="">すべて</option>${[...new Set(metadata.map(contentLabel))].map(name => `<option>${escapeHtml(name)}</option>`).join('')}</select></label>
-        <label class="fdc-field"><span>敵</span><select data-enemy-name><option value="">敵を選択</option><option value="__manual__">手動入力</option></select></label>
+        <label class="fdc-field"><span>難易度・段階</span><select data-enemy-variant disabled><option value="">先にモンスターを選択</option></select></label>
       </div>
-      <label class="fdc-field fdc-enemy-variant-field"><span>難易度・段階</span><select data-enemy-variant disabled><option value="">先に敵を選択</option></select></label>
+      <label class="fdc-field fdc-enemy-name-field"><span>モンスター</span><select data-enemy-name><option value="">モンスターを選択</option><option value="__manual__">手動入力</option></select></label>
       <footer><button type="button" data-enemy-cancel>取消</button><button type="button" data-enemy-confirm>選択を反映</button></footer>`;
     const search = dialog.querySelector('[data-enemy-search]');
     const content = dialog.querySelector('[data-enemy-content]');
@@ -2542,7 +2548,7 @@
         return;
       }
       if (!rows.length) {
-        variant.innerHTML = '<option value="">先に敵を選択</option>';
+        variant.innerHTML = '<option value="">先にモンスターを選択</option>';
         variant.disabled = true;
         pending = null;
         confirm.disabled = true;
@@ -2575,7 +2581,7 @@
         pending = null;
       }
       const options = [...groups.values()].map(row => `<option value="${escapeAttr(row.groupKey)}">${escapeHtml(entityLabel(row))}</option>`).join('');
-      enemy.innerHTML = '<option value="">敵を選択</option><option value="__manual__">手動入力</option>' + options;
+      enemy.innerHTML = '<option value="">モンスターを選択</option><option value="__manual__">手動入力</option>' + options;
       if (selectedGroupKey && (selectedGroupKey === '__manual__' || groups.has(selectedGroupKey))) enemy.value = selectedGroupKey;
       else enemy.value = '';
       renderVariants();
@@ -3631,7 +3637,7 @@
     closeDamageSaveMenu();
     const context = buildContext();
     syncPinnedComparisonUi(context);
-    renderResult(context);
+    renderResult(context, { source: 'comparison' });
     dispatchComparisonDefinitionChanged({
       evaluator: 'singleAction',
       mode: 'pinned',
@@ -10106,6 +10112,9 @@
     Object.values(el.result.shieldResults || {}).forEach(element => { if (element) element.hidden = true; });
     if (context.statRecalculationRequired) {
       renderStatRecalculationRequiredResult(context);
+      window.dispatchEvent(new CustomEvent('trickcal:damage-calculator-rendered', {
+        detail: { targetId: context.target?.id || '', statRecalculationRequired: true, source: options.source || '' }
+      }));
       return;
     }
     if (context.targetPlacementRequired) {
@@ -12216,7 +12225,7 @@
       return;
     }
     syncPinnedComparisonUi(context);
-    renderResult(context);
+    renderResult(context, { source: 'comparison' });
     dispatchComparisonDefinitionChanged({
       evaluator: 'singleAction',
       mode: 'pinned',
@@ -12230,7 +12239,7 @@
     getCombatScenarioApi()?.clearComparisonSession?.();
     const context = buildContext();
     syncPinnedComparisonUi(context);
-    renderResult(context);
+    renderResult(context, { source: 'comparison' });
     dispatchComparisonDefinitionChanged({
       evaluator: 'singleAction',
       mode: 'none'

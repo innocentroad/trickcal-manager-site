@@ -16,6 +16,12 @@
 .fdcp-dps-reason-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; font-size:.85rem; }
 .fdcp-dps-reason-head button { flex:none; width:2rem; height:2rem; border:1px solid var(--fdc-border); border-radius:7px; color:inherit; background:transparent; font:inherit; cursor:pointer; }
 .fdcp-dps-reason-dialog > p { margin:.65rem 0 0; font-size:.8rem; line-height:1.5; white-space:pre-line; overflow-wrap:anywhere; }
+.fdcp-bottom-bar .fdcp-left-tabs { position:absolute; z-index:3; top:calc(-1.7rem - 1px); left:max(.7rem,calc((100% - 1200px) / 2 + 7px)); right:calc(max(.7rem,calc((100% - 1200px) / 2 + 7px)) + var(--fdcp-detail-column) + .45rem); display:flex; align-items:stretch; gap:2px; height:1.7rem; pointer-events:none; }
+.fdcp-bottom-bar .fdcp-left-tabs > * { pointer-events:auto; }
+.fdcp-bottom-bar .fdcp-left-tabs .fdcp-mode-tabs, .fdcp-bottom-bar .fdcp-left-tabs .fdc-shield-switch, .fdcp-bottom-bar .fdcp-left-tabs .fdcp-dps-unavailable-details { position:static; flex:0 0 auto; }
+.fdcp-bottom-bar .fdcp-left-tabs .fdcp-dps-unavailable-details { flex:0 1 auto; min-width:0; }
+.fdcp-left-tabs .fdcp-dps-unavailable-details summary { overflow:hidden; text-overflow:ellipsis; }
+@media (max-width:680px) { .fdcp-bottom-bar .fdcp-left-tabs { left:max(.34rem,env(safe-area-inset-left)); right:calc(max(.34rem,env(safe-area-inset-right)) + 3.15rem + .35rem); } }
 .fdcp-mode-tabs button { box-sizing:border-box; flex:0 0 var(--fdcp-mode-tabs-width); width:var(--fdcp-mode-tabs-width); height:1.7rem; border:1px solid var(--fdc-border); border-bottom:0; border-radius:7px 7px 0 0; padding:3px 6px; color:var(--fdc-text); background:#1a2744; font:inherit; font-size:.68rem; font-weight:900; line-height:1; cursor:pointer; writing-mode:horizontal-tb; text-orientation:mixed; box-shadow:0 -2px 7px rgba(15,23,42,.2); }
 body.theme-light .fdcp-mode-tabs button:not([aria-selected="true"]):not([disabled]):not([aria-disabled="true"]) { background:#fff; }
 .fdcp-mode-tabs button[aria-selected="true"] { color:#fff; background:#566fd1; border-color:#93aaff; }

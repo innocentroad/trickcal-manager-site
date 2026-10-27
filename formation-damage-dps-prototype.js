@@ -925,7 +925,7 @@
       return createDpsComparisonAxis(snapshot, options);
     }
 
-    getSupport(snapshot) {
+    getSupport(snapshot, options = this.getOptions()) {
       if (snapshot?.placementRequired) {
         return { supported: false, reason: snapshot.placementMessage || '配置先を選択してください。' };
       }
@@ -938,7 +938,7 @@
         };
       }
       const registry = window.TRICKCAL_DPS_SUPPORT_REGISTRY;
-      return registry?.evaluate?.(snapshot, this.getOptions()) || { supported: false, reason: 'DPS対応リストを読み込めませんでした。' };
+      return registry?.evaluate?.(snapshot, options) || { supported: false, reason: 'DPS対応リストを読み込めませんでした。' };
     }
 
     setRecalculationIndicator({ visible = false, running = false } = {}) {
@@ -1089,7 +1089,23 @@
         this.updateExternalEventCount();
         this.renderDpsExternalInput(snapshot);
         this.renderDpsRuntimeSettings(snapshot);
-        const support = this.getSupport(snapshot);
+        let support = this.getSupport(snapshot);
+        if (this.highSkillFallbackNotice?.targetId !== targetId || this.elements.highMode?.value === 'auto') {
+          this.highSkillFallbackNotice = null;
+        }
+        if (!support.supported && this.elements.highMode?.value === 'auto') {
+          const highOffSupport = this.getSupport(snapshot, { ...this.getOptions(), highSkillMode: 'disabled' });
+          if (highOffSupport.supported) {
+            this.elements.highMode.value = 'disabled';
+            this.persistDpsSettingsForTarget(targetId);
+            this.highSkillFallbackNotice = { targetId };
+            support = highOffSupport;
+          }
+        }
+        if (support.supported && this.highSkillFallbackNotice?.targetId === targetId) {
+          support = { ...support, warnings: [...(support.warnings || []),
+            '高学年を含む計算が未対応のため、高学年をOFFにしました。高学年分のダメージは含みません。'] };
+        }
         const transition = getDpsTargetChangeTransition({
           previousTargetId: this.currentTargetId,
           nextTargetId: targetId,
@@ -1114,6 +1130,18 @@
         this.onAvailabilityChange?.({ ready: false, snapshot: null, support: null, error, transition: null });
         return null;
       }
+    }
+
+    refreshExecutionOptions({ render = this.dpsModeActive } = {}) {
+      if (!this.dpsModeActive) return null;
+      const current = this.availability;
+      if (this.inputDirty || !current?.ready || !current.snapshot) {
+        return this.refreshAvailability({ render });
+      }
+                                               
+                                   
+      this.renderAvailability(current.snapshot, current.support);
+      return current;
     }
 
     canEnterDpsMode() {
@@ -2038,6 +2066,7 @@
     }
     let currentMode = 'single';
     let refreshTimer = 0;
+    let refreshDeadline = 0;
                                                        
                                                  
     const applyFloatState = (active, { preserveNative = false } = {}) => {
@@ -2125,7 +2154,7 @@
       const dpsMode = mode === 'dps';
       window.clearTimeout(enterTimer);
       window.clearTimeout(refreshTimer);
-      enterTimer = refreshTimer = 0;
+      enterTimer = refreshTimer = refreshDeadline = 0;
       currentMode = dpsMode ? 'dps' : 'single';
                                                                                
                                                                                
@@ -2163,10 +2192,27 @@
         enterTimer = window.setTimeout(() => {
           enterTimer = 0;
           if (currentMode !== 'dps') return;
-          const available = controller.refreshAvailability();
+          const cachedAvailability = controller.availability;
+          const available = !controller.inputDirty && cachedAvailability?.ready
+            ? { snapshot: cachedAvailability.snapshot, support: cachedAvailability.support }
+            : controller.refreshAvailability();
           if (currentMode !== 'dps') return;
           if (available && !controller.canEnterDpsMode()) { setMode('single'); return; }
-          controller.requestAutoRun();
+          const latestStillCurrent = controller.latest
+            && !controller.requiresRecalculation
+            && controller.latest.inputFingerprint === controller.currentInputFingerprint;
+          if (latestStillCurrent) {
+            controller.renderLatest();
+            elements.run.disabled = false;
+            return;
+          }
+          if (elements.autoRun?.checked) {
+            controller.requestAutoRun();
+          } else if (available?.support?.supported && (controller.requiresRecalculation || !controller.latest)) {
+                                                          
+                                             
+            controller.run();
+          }
         }, 0);
       }
       return true;
@@ -2182,7 +2228,11 @@
       if (button.disabled || button.getAttribute('aria-disabled') === 'true') return;
       setMode(button.dataset.fdcpMode);
     }));
-    elements.run.addEventListener('click', () => controller.run());
+    elements.run.addEventListener('click', () => {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = refreshDeadline = 0;
+      controller.run();
+    });
     dpsDetailToggle.addEventListener('click', () => setDpsDetailOpen(elements.drawer.hidden));
     elements.highModeQuick?.addEventListener('click', () => {
       if (!elements.highMode) return;
@@ -2246,33 +2296,69 @@
     singleApplyToggle.addEventListener('click', () => { if (currentMode === 'single') syncNativeFloat(singleApplyPanel, 'singleApply'); });
     singleCompareToggle.addEventListener('click', () => { if (currentMode === 'single') syncNativeFloat(singleComparePanel, 'singleCompare'); });
     saveMenu.addEventListener('toggle', () => { if (saveMenu.open) applyFloatState('save'); });
-    const refreshDpsSettings = () => {
+    const refreshDpsSettings = event => {
       syncHighModeQuickControl();
       controller.persistDpsSettingsForTarget();
       if (currentMode !== 'dps') return;
-      controller.refreshAvailability();
-      controller.requestAutoRun();
+      const control = event.currentTarget;
+      if (control === elements.autoRun) {
+        if (!control.checked) {
+          window.clearTimeout(controller.autoTimer);
+          controller.autoTimer = 0;
+          controller.pendingAutoRun = false;
+          return;
+        }
+        controller.requestAutoRun();
+        return;
+      }
+      if ([elements.duration, elements.seed, elements.trials].includes(control)) {
+        if (controller.inputDirty || !controller.availability?.ready) {
+          scheduleAvailabilityRefresh();
+          return;
+        }
+        controller.refreshExecutionOptions();
+        controller.requestAutoRun();
+        return;
+      }
+                                     
+                                             
+      scheduleAvailabilityRefresh();
     };
     [elements.highMode, elements.masterPowerMode, elements.formationTimelineMode, elements.formationHighMode, elements.duration, elements.seed, elements.trials, elements.autoRun]
       .filter(Boolean).forEach(input => input.addEventListener('change', refreshDpsSettings));
     const scheduleAvailabilityRefresh = ({ delay = 120 } = {}) => {
       controller.markInputDirty();
+      if (currentMode !== 'dps') {
+        window.clearTimeout(refreshTimer);
+        refreshTimer = refreshDeadline = 0;
+        return;
+      }
+      const dueAt = Date.now() + Math.max(0, Number(delay) || 0);
+                                           
+                                             
+      if (refreshTimer && dueAt < refreshDeadline) return;
       window.clearTimeout(refreshTimer);
-      if (currentMode !== 'dps') { refreshTimer = 0; return; }
+      refreshDeadline = dueAt;
       refreshTimer = window.setTimeout(() => {
-        refreshTimer = 0;
+        refreshTimer = refreshDeadline = 0;
         if (currentMode !== 'dps' || enterTimer || !controller.inputDirty) return;
         controller.refreshAvailability();
         if (currentMode === 'dps') controller.requestAutoRun();
-      }, delay);
+      }, Math.max(0, dueAt - Date.now()));
     };
-    const isPrototypeControl = target => !!target?.closest?.('#fdcp-bottom-bar, #fdc-apply-float-controller');
+    const isPrototypeControl = target => !!target?.closest?.(
+      '#fdcp-bottom-bar, #fdcp-dps-settings-slot, #fdcp-dps-compare-slot, #fdc-apply-float-controller'
+    );
+    const isViewOnlyInput = target => !!target?.matches?.('input[type="search"]') || !!target?.closest?.(
+      '[data-fdc-picker-search], [data-fdc-picker-sort], [data-fdc-picker-filter], '
+      + '[data-fdc-compare-scope], [data-fdc-load-part], [data-fdc-result-display], '
+      + '[data-enemy-search], [data-enemy-content], [data-enemy-name], [data-enemy-variant], '
+      + '#fdc-compare-source, #fdc-enemy-rank-preset, #fdc-enemy-research-level, #fdc-enemy-research-progress'
+    );
     const refreshFromInput = event => {
-      if (isPrototypeControl(event.target)) return;
-                                                                     
+      if (isPrototypeControl(event.target) || isViewOnlyInput(event.target)) return;
       const season = event.composedPath?.().some(node => node?.id === 'fdc-season-section')
         || !!event.target?.closest?.('#fdc-season-section');
-      if (season && event.type === 'click') return;
       scheduleAvailabilityRefresh({ delay: season ? 300 : 120 });
     };
     document.addEventListener('change', event => {
@@ -2281,16 +2367,16 @@
     document.addEventListener('input', event => {
       refreshFromInput(event);
     }, { passive: true });
-                                               
-                                               
-    document.addEventListener('click', event => {
-      refreshFromInput(event);
-    }, { passive: true });
-                                                        
-                                                        
-                                               
+                                            
+                                                  
     window.addEventListener('trickcal:damage-calculator-rendered', event => {
-      scheduleAvailabilityRefresh({ delay: 0 });
+      const source = String(event.detail?.source || '');
+      if (['displayMetric', 'displayPreference', 'comparison'].includes(source)) return;
+      scheduleAvailabilityRefresh({ delay: source === 'seasonRules' ? 0 : 120 });
+    });
+    window.addEventListener('storage', event => {
+      if (event.key !== 'trickcal_stat_prototype_v1' && event.key !== null) return;
+      scheduleAvailabilityRefresh();
     });
     window.addEventListener('pagehide', () => controller.persistDpsSettingsForTarget());
     syncHighModeQuickControl();
