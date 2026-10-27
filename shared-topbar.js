@@ -151,7 +151,7 @@
     if (item.fallbackFromPublic && /\/public\/[^/]+$/.test(window.location.pathname)) {
       return stripLegacyRecoveryQuery(item.fallbackFromPublic);
     }
-    if (page === PAGE_KEYS.data) {
+    if (page === PAGE_KEYS.data && /\/public\/[^/]+$/.test(window.location.pathname)) {
       return stripLegacyRecoveryQuery(item.key === 'data' ? './' : `../${item.fallback}`);
     }
     return stripLegacyRecoveryQuery(item.fallback);

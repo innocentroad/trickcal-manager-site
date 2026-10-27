@@ -1,13 +1,13 @@
 body.apostle-data-page {
-  --fdc-bg: #f3f8ed;
-  --fdc-panel: rgba(255, 255, 255, .94);
-  --fdc-panel-solid: #ffffff;
-  --fdc-text: #233629;
-  --fdc-muted: #63725f;
-  --fdc-border: rgba(75, 125, 67, .2);
-  --fdc-primary: #4e9d4f;
-  --fdc-primary-soft: rgba(112, 189, 91, .18);
-  --fdc-shadow: rgba(75, 125, 67, .16);
+  --fdc-bg: #edf2f8;
+  --fdc-panel: #f9fbfe;
+  --fdc-panel-solid: #eef4fb;
+  --fdc-text: #172235;
+  --fdc-muted: #617086;
+  --fdc-border: #cad5e3;
+  --fdc-primary: #2e65be;
+  --fdc-primary-soft: rgba(46, 101, 190, .12);
+  --fdc-shadow: rgba(23, 34, 53, .16);
   --trickcal-top-occupied-height: calc(var(--trickcal-topbar-height, 3.25rem) + var(--trickcal-follow-bar-height, 0px));
   box-sizing: border-box;
   min-width: 320px;
@@ -24,6 +24,10 @@ body.apostle-data-page {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+body.apostle-data-page:not(.theme-dark) {
+  background: radial-gradient(circle at 10% 15%, rgba(65, 109, 180, .14), transparent 28rem), var(--fdc-bg);
 }
 
 body.apostle-data-page.theme-dark {

@@ -1,13 +1,14 @@
 :root {
   color-scheme: light;
-  --life-bg: #f3f8ed;
-  --life-panel: rgba(255, 255, 255, .96);
-  --life-panel-strong: #fff;
-  --life-text: #233629;
-  --life-muted: #63725f;
-  --life-border: rgba(75, 125, 67, .2);
-  --life-accent: #4e9d4f;
-  --life-shadow: rgba(75, 125, 67, .16);
+  --life-bg: #edf2f8;
+  --life-panel: #f9fbfe;
+  --life-panel-strong: #eef4fb;
+  --life-text: #172235;
+  --life-muted: #617086;
+  --life-border: #cad5e3;
+  --life-accent: #2e65be;
+  --life-accent-soft: rgba(46, 101, 190, .12);
+  --life-shadow: rgba(23, 34, 53, .16);
   --life-main-border: #329949;
   --life-sub-border: #4388c9;
   --life-rest-border: #bd7424;
@@ -21,6 +22,7 @@
   --life-muted: #aeb9d1;
   --life-border: rgba(180, 207, 255, .18);
   --life-accent: #8cabff;
+  --life-accent-soft: rgba(140, 171, 255, .2);
   --life-shadow: rgba(0, 0, 0, .36);
   --life-main-border: #59ce78;
   --life-sub-border: #7dbbff;
@@ -40,6 +42,9 @@ body.life-jobs-page {
   background: var(--life-bg);
   font-family: "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
 }
+:root:not([data-theme="dark"]) body.life-jobs-page {
+  background: radial-gradient(circle at 10% 15%, rgba(65, 109, 180, .14), transparent 28rem), var(--life-bg);
+}
 .life-jobs-page :is(button, input, select) { font: inherit; }
 .data-detail-topbar {
   --fdc-bg: var(--life-bg);
@@ -48,6 +53,7 @@ body.life-jobs-page {
   --fdc-text: var(--life-text);
   --fdc-muted: var(--life-muted);
   --fdc-primary: var(--life-accent);
+  --fdc-primary-soft: var(--life-accent-soft);
   --fdc-shadow: var(--life-shadow);
 }
 .life-jobs-heading { flex: 0 0 auto; padding: 6px clamp(10px, 1.5vw, 20px) 2px; }

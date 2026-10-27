@@ -125,6 +125,7 @@ img:not([data-allow-image-interaction]) {
 }
 
 .topbar-global-popover {
+  box-sizing: border-box;
   position: absolute;
   top: calc(100% + 0.42rem);
   left: 50%;
@@ -141,6 +142,7 @@ img:not([data-allow-image-interaction]) {
 }
 
 .topbar-global-popover :is(button, a) {
+  box-sizing: border-box;
   min-width: 5.15rem !important;
   min-height: 2.05rem !important;
   border-radius: 0.6rem !important;

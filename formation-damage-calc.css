@@ -3263,11 +3263,9 @@ body.theme-dark .fdc-floating-target.is-resonance .fdc-floating-target-portrait 
 }
 
 .fdc-picker-artifact-mini .fdc-artifact-solder {
-  right: -0.25rem;
-  bottom: -0.12rem;
-  min-width: 0.72rem;
-  padding: 0 0.08rem;
-  font-size: 0.48rem;
+  right: -1px;
+  bottom: -1px;
+  font-size: 0.42rem;
 }
 
 @media (max-width: 720px) {
@@ -5267,17 +5265,20 @@ button.fdc-artifact-slot {
 .fdc-artifact-solder {
   position: absolute;
   z-index: 4;
-  right: -2px;
-  bottom: -2px;
-  min-width: 1.12rem;
-  border-radius: 999px;
-  padding: 0 0.16rem;
-  color: #111;
-  background: rgba(255, 255, 255, 0.92);
-  font-size: 0.58rem;
+  right: 0;
+  bottom: 0;
+  min-width: 0;
+  padding: 0;
+  color: #fff;
+  background: transparent;
+  font-size: 0.52rem;
   font-weight: 950;
-  line-height: 1.12rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+  line-height: 1;
+  white-space: nowrap;
+  -webkit-text-stroke: 2px #101827;
+  paint-order: stroke fill;
+  text-shadow: -1px -1px 0 #101827, 1px -1px 0 #101827,
+    -1px 1px 0 #101827, 1px 1px 0 #101827;
 }
 
 .fdc-equipped-artifact-list {
