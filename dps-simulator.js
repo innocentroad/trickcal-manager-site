@@ -4925,7 +4925,7 @@
     }
     const calculationMode = 'legacy-continuous';
     if (input.legacyExpectedDamage != null) expectedDamage = Math.max(0, toFiniteNumber(input.legacyExpectedDamage));
-    const roundingReason = input.roundingReason || base?.roundingReason || '補正の供給元または命中配分が未確定です';
+     const roundingReason = input.roundingReason || base?.roundingReason || '補正の供給元または命中配分が未確定です';
     const ratios = { attackDefense: 1, actionMultiplier: 1, add: 1, special: 1, other: 1, critical: 1 };
     const attackP = getRuntimeAttackModifierP(modifierDelta, base?.damageType || '');
     const actionMultiplierP = getRuntimeActionMultiplierModifierP(modifierDelta, actionKey, generatedEventType);
@@ -5071,7 +5071,7 @@
     };
   }
 
-  function evaluateRuntimeDamage(expectedDamage, current, event, damageProfiles, state, config, runtimeBase = null, statusDamageP = 0) {
+ function evaluateRuntimeDamage(expectedDamage, current, event, damageProfiles, state, config, runtimeBase = null, statusDamageP = 0) {
                                                                              
                                                                                  
                                                                        
@@ -5159,6 +5159,7 @@
       resolvedStatusTakenDmgP,
       hasUnresolvedStatusReaction,
       statusDamageP,
+       roundingReason: event?.roundingReason || undefined,
       activeEffects,
       hitComponents,
       runtimeBase: eventRuntimeBase
@@ -8104,23 +8105,45 @@
         );
         const base = profile.damageResult?.runtimeBase || null;
         let damageEvaluation;
-        if (base?.dotInput && !resolveStatusDamage) {
+       if (base?.dotInput && !resolveStatusDamage) {
           const delta = getRuntimeDamageBuffDelta(state, config);
           const heldAdd = Object.values(state.runtimeResources || {}).some(resource => toFiniteNumber(resource.stacks)
             && toFiniteNumber(resource.heldAddPPerStack) && normalizeArray(resource.heldAddEffectIds)
               .some(id => normalizeArray(state.runtimeDamageEffectIds).includes(String(id || ''))));
           const statusTakenDmgP = getStatusReactionTakenDmgP(state, config, isResolvedDamageRateStatusReaction);
-          const unresolved = heldAdd || getStatusReactionTakenDmgP(state, config, reaction => !isResolvedDamageRateStatusReaction(reaction))
-            || toFiniteNumber(config.runtimeEffects?.statusDamageWeaknessP);
-          const evaluated = unresolved ? { supported: false, reason: '状態・所持補正の周期ダメージ供給位置が未確認です' }
-            : evaluateDotAtTick(base, stack.dotAttackSnapshot,
-              { ...delta, addP: toFiniteNumber(delta.addP) + statusTakenDmgP });
-          if (!evaluated.supported) throw new RangeError(evaluated.reason);
-          damageEvaluation = { ...evaluated, baseExpectedDamage, expectedDamage: evaluated.expected,
-            ratio: baseExpectedDamage > 0 ? evaluated.expected / baseExpectedDamage : 1,
-            modifierDelta: delta, statusTakenDmgP, runtimeBaseAvailable: true, dotAttackSnapshot: stack.dotAttackSnapshot };
-          const calculation = state.damageCalculation || (state.damageCalculation = { roundedEvents: 0, legacyEvents: 0, reasons: new Set() });
-          calculation.roundedDotEvents = (calculation.roundedDotEvents || 0) + 1;
+         const unresolvedReactionP = getStatusReactionTakenDmgP(state, config,
+           reaction => !isResolvedDamageRateStatusReaction(reaction));
+          const statusDamageWeaknessP = ['火傷', '毒', '苦痛', '凍傷'].includes(String(stack.status || ''))
+            ? Math.max(0, toFiniteNumber(config.runtimeEffects?.statusDamageWeaknessP)) : 0;
+         const unsupportedDotModifier = heldAdd || unresolvedReactionP
+           || toFiniteNumber(delta.specialP) || toFiniteNumber(delta.otherP)
+           || toFiniteNumber(delta.actionMultiplierBonusP);
+         if (statusDamageWeaknessP > 0 && !unsupportedDotModifier) {
+                                                                            
+                                                                            
+                                                                             
+                                                                               
+           const roundingReason = '状態異常ダメージ弱点をその他倍率へ加算する概算モデル（ゲーム内の演算・丸め位置は未確認）';
+           damageEvaluation = evaluateRuntimeDamage(baseExpectedDamage,
+             { key: stack.sourceActionKey },
+             { type: 'statusTick', effectId: stack.sourceRuntimeEffectId || '', roundingReason },
+             damageProfiles, state, config, base, statusDamageWeaknessP);
+           damageEvaluation = { ...damageEvaluation, baseExpectedDamage,
+             ratio: baseExpectedDamage > 0 ? damageEvaluation.expectedDamage / baseExpectedDamage : 1,
+             modifierDelta: delta, statusTakenDmgP, statusDamageP: statusDamageWeaknessP,
+             runtimeBaseAvailable: true, dotAttackSnapshot: stack.dotAttackSnapshot };
+         } else {
+           const evaluated = unsupportedDotModifier
+             ? { supported: false, reason: '状態・所持補正の周期ダメージ供給位置が未確認です' }
+             : evaluateDotAtTick(base, stack.dotAttackSnapshot,
+               { ...delta, addP: toFiniteNumber(delta.addP) + statusTakenDmgP });
+           if (!evaluated.supported) throw new RangeError(evaluated.reason);
+           damageEvaluation = { ...evaluated, baseExpectedDamage, expectedDamage: evaluated.expected,
+             ratio: baseExpectedDamage > 0 ? evaluated.expected / baseExpectedDamage : 1,
+             modifierDelta: delta, statusTakenDmgP, runtimeBaseAvailable: true, dotAttackSnapshot: stack.dotAttackSnapshot };
+           const calculation = state.damageCalculation || (state.damageCalculation = { roundedEvents: 0, legacyEvents: 0, reasons: new Set() });
+           calculation.roundedDotEvents = (calculation.roundedDotEvents || 0) + 1;
+         }
         } else damageEvaluation = evaluateRuntimeDamage(
           baseExpectedDamage,
           { key: stack.sourceActionKey, variant: '' },
@@ -8129,7 +8152,8 @@
           state,
           config,
           base,
-          toFiniteNumber(config?.runtimeEffects?.statusDamageWeaknessP)
+          ['火傷', '毒', '苦痛', '凍傷'].includes(String(stack.status || ''))
+            ? Math.max(0, toFiniteNumber(config?.runtimeEffects?.statusDamageWeaknessP)) : 0
         );
         const expectedDamage = damageEvaluation.expectedDamage;
         if (stack.sourceRuntimeEffectId) {
