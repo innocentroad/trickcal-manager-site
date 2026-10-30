@@ -72,6 +72,19 @@
   const COMMON_THEME_STORAGE_KEY = 'trickcal_theme';
   const THEME_STORAGE_KEY = 'trickcal_stat_theme';
   const BOARD_SHORTCUT_OFF_MODE_STORAGE_KEY = 'trickcal_board_shortcut_off_mode';
+  const BOARD_GLOBAL_VIEW_PREFERENCES_STORAGE_KEY = 'trickcal_board_global_view_preferences_v1';
+  const APOSTLE_PICKER_SORT_STORAGE_KEY = 'trickcal_manager_sort_apostle_picker_v1';
+  const FORMATION_PICKER_SORT_STORAGE_KEY = 'trickcal_manager_sort_formation_picker_v1';
+  const APOSTLE_BULK_SORT_STORAGE_KEY = 'trickcal_manager_sort_apostle_bulk_v1';
+  const RANK_OVERVIEW_SORT_STORAGE_KEY = 'trickcal_manager_sort_rank_overview_v1';
+  const BOND_OVERVIEW_SORT_STORAGE_KEY = 'trickcal_manager_sort_bond_overview_v1';
+  const ASIDE_OVERVIEW_SORT_STORAGE_KEY = 'trickcal_manager_sort_aside_overview_v1';
+  const APOSTLE_PICKER_SORT_VALUES = Object.freeze(['name', 'combatPower', 'level', 'rank']);
+  const FORMATION_PICKER_SORT_VALUES = Object.freeze(['name', 'combatPower', 'level', 'rank']);
+  const APOSTLE_BULK_SORT_VALUES = Object.freeze(['combatPower', 'name', 'star', 'level', 'skillLevel', 'equipment']);
+  const RANK_OVERVIEW_SORT_VALUES = Object.freeze(['rank', 'combatPower', 'name']);
+  const BOND_OVERVIEW_SORT_VALUES = Object.freeze(['bond', 'name']);
+  const ASIDE_OVERVIEW_SORT_VALUES = Object.freeze(['aside', 'name']);
   const BOARD_ORIENTATION_STORAGE_KEY = 'trickcal_board_orientation';
   const DASHBOARD_RELOAD_CONTEXT_KEY = 'trickcal_dashboard_reload_context_v1';
   const RESEARCH_INVENTORY_KEY = 'trickcal_research_inventory_v1';
@@ -367,6 +380,7 @@
     apostleBulkFilters: document.getElementById('apostle-bulk-filters'),
     apostleBulkFilterCount: document.getElementById('apostle-bulk-filter-count'),
     apostleBulkList: document.getElementById('apostle-bulk-list'),
+    apostleBulkPopover: document.getElementById('apostle-bulk-action-popover'),
     rankOverviewSummary: document.getElementById('rank-overview-summary'),
     rankOverviewGrid: document.getElementById('rank-overview-grid'),
     rankOverviewSort: document.getElementById('rank-overview-sort'),
@@ -389,6 +403,7 @@
     boardGlobalModePlan: document.getElementById('board-global-mode-plan'),
     boardGlobalSearch: document.getElementById('board-global-search'),
     boardGlobalSort: document.getElementById('board-global-sort'),
+    boardGlobalPaintFilter: document.getElementById('board-global-paint-filter'),
     boardGlobalProgressSummary: document.getElementById('board-global-progress-summary'),
     boardProgressDialog: document.getElementById('board-progress-dialog'),
     boardProgressClose: document.getElementById('board-progress-close'),
@@ -422,6 +437,7 @@
     boardGrid: document.getElementById('board-grid')
   };
 
+  const boardGlobalViewPreferences = loadBoardGlobalViewPreferences();
   const TAB_INSTANCE_ID = createStateTabInstanceId();
   let sharedStateSlotStore = null;
   let initialWorkspaceState = null;
@@ -434,6 +450,7 @@
   let researchInventorySaving = false;
   let researchPlan = null;
   let researchDialogOpener = null;
+  let apostleBulkPopoverTrigger = null;
   let boardDraft = null;
   let globalBoardDrafts = {};
   let boardWorkspaceDrafts = cloneJson(initialWorkspaceState?.boardWorkspaceDrafts || {});
@@ -452,14 +469,16 @@
       role: new Set(),
       position: new Set()
     },
-    apostleSort: 'name',
+    apostleSort: loadApostlePickerSortPreference(),
     apostleBulkSearch: '',
     researchBrowseStage: null,
     researchBrowseStageTouched: false,
     researchPlanEndStage: RESEARCH_LIMITS.maxLevel,
     researchPlanMode: 'total',
     researchPlanTab: 'remaining',
-    apostleBulkSort: 'combatPower',
+    apostleBulkSort: loadApostleBulkSortPreference(),
+    apostleBulkOrderContext: null,
+    apostleBulkOrderIds: [],
     apostleBulkFilters: {
       personality: new Set(),
       species: new Set(),
@@ -472,25 +491,27 @@
       role: new Set(),
       position: new Set()
     },
-    rankSort: 'rank',
+    rankSort: loadRankOverviewSortPreference(),
     bondFilters: {
       personality: new Set(),
       species: new Set(),
       role: new Set(),
       position: new Set()
     },
-    bondSort: 'bond',
+    bondSort: loadBondOverviewSortPreference(),
     asideFilters: {
       personality: new Set(),
       species: new Set(),
       role: new Set(),
       position: new Set()
     },
-    asideSort: 'aside',
+    asideSort: loadAsideOverviewSortPreference(),
     boardGlobalMode: 'current',
     boardShortcutOffMode: loadBoardShortcutOffMode(),
-    boardGlobalSort: 'name',
-    boardGlobalSortTouched: false,
+    boardGlobalSort: boardGlobalViewPreferences.sort,
+    boardGlobalSortTouched: boardGlobalViewPreferences.sortTouched,
+    boardGlobalPaintFilter: boardGlobalViewPreferences.paintFilter,
+    boardGlobalRememberedPaintFilter: boardGlobalViewPreferences.paintFilter,
     boardGlobalFilters: {
       layers: new Set(),
       stats: new Set()
@@ -507,7 +528,7 @@
       ownedOnly: false
     },
     formationPicker: null,
-    formationSort: 'name',
+    formationSort: loadFormationPickerSortPreference(),
     formationFilters: {
       personality: new Set(),
       species: new Set(),
@@ -649,6 +670,154 @@
 
   function loadBoardShortcutOffMode() {
       return storageLocal.getItem(BOARD_SHORTCUT_OFF_MODE_STORAGE_KEY) === 'route' ? 'route' : 'node';
+  }
+
+  function loadBoardGlobalViewPreferences() {
+    const allowedSorts = new Set(['name', 'combatPower', 'planned']);
+    const allowedPaintFilters = new Set(['all', 'unpainted-first']);
+    try {
+      const parsed = JSON.parse(storageLocal.getItem(BOARD_GLOBAL_VIEW_PREFERENCES_STORAGE_KEY) || '{}');
+      const sortTouched = parsed?.sortTouched === true && allowedSorts.has(parsed?.sort);
+      const sort = sortTouched ? parsed.sort : 'name';
+      const paintFilter = allowedPaintFilters.has(parsed?.paintFilter) ? parsed.paintFilter : 'all';
+      return { sort, sortTouched, paintFilter };
+    } catch (_) {
+      return { sort: 'name', sortTouched: false, paintFilter: 'all' };
+    }
+  }
+
+  function saveBoardGlobalViewPreferences() {
+    const preferences = {
+      sort: ['name', 'combatPower', 'planned'].includes(view.boardGlobalSort) ? view.boardGlobalSort : 'name',
+      sortTouched: view.boardGlobalSortTouched === true,
+      paintFilter: ['all', 'unpainted-first'].includes(view.boardGlobalRememberedPaintFilter)
+        ? view.boardGlobalRememberedPaintFilter
+        : 'all'
+    };
+    try {
+      storageLocal.setItem(BOARD_GLOBAL_VIEW_PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
+    } catch (_) {}
+  }
+
+  function normalizeSortPreference(value, allowedValues, fallback) {
+    return allowedValues.includes(value) ? value : fallback;
+  }
+
+  function loadSortPreference(readValue, allowedValues, fallback) {
+    try {
+      return normalizeSortPreference(readValue(), allowedValues, fallback);
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  function saveSortPreference(writeValue, value, allowedValues, fallback) {
+    const normalized = normalizeSortPreference(value, allowedValues, fallback);
+    try {
+      writeValue(normalized);
+    } catch (_) {}
+  }
+
+  function loadApostlePickerSortPreference() {
+    return loadSortPreference(
+      () => storageLocal.getItem(APOSTLE_PICKER_SORT_STORAGE_KEY),
+      APOSTLE_PICKER_SORT_VALUES,
+      'name'
+    );
+  }
+
+  function saveApostlePickerSortPreference(value) {
+    saveSortPreference(
+      next => storageLocal.setItem(APOSTLE_PICKER_SORT_STORAGE_KEY, next),
+      value,
+      APOSTLE_PICKER_SORT_VALUES,
+      'name'
+    );
+  }
+
+  function loadFormationPickerSortPreference() {
+    return loadSortPreference(
+      () => storageLocal.getItem(FORMATION_PICKER_SORT_STORAGE_KEY),
+      FORMATION_PICKER_SORT_VALUES,
+      'name'
+    );
+  }
+
+  function saveFormationPickerSortPreference(value) {
+    saveSortPreference(
+      next => storageLocal.setItem(FORMATION_PICKER_SORT_STORAGE_KEY, next),
+      value,
+      FORMATION_PICKER_SORT_VALUES,
+      'name'
+    );
+  }
+
+  function loadApostleBulkSortPreference() {
+    return loadSortPreference(
+      () => storageLocal.getItem(APOSTLE_BULK_SORT_STORAGE_KEY),
+      APOSTLE_BULK_SORT_VALUES,
+      'combatPower'
+    );
+  }
+
+  function saveApostleBulkSortPreference(value) {
+    saveSortPreference(
+      next => storageLocal.setItem(APOSTLE_BULK_SORT_STORAGE_KEY, next),
+      value,
+      APOSTLE_BULK_SORT_VALUES,
+      'combatPower'
+    );
+  }
+
+  function loadRankOverviewSortPreference() {
+    return loadSortPreference(
+      () => storageLocal.getItem(RANK_OVERVIEW_SORT_STORAGE_KEY),
+      RANK_OVERVIEW_SORT_VALUES,
+      'rank'
+    );
+  }
+
+  function saveRankOverviewSortPreference(value) {
+    saveSortPreference(
+      next => storageLocal.setItem(RANK_OVERVIEW_SORT_STORAGE_KEY, next),
+      value,
+      RANK_OVERVIEW_SORT_VALUES,
+      'rank'
+    );
+  }
+
+  function loadBondOverviewSortPreference() {
+    return loadSortPreference(
+      () => storageLocal.getItem(BOND_OVERVIEW_SORT_STORAGE_KEY),
+      BOND_OVERVIEW_SORT_VALUES,
+      'bond'
+    );
+  }
+
+  function saveBondOverviewSortPreference(value) {
+    saveSortPreference(
+      next => storageLocal.setItem(BOND_OVERVIEW_SORT_STORAGE_KEY, next),
+      value,
+      BOND_OVERVIEW_SORT_VALUES,
+      'bond'
+    );
+  }
+
+  function loadAsideOverviewSortPreference() {
+    return loadSortPreference(
+      () => storageLocal.getItem(ASIDE_OVERVIEW_SORT_STORAGE_KEY),
+      ASIDE_OVERVIEW_SORT_VALUES,
+      'aside'
+    );
+  }
+
+  function saveAsideOverviewSortPreference(value) {
+    saveSortPreference(
+      next => storageLocal.setItem(ASIDE_OVERVIEW_SORT_STORAGE_KEY, next),
+      value,
+      ASIDE_OVERVIEW_SORT_VALUES,
+      'aside'
+    );
   }
 
   function loadBoardOrientation() {
@@ -879,7 +1048,12 @@
 
     elements.apostlePickerSearch.addEventListener('input', renderApostlePicker);
     elements.apostlePickerSort.addEventListener('change', () => {
-      view.apostleSort = elements.apostlePickerSort.value || 'name';
+      view.apostleSort = normalizeSortPreference(
+        elements.apostlePickerSort.value,
+        APOSTLE_PICKER_SORT_VALUES,
+        'name'
+      );
+      saveApostlePickerSortPreference(view.apostleSort);
       renderApostlePicker();
     });
 
@@ -1665,7 +1839,12 @@
     elements.formationPickerSearch?.addEventListener('input', renderFormationPickerOptions);
 
     elements.formationPickerSort?.addEventListener('change', () => {
-      view.formationSort = elements.formationPickerSort.value || 'name';
+      view.formationSort = normalizeSortPreference(
+        elements.formationPickerSort.value,
+        FORMATION_PICKER_SORT_VALUES,
+        'name'
+      );
+      saveFormationPickerSortPreference(view.formationSort);
       renderFormationPickerOptions();
     });
 
@@ -1973,7 +2152,12 @@
     });
 
     elements.apostleBulkSort?.addEventListener('change', () => {
-      view.apostleBulkSort = elements.apostleBulkSort.value || 'name';
+      view.apostleBulkSort = normalizeSortPreference(
+        elements.apostleBulkSort.value,
+        APOSTLE_BULK_SORT_VALUES,
+        'combatPower'
+      );
+      saveApostleBulkSortPreference(view.apostleBulkSort);
       renderApostleBulkSettings();
     });
 
@@ -1993,6 +2177,43 @@
       else values.add(value);
       renderApostleBulkSettings();
     });
+
+    elements.apostleBulkList?.addEventListener('click', event => {
+      const trigger = event.target.closest('[data-apostle-bulk-menu-trigger]');
+      if (!trigger) return;
+      event.preventDefault();
+      toggleApostleBulkPopover(trigger);
+    });
+
+    elements.apostleBulkPopover?.addEventListener('click', event => {
+      const option = event.target.closest('[data-apostle-bulk-action-value]');
+      if (!option || !apostleBulkPopoverTrigger) return;
+      const context = { apostleId: apostleBulkPopoverTrigger.apostleId, group: apostleBulkPopoverTrigger.group };
+      const value = option.dataset.apostleBulkActionValue;
+      closeApostleBulkPopover({ restoreFocus: false });
+      if (context.group === 'skills') applyApostleBulkSkillPreset(context.apostleId, value);
+      if (context.group === 'equipment') applyApostleBulkEquipmentPreset(context.apostleId, value);
+      findApostleBulkPopoverTrigger(context.apostleId, context.group)?.focus({ preventScroll: true });
+    });
+
+    document.addEventListener('click', event => {
+      if (!elements.apostleBulkPopover || elements.apostleBulkPopover.hidden) return;
+      if (event.target.closest('#apostle-bulk-action-popover, [data-apostle-bulk-menu-trigger]')) return;
+      closeApostleBulkPopover({ restoreFocus: false });
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || !elements.apostleBulkPopover || elements.apostleBulkPopover.hidden) return;
+      event.preventDefault();
+      closeApostleBulkPopover();
+    });
+
+    const repositionApostleBulkPopover = () => {
+      if (!elements.apostleBulkPopover || elements.apostleBulkPopover.hidden || !apostleBulkPopoverTrigger?.element?.isConnected) return;
+      positionApostleBulkPopover(apostleBulkPopoverTrigger.element);
+    };
+    window.addEventListener('resize', repositionApostleBulkPopover, { passive: true });
+    window.addEventListener('scroll', repositionApostleBulkPopover, { capture: true, passive: true });
 
     elements.apostleBulkList?.addEventListener('change', event => {
       const control = event.target.closest('[data-apostle-bulk-id]');
@@ -2038,7 +2259,12 @@
     });
 
     elements.rankOverviewSort.addEventListener('change', () => {
-      view.rankSort = elements.rankOverviewSort.value || 'name';
+      view.rankSort = normalizeSortPreference(
+        elements.rankOverviewSort.value,
+        RANK_OVERVIEW_SORT_VALUES,
+        'rank'
+      );
+      saveRankOverviewSortPreference(view.rankSort);
       renderRankOverview();
     });
 
@@ -2086,7 +2312,12 @@
     });
 
     elements.bondOverviewSort.addEventListener('change', () => {
-      view.bondSort = elements.bondOverviewSort.value || 'name';
+      view.bondSort = normalizeSortPreference(
+        elements.bondOverviewSort.value,
+        BOND_OVERVIEW_SORT_VALUES,
+        'bond'
+      );
+      saveBondOverviewSortPreference(view.bondSort);
       renderBondOverview();
     });
 
@@ -2140,7 +2371,12 @@
     });
 
     elements.asideOverviewSort.addEventListener('change', () => {
-      view.asideSort = elements.asideOverviewSort.value || 'name';
+      view.asideSort = normalizeSortPreference(
+        elements.asideOverviewSort.value,
+        ASIDE_OVERVIEW_SORT_VALUES,
+        'aside'
+      );
+      saveAsideOverviewSortPreference(view.asideSort);
       renderAsideOverview();
     });
 
@@ -2210,8 +2446,21 @@
     });
 
     elements.boardGlobalSort.addEventListener('change', () => {
-      view.boardGlobalSort = elements.boardGlobalSort.value || 'name';
+      view.boardGlobalSort = ['name', 'combatPower', 'planned'].includes(elements.boardGlobalSort.value)
+        ? elements.boardGlobalSort.value
+        : 'name';
       view.boardGlobalSortTouched = true;
+      saveBoardGlobalViewPreferences();
+      renderBoardGlobalOverview();
+    });
+
+    elements.boardGlobalPaintFilter.addEventListener('change', () => {
+      const value = elements.boardGlobalPaintFilter.value;
+      view.boardGlobalPaintFilter = ['all', 'unpainted-first', 'unpainted-only'].includes(value) ? value : 'all';
+      if (view.boardGlobalPaintFilter !== 'unpainted-only') {
+        view.boardGlobalRememberedPaintFilter = view.boardGlobalPaintFilter;
+        saveBoardGlobalViewPreferences();
+      }
       renderBoardGlobalOverview();
     });
 
@@ -2225,19 +2474,19 @@
       }
       const button = event.target.closest('button[data-board-global-key]');
       if (!button) return;
+      const apostleId = button.dataset.boardGlobalApostleId;
       toggleGlobalBoardSpecial(
-        button.dataset.boardGlobalApostleId,
+        apostleId,
         Number(button.dataset.boardGlobalLayer) || 1,
         button.dataset.boardGlobalKey
       );
       render();
-      const shouldFollow = view.boardGlobalSort === 'progress'
-        || (view.boardGlobalSort === 'planned' && view.boardGlobalMode === 'plan');
+      const shouldFollow = view.boardGlobalSort === 'planned' && view.boardGlobalMode === 'plan';
       if (shouldFollow) {
         followResortedApostle(
           elements.boardGlobalOverviewList,
           'data-board-global-card-id',
-          button.dataset.boardGlobalApostleId
+          apostleId
         );
       }
     });
@@ -2398,6 +2647,7 @@
   }
 
   function renderApostlePicker() {
+    elements.apostlePickerSort.value = view.apostleSort;
     const query = elements.apostlePickerSearch.value.trim().toLocaleLowerCase('ja');
     const rows = DATA.sheets.basicInfo.filter(row => {
       const matchesQuery = !query || [row.使徒名, row.id, row.性格, row.種族, row.役割, row.配列]
@@ -5270,6 +5520,11 @@
     syncDashboardRouteToUrl();
   }
   function activateDashboardView(name, options = {}) {
+    const previousViewName = getActiveDashboardViewName();
+    if (name === 'global' && previousViewName !== 'global'
+      && getActiveGlobalSettingPanelName() === 'apostles') {
+      view.apostleBulkOrderContext = null;
+    }
     const history = options.skipHistory ? null : beginHistoryAction('画面遷移');
     const viewName = name || 'settings';
     stashBoardWorkspaceDrafts();
@@ -5378,6 +5633,7 @@
   }
 
   function openGlobalSettingPanel(tab = 'research', options = {}) {
+    if (tab === 'apostles') view.apostleBulkOrderContext = null;
     const history = options.skipHistory ? null : beginHistoryAction('画面遷移');
     syncBoardDraftToGlobalDraft();
     activateDashboardView('global', { render: false, skipHistory: true });
@@ -7031,6 +7287,9 @@
 
   function renderApostleBulkSettings() {
     if (!elements.apostleBulkList) return;
+    if (elements.apostleBulkPopover && !elements.apostleBulkPopover.hidden) {
+      closeApostleBulkPopover({ restoreFocus: false });
+    }
     const query = String(view.apostleBulkSearch || '').trim().toLocaleLowerCase('ja');
     if (elements.apostleBulkSearch && elements.apostleBulkSearch.value !== view.apostleBulkSearch) {
       elements.apostleBulkSearch.value = view.apostleBulkSearch;
@@ -7060,8 +7319,29 @@
       ].every(([group, value]) => {
         const selected = view.apostleBulkFilters[group];
         return selected.size === 0 || selected.has(value);
-      }))
-      .sort(compareApostleBulkRows);
+      }));
+    const orderContext = JSON.stringify([
+      view.apostleBulkSort,
+      query,
+      ...Object.entries(view.apostleBulkFilters)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([group, values]) => [group, [...values].sort()])
+    ]);
+    if (orderContext !== view.apostleBulkOrderContext) {
+      rows.sort(compareApostleBulkRows);
+      view.apostleBulkOrderIds = rows.map(row => row.id);
+      view.apostleBulkOrderContext = orderContext;
+    } else {
+      const order = new Map(view.apostleBulkOrderIds.map((id, index) => [id, index]));
+      rows.sort((a, b) => {
+        const aIndex = order.get(a.id);
+        const bIndex = order.get(b.id);
+        if (aIndex !== undefined && bIndex !== undefined) return aIndex - bIndex;
+        if (aIndex !== undefined) return -1;
+        if (bIndex !== undefined) return 1;
+        return compareApostleBulkRows(a, b);
+      });
+    }
     if (elements.apostleBulkCount) {
       elements.apostleBulkCount.textContent = `${rows.length}/${DATA.sheets.basicInfo.length}使徒`;
     }
@@ -7132,8 +7412,7 @@
     const skillOptions = createNumberOptions(1, maxSkillLevel);
     const equipment = DATA.getById('equipment', basic.id);
     const equipmentControls = getApostleBulkEquipmentDefinitions(basic).map(item => {
-      const tier = Number(equipment?.[`Equip_Rank${state.rank}_${item.key}`]);
-      const available = Number.isFinite(tier);
+      const available = isApostleBulkEquipmentAvailable(basic, state, item, equipment);
       const saved = state.equipment?.[item.key] || { enabled: false, enhance: 0 };
       const selected = available && saved.enabled
         ? Math.max(0, Math.min(5, Number(saved.enhance) || 0))
@@ -7176,7 +7455,11 @@
             data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-field="level" aria-label="${escapeAttr(`${basic.使徒名 || basic.id} Lv`)}">
         </label>
         <div class="apostle-bulk-group apostle-bulk-skills" role="group" aria-label="${escapeAttr(`${basic.使徒名 || basic.id} SLv`)}">
-          <span class="apostle-bulk-group-title">SLv${asideRank ? `<small>A${asideRank}<br>上限${maxSkillLevel}</small>` : ''}</span>
+          <button type="button" class="apostle-bulk-group-title" title="SLv一括変更"
+            data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-menu-trigger="skills"
+            aria-haspopup="dialog" aria-controls="apostle-bulk-action-popover" aria-expanded="false">
+            SLv${asideRank ? `<small>A${asideRank}<br>上限${maxSkillLevel}</small>` : ''}
+          </button>
           ${[
             ['low', '低'],
             ['high', '高'],
@@ -7187,7 +7470,11 @@
           `).join('')}
         </div>
         <div class="apostle-bulk-group apostle-bulk-equipments" role="group" aria-label="${escapeAttr(`${basic.使徒名 || basic.id} 装備 Rank ${state.rank}`)}">
-          <span class="apostle-bulk-group-title">装備<small>R${state.rank}</small></span>
+          <button type="button" class="apostle-bulk-group-title" title="装備一括変更"
+            data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-menu-trigger="equipment"
+            aria-haspopup="dialog" aria-controls="apostle-bulk-action-popover" aria-expanded="false">
+            装備<small>R${state.rank}</small>
+          </button>
           ${equipmentControls}
         </div>
       </article>
@@ -7204,6 +7491,105 @@
       { key: '会心/会心DMG', label: '会心', title: '会心・会心DMG装備' },
       { key: '会心抵抗/会心DMG抵抗', label: '抵抗', title: '会心抵抗・会心DMG抵抗装備' }
     ];
+  }
+
+  function isApostleBulkEquipmentAvailable(basic, state, item, sheet = DATA.getById('equipment', basic?.id)) {
+    const tier = Number(sheet?.[`Equip_Rank${state.rank}_${item.key}`]);
+    return Number.isFinite(tier);
+  }
+
+  function findApostleBulkPopoverTrigger(apostleId, group) {
+    return Array.from(elements.apostleBulkList?.querySelectorAll('[data-apostle-bulk-menu-trigger]') || [])
+      .find(trigger => trigger.dataset.apostleBulkId === String(apostleId)
+        && trigger.dataset.apostleBulkMenuTrigger === group) || null;
+  }
+
+  function toggleApostleBulkPopover(trigger) {
+    const apostleId = trigger.dataset.apostleBulkId;
+    const group = trigger.dataset.apostleBulkMenuTrigger;
+    if (!apostleId || !['skills', 'equipment'].includes(group) || !elements.apostleBulkPopover) return;
+    if (!elements.apostleBulkPopover.hidden
+      && apostleBulkPopoverTrigger?.apostleId === apostleId
+      && apostleBulkPopoverTrigger?.group === group) {
+      closeApostleBulkPopover({ restoreFocus: false });
+      return;
+    }
+    closeApostleBulkPopover({ restoreFocus: false });
+    apostleBulkPopoverTrigger = { apostleId, group, element: trigger };
+    trigger.setAttribute('aria-expanded', 'true');
+    elements.apostleBulkPopover.innerHTML = renderApostleBulkPopover(apostleId, group);
+    elements.apostleBulkPopover.hidden = false;
+    positionApostleBulkPopover(trigger);
+    elements.apostleBulkPopover.querySelector('[data-apostle-bulk-action-value]')?.focus({ preventScroll: true });
+  }
+
+  function closeApostleBulkPopover(options = {}) {
+    if (!elements.apostleBulkPopover || elements.apostleBulkPopover.hidden) {
+      apostleBulkPopoverTrigger = null;
+      return;
+    }
+    const trigger = apostleBulkPopoverTrigger?.element;
+    elements.apostleBulkPopover.hidden = true;
+    elements.apostleBulkPopover.replaceChildren();
+    trigger?.setAttribute('aria-expanded', 'false');
+    apostleBulkPopoverTrigger = null;
+    if (options.restoreFocus !== false && trigger?.isConnected) trigger.focus({ preventScroll: true });
+  }
+
+  function renderApostleBulkPopover(apostleId, group) {
+    const basic = DATA.getById('basicInfo', apostleId);
+    if (!basic) return '';
+    const title = group === 'skills' ? 'SLv一括変更' : '装備一括変更';
+    const actions = group === 'skills'
+      ? [
+        ['4', 'Lv4', '低・高・パッシブをLv4にする'],
+        ['7', 'Lv7', '低・高・パッシブをLv7にする'],
+        ['max', 'MAX', '現在の上限にする']
+      ]
+      : [
+        ['none', 'なし'],
+        ['0', '+0'],
+        ['1', '+1'],
+        ['2', '+2'],
+        ['3', '+3'],
+        ['4', '+4'],
+        ['5', '+5']
+      ];
+    const note = group === 'skills'
+      ? '<p class="apostle-bulk-popover-note">低・高・パッシブをまとめて変更します。</p>'
+      : '<p class="apostle-bulk-popover-note">「なし」は装備解除、「+0」は強化なしで装備します。</p>';
+    return `
+      <h3 id="apostle-bulk-popover-title" class="apostle-bulk-popover-title">${escapeHtml(basic.使徒名 || apostleId)} · ${title}</h3>
+      ${note}
+      <div class="apostle-bulk-popover-actions ${group === 'skills' ? 'is-skills' : 'is-equipment'}">
+        ${actions.map(([value, label, description]) => `
+          <button type="button" data-apostle-bulk-action-value="${escapeAttr(value)}"
+            aria-label="${escapeAttr(description || label)}">${escapeHtml(label)}</button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function positionApostleBulkPopover(trigger) {
+    const popover = elements.apostleBulkPopover;
+    if (!popover || popover.hidden || !trigger?.isConnected) return;
+    const rect = trigger.getBoundingClientRect();
+    const popupRect = popover.getBoundingClientRect();
+    const gutter = 8;
+    const gap = 6;
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+    const below = viewportHeight - rect.bottom - gap - gutter;
+    const above = rect.top - gap - gutter;
+    const placeBelow = below >= popupRect.height || below >= above;
+    const available = Math.max(80, (placeBelow ? below : above));
+    popover.style.maxHeight = `min(360px, ${available}px)`;
+    const finalHeight = Math.min(popupRect.height, available);
+    const preferredTop = placeBelow ? rect.bottom + gap : rect.top - finalHeight - gap;
+    const top = Math.max(gutter, Math.min(preferredTop, viewportHeight - finalHeight - gutter));
+    const left = Math.max(gutter, Math.min(rect.left, viewportWidth - popupRect.width - gutter));
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
   }
 
   function updateApostleBulkLevelInput(control) {
@@ -7246,11 +7632,7 @@
       syncControlsFromState();
       renderProfileQuick();
     }
-    if (['level', 'combatPower'].includes(view.apostleBulkSort)) {
-      renderApostleBulkSettings();
-      followResortedApostle(elements.apostleBulkList, 'data-apostle-bulk-row', id);
-    }
-    else updateApostleBulkRow(id);
+    updateApostleBulkRow(id);
     commitHistoryAction(history);
   }
 
@@ -7287,15 +7669,7 @@
       renderProfileQuick();
       renderSkillLevelChange();
     }
-    const shouldResort = (field === 'star' && view.apostleBulkSort === 'star')
-      || (skill && view.apostleBulkSort === 'skillLevel')
-      || (equipmentKey && view.apostleBulkSort === 'equipment')
-      || view.apostleBulkSort === 'combatPower';
-    if (shouldResort) {
-      renderApostleBulkSettings();
-      followResortedApostle(elements.apostleBulkList, 'data-apostle-bulk-row', id);
-    }
-    else updateApostleBulkRow(id);
+    updateApostleBulkRow(id);
     commitHistoryAction(history);
   }
 
@@ -7303,7 +7677,105 @@
     const row = Array.from(elements.apostleBulkList?.querySelectorAll('[data-apostle-bulk-row]') || [])
       .find(element => element.dataset.apostleBulkRow === id);
     const basic = DATA.getById('basicInfo', id);
-    if (row && basic) row.outerHTML = renderApostleBulkRow(basic);
+    if (!row || !basic) return;
+    const active = document.activeElement;
+    const focusedControl = active?.closest?.('[data-apostle-bulk-id]');
+    const focusDescriptor = focusedControl?.dataset.apostleBulkId === id
+      ? {
+        field: focusedControl.dataset.apostleBulkField || '',
+        skill: focusedControl.dataset.apostleBulkSkill || '',
+        equipment: focusedControl.dataset.apostleBulkEquipment || '',
+        trigger: focusedControl.dataset.apostleBulkMenuTrigger || ''
+      }
+      : null;
+    const scrollPositions = [];
+    let ancestor = row.parentElement;
+    while (ancestor) {
+      const style = getComputedStyle(ancestor);
+      if (/(auto|scroll)/.test(style.overflowY) && ancestor.scrollHeight > ancestor.clientHeight) {
+        scrollPositions.push([ancestor, ancestor.scrollTop, ancestor.scrollLeft]);
+      }
+      ancestor = ancestor.parentElement;
+    }
+    const pageScroll = [window.scrollX, window.scrollY];
+    const template = document.createElement('template');
+    template.innerHTML = renderApostleBulkRow(basic).trim();
+    const nextRow = template.content.firstElementChild;
+    row.replaceWith(nextRow);
+    for (const [container, top, left] of scrollPositions) {
+      container.scrollTop = top;
+      container.scrollLeft = left;
+    }
+    if (focusDescriptor) {
+      const nextFocus = Array.from(nextRow.querySelectorAll('[data-apostle-bulk-id]')).find(control =>
+        control.dataset.apostleBulkId === id
+        && (control.dataset.apostleBulkField || '') === focusDescriptor.field
+        && (control.dataset.apostleBulkSkill || '') === focusDescriptor.skill
+        && (control.dataset.apostleBulkEquipment || '') === focusDescriptor.equipment
+        && (control.dataset.apostleBulkMenuTrigger || '') === focusDescriptor.trigger
+      );
+      nextFocus?.focus({ preventScroll: true });
+    }
+    window.scrollTo({ left: pageScroll[0], top: pageScroll[1], behavior: 'auto' });
+  }
+
+  function applyApostleBulkSkillPreset(id, preset) {
+    const basic = DATA.getById('basicInfo', id);
+    if (!basic || !['4', '7', 'max'].includes(preset)) return;
+    const state = ensureApostleState(id);
+    const asideRank = getEffectiveAsideRank(id, state.asideRank);
+    const maxLevel = getMaxSkillLevel(asideRank);
+    const level = preset === 'max' ? maxLevel : Math.min(maxLevel, Number(preset));
+    const nextLevels = normalizeSkillLevels({ low: level, high: level, passive: level }, asideRank);
+    const previousLevels = normalizeSkillLevels(state.skillLevels, asideRank);
+    if (['low', 'high', 'passive'].every(key => previousLevels[key] === nextLevels[key])) return;
+
+    const history = beginHistoryAction('使徒設定一覧SLv一括変更');
+    state.skillLevels = nextLevels;
+    refreshSingleStatSnapshotImmediately(basic);
+    saveState({ renderStateManager: false, refreshSnapshots: false });
+    if (id === view.id) {
+      syncControlsFromState();
+      renderProfileQuick();
+      renderSkillLevelChange();
+    }
+    updateApostleBulkRow(id);
+    commitHistoryAction(history);
+  }
+
+  function applyApostleBulkEquipmentPreset(id, preset) {
+    const basic = DATA.getById('basicInfo', id);
+    if (!basic || !['none', '0', '1', '2', '3', '4', '5'].includes(preset)) return;
+    const state = ensureApostleState(id);
+    const sheet = DATA.getById('equipment', id);
+    const definitions = getApostleBulkEquipmentDefinitions(basic);
+    const desiredEnabled = preset !== 'none';
+    const desiredEnhance = preset === 'none' ? 0 : Number(preset);
+    const availableItems = definitions.filter(item => isApostleBulkEquipmentAvailable(basic, state, item, sheet));
+    const changed = availableItems.some(item => {
+      const saved = state.equipment?.[item.key] || {};
+      return Boolean(saved.enabled) !== desiredEnabled || (Number(saved.enhance) || 0) !== desiredEnhance;
+    });
+    if (!changed) return;
+
+    const history = beginHistoryAction('使徒設定一覧装備一括変更');
+    state.equipment ||= {};
+    for (const item of availableItems) {
+      state.equipment[item.key] = {
+        ...(state.equipment[item.key] || {}),
+        enabled: desiredEnabled,
+        enhance: desiredEnhance
+      };
+    }
+    refreshSingleStatSnapshotImmediately(basic);
+    saveState({ renderStateManager: false, refreshSnapshots: false });
+    if (id === view.id) {
+      syncControlsFromState();
+      renderProfileQuick();
+      renderSkillLevelChange();
+    }
+    updateApostleBulkRow(id);
+    commitHistoryAction(history);
   }
 
   function renderRankOverviewControls() {
@@ -10041,14 +10513,31 @@
       .filter(basic => !query || [basic.使徒名, basic.id, basic.性格, basic.種族, basic.役割]
         .filter(Boolean)
         .some(value => String(value).toLocaleLowerCase('ja').includes(query)))
-      .map(basic => ({
-        basic,
-        result: collectBoardGlobalEffectsForApostle(basic.id, getGlobalBoardDisplayBoards(basic.id))
-      }))
-      .filter(({ result }) => result.nodes.some(({ row }) =>
-        row.マス_type === '特殊' && matchesBoardGlobalFilters(row)
-      ))
+      .map(basic => {
+        const displayBoards = getGlobalBoardDisplayBoards(basic.id);
+        const result = collectBoardGlobalEffectsForApostle(basic.id, displayBoards);
+        const matchedSpecialNodes = result.nodes.filter(({ row }) =>
+          row.マス_type === '特殊' && matchesBoardGlobalFilters(row)
+        );
+        const draft = globalBoardDrafts[basic.id];
+        const hasDirtyDraft = draft?.mode === view.boardGlobalMode && hasGlobalBoardDraftChanges(basic.id);
+        const classificationBoards = hasDirtyDraft
+          ? getGlobalBoardBaselineBoards(basic.id)
+          : displayBoards;
+        const hasUnpainted = matchedSpecialNodes.some(({ row }) =>
+          !classificationBoards?.[String(row.ボード階層)]?.filled?.[boardKey(row)]
+        );
+        return { basic, result, matchedSpecialNodes, hasUnpainted };
+      })
+      .filter(({ matchedSpecialNodes, hasUnpainted }) =>
+        matchedSpecialNodes.length > 0
+        && (view.boardGlobalPaintFilter !== 'unpainted-only' || hasUnpainted)
+      )
       .sort((a, b) => {
+        if (view.boardGlobalPaintFilter === 'unpainted-first') {
+          const unpaintedOrder = Number(b.hasUnpainted) - Number(a.hasUnpainted);
+          if (unpaintedOrder) return unpaintedOrder;
+        }
         const nameOrder = String(a.basic.使徒名 || a.basic.id).localeCompare(
           String(b.basic.使徒名 || b.basic.id),
           'ja',
@@ -10062,8 +10551,7 @@
         if (view.boardGlobalSort === 'combatPower') {
           return getApostleCombatPowerForSort(b.basic.id) - getApostleCombatPowerForSort(a.basic.id) || nameOrder;
         }
-        if (view.boardGlobalSort !== 'progress') return nameOrder;
-        return b.result.filledSpecialCount - a.result.filledSpecialCount || nameOrder;
+        return nameOrder;
       });
 
     const hasChanges = Object.keys(globalBoardDrafts).length > 0;
@@ -10072,6 +10560,7 @@
     elements.boardGlobalModeCurrent.classList.toggle('is-active', !planMode);
     elements.boardGlobalModePlan.classList.toggle('is-active', planMode);
     elements.boardGlobalSort.value = view.boardGlobalSort;
+    elements.boardGlobalPaintFilter.value = view.boardGlobalPaintFilter;
     elements.boardGlobalCancel.disabled = !hasChanges;
     elements.boardGlobalSavePlan.disabled = !hasChanges;
     elements.boardGlobalConfirm.hidden = planMode;
@@ -10084,7 +10573,7 @@
       : '保存予定を破棄';
     elements.boardGlobalOverviewSummary.innerHTML = renderGlobalBoardChangeSummary();
     elements.boardGlobalOverviewList.innerHTML = rows
-      .map(({ basic, result }) => renderBoardGlobalApostleCard(basic, result))
+      .map(({ basic, result, matchedSpecialNodes }) => renderBoardGlobalApostleCard(basic, result, matchedSpecialNodes))
       .join('') || '<p class="empty-note">一致する使徒がいません。</p>';
     if (elements.boardGlobalBottomSummary) {
       elements.boardGlobalBottomSummary.innerHTML = renderBoardGlobalBottomSummary(rows);
@@ -10267,11 +10756,8 @@
     `;
   }
 
-  function renderBoardGlobalApostleCard(basic, result) {
+  function renderBoardGlobalApostleCard(basic, result, specialNodes = []) {
     if (!result.nodes.length) return '';
-    const specialNodes = result.nodes.filter(({ row }) =>
-      row.マス_type === '特殊' && matchesBoardGlobalFilters(row)
-    );
     if (!specialNodes.length) return '';
     const nodes = [1, 2, 3].map(layer => {
       const layerNodes = specialNodes.filter(({ row }) => Number(row.ボード階層) === layer);
