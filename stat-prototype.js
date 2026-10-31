@@ -2194,6 +2194,13 @@
     });
 
     elements.apostleBulkPopover?.addEventListener('click', event => {
+      const rankOption = event.target.closest('[data-apostle-bulk-rank-value]');
+      if (rankOption && apostleBulkPopoverTrigger) {
+        event.stopPropagation();
+        const context = { apostleId: apostleBulkPopoverTrigger.apostleId, group: apostleBulkPopoverTrigger.group };
+        if (context.group === 'equipment') applyApostleBulkRank(context.apostleId, rankOption.dataset.apostleBulkRankValue);
+        return;
+      }
       const option = event.target.closest('[data-apostle-bulk-action-value]');
       if (!option || !apostleBulkPopoverTrigger) return;
       const context = { apostleId: apostleBulkPopoverTrigger.apostleId, group: apostleBulkPopoverTrigger.group };
@@ -2201,6 +2208,7 @@
       closeApostleBulkPopover({ restoreFocus: false });
       if (context.group === 'skills') applyApostleBulkSkillPreset(context.apostleId, value);
       if (context.group === 'equipment') applyApostleBulkEquipmentPreset(context.apostleId, value);
+      if (context.group === 'level') applyApostleBulkLevelPreset(context.apostleId, value);
       findApostleBulkPopoverTrigger(context.apostleId, context.group)?.focus({ preventScroll: true });
     });
 
@@ -7495,10 +7503,14 @@
             ${renderOptions(starOptions, state.star)}
           </select>
         </label>
-        <label class="apostle-bulk-field is-level"><span>Lv</span>
+        <div class="apostle-bulk-field is-level">
+          <button type="button" class="apostle-bulk-level-menu-trigger" title="Lvを簡易変更"
+            data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-menu-trigger="level"
+            aria-label="${escapeAttr(`${basic.使徒名 || basic.id} Lvの簡易変更`)}"
+            aria-haspopup="dialog" aria-controls="apostle-bulk-action-popover" aria-expanded="false">Lv</button>
           <input type="number" min="1" max="${getLevelCapForStar(state.star)}" step="1" value="${state.level}"
             data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-field="level" aria-label="${escapeAttr(`${basic.使徒名 || basic.id} Lv`)}">
-        </label>
+        </div>
         <div class="apostle-bulk-group apostle-bulk-skills" role="group" aria-label="${escapeAttr(`${basic.使徒名 || basic.id} SLv`)}">
           <button type="button" class="apostle-bulk-group-title" title="SLv一括変更"
             data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-menu-trigger="skills"
@@ -7552,7 +7564,7 @@
   function toggleApostleBulkPopover(trigger) {
     const apostleId = trigger.dataset.apostleBulkId;
     const group = trigger.dataset.apostleBulkMenuTrigger;
-    if (!apostleId || !['skills', 'equipment'].includes(group) || !elements.apostleBulkPopover) return;
+    if (!apostleId || !['skills', 'equipment', 'level'].includes(group) || !elements.apostleBulkPopover) return;
     if (!elements.apostleBulkPopover.hidden
       && apostleBulkPopoverTrigger?.apostleId === apostleId
       && apostleBulkPopoverTrigger?.group === group) {
@@ -7565,7 +7577,7 @@
     elements.apostleBulkPopover.innerHTML = renderApostleBulkPopover(apostleId, group);
     elements.apostleBulkPopover.hidden = false;
     positionApostleBulkPopover(trigger);
-    elements.apostleBulkPopover.querySelector('[data-apostle-bulk-action-value]')?.focus({ preventScroll: true });
+    elements.apostleBulkPopover.querySelector('[data-apostle-bulk-rank-value], [data-apostle-bulk-action-value]')?.focus({ preventScroll: true });
   }
 
   function closeApostleBulkPopover(options = {}) {
@@ -7584,14 +7596,15 @@
   function renderApostleBulkPopover(apostleId, group) {
     const basic = DATA.getById('basicInfo', apostleId);
     if (!basic) return '';
-    const title = group === 'skills' ? 'SLv一括変更' : '装備一括変更';
+    const state = ensureApostleState(apostleId);
+    const title = group === 'skills' ? 'SLv一括変更' : group === 'level' ? 'Lv変更' : '装備一括変更';
     const actions = group === 'skills'
       ? [
         ['4', 'Lv4', '低・高・パッシブをLv4にする'],
         ['7', 'Lv7', '低・高・パッシブをLv7にする'],
         ['max', 'MAX', '現在の上限にする']
       ]
-      : [
+      : group === 'equipment' ? [
         ['none', 'なし'],
         ['0', '+0'],
         ['1', '+1'],
@@ -7599,17 +7612,38 @@
         ['3', '+3'],
         ['4', '+4'],
         ['5', '+5']
-      ];
+      ] : (() => {
+        const cap = getLevelCapForStar(state.star);
+        const values = Array.from({ length: Math.floor(cap / 10) }, (_, index) => (index + 1) * 10);
+        if (!values.includes(cap)) values.push(cap);
+        return values.map(value => [String(value), value === cap ? `${value}/MAX` : String(value), `Lv${value}にする`]);
+      })();
     const note = group === 'skills'
       ? '<p class="apostle-bulk-popover-note">低・高・パッシブをまとめて変更します。</p>'
-      : '<p class="apostle-bulk-popover-note">「なし」は装備解除、「+0」は強化なしで装備します。</p>';
+      : group === 'level'
+        ? '<p class="apostle-bulk-popover-note">10刻みまたは現在の★上限を選びます。</p>'
+        : '<p class="apostle-bulk-popover-note">「なし」は装備解除、「+0」は強化なしで装備します。</p>';
+    const rankActions = Array.from({ length: 9 }, (_, index) => index + 1);
+    const rankSection = group === 'equipment' ? `
+      <div class="apostle-bulk-popover-section-label">装備Rank</div>
+      <div class="apostle-bulk-popover-actions is-rank" aria-label="装備Rank">
+        ${rankActions.map(rank => `
+          <button type="button" data-apostle-bulk-rank-value="${rank}" aria-pressed="${Number(state.rank) === rank}"
+            aria-label="Rank ${rank}"${Number(state.rank) === rank ? ' class="is-selected"' : ''}>R${rank}</button>
+        `).join('')}
+      </div>
+      <div class="apostle-bulk-popover-section-label">装備6枠</div>
+    ` : '';
+    const actionClass = group === 'skills' ? 'is-skills' : group === 'level' ? 'is-level' : 'is-equipment';
+    const selectedLevel = Number(state.level);
     return `
       <h3 id="apostle-bulk-popover-title" class="apostle-bulk-popover-title">${escapeHtml(basic.使徒名 || apostleId)} · ${title}</h3>
       ${note}
-      <div class="apostle-bulk-popover-actions ${group === 'skills' ? 'is-skills' : 'is-equipment'}">
+      ${rankSection}
+      <div class="apostle-bulk-popover-actions ${actionClass}">
         ${actions.map(([value, label, description]) => `
           <button type="button" data-apostle-bulk-action-value="${escapeAttr(value)}"
-            aria-label="${escapeAttr(description || label)}">${escapeHtml(label)}</button>
+            aria-label="${escapeAttr(description || label)}"${group === 'level' ? ` aria-pressed="${Number(value) === selectedLevel}"${Number(value) === selectedLevel ? ' class="is-selected"' : ''}` : ''}>${escapeHtml(label)}</button>
         `).join('')}
       </div>
     `;
@@ -7724,6 +7758,14 @@
     const basic = DATA.getById('basicInfo', id);
     if (!row || !basic) return;
     const active = document.activeElement;
+    const popoverOpenForRow = !elements.apostleBulkPopover?.hidden && apostleBulkPopoverTrigger?.apostleId === id;
+    const popoverFocus = popoverOpenForRow
+      ? active?.closest?.('[data-apostle-bulk-rank-value], [data-apostle-bulk-action-value]')
+      : null;
+    const popoverFocusDescriptor = popoverFocus ? {
+      rank: popoverFocus.dataset.apostleBulkRankValue || '',
+      action: popoverFocus.dataset.apostleBulkActionValue || ''
+    } : null;
     const focusedControl = active?.closest?.('[data-apostle-bulk-id]');
     const focusDescriptor = focusedControl?.dataset.apostleBulkId === id
       ? {
@@ -7747,6 +7789,20 @@
     template.innerHTML = renderApostleBulkRow(basic).trim();
     const nextRow = template.content.firstElementChild;
     row.replaceWith(nextRow);
+    if (popoverOpenForRow) {
+      const nextTrigger = findApostleBulkPopoverTrigger(id, apostleBulkPopoverTrigger.group);
+      apostleBulkPopoverTrigger.element = nextTrigger;
+      nextTrigger?.setAttribute('aria-expanded', 'true');
+      elements.apostleBulkPopover.innerHTML = renderApostleBulkPopover(id, apostleBulkPopoverTrigger.group);
+      const nextPopoverFocus = popoverFocusDescriptor?.rank
+        ? elements.apostleBulkPopover.querySelector('[data-apostle-bulk-rank-value][aria-pressed="true"]')
+        : popoverFocusDescriptor
+          ? Array.from(elements.apostleBulkPopover.querySelectorAll('[data-apostle-bulk-rank-value], [data-apostle-bulk-action-value]'))
+            .find(control => control.dataset.apostleBulkRankValue === popoverFocusDescriptor.rank
+              && control.dataset.apostleBulkActionValue === popoverFocusDescriptor.action)
+          : null;
+      nextPopoverFocus?.focus({ preventScroll: true });
+    }
     for (const [container, top, left] of scrollPositions) {
       container.scrollTop = top;
       container.scrollLeft = left;
@@ -7762,6 +7818,9 @@
       nextFocus?.focus({ preventScroll: true });
     }
     window.scrollTo({ left: pageScroll[0], top: pageScroll[1], behavior: 'auto' });
+    if (popoverOpenForRow && apostleBulkPopoverTrigger?.element?.isConnected) {
+      positionApostleBulkPopover(apostleBulkPopoverTrigger.element);
+    }
   }
 
   function applyApostleBulkSkillPreset(id, preset) {
@@ -7787,6 +7846,47 @@
     updateApostleBulkRow(id);
     commitHistoryAction(history);
   }
+
+  function applyApostleBulkRank(id, rawRank) {
+    const basic = DATA.getById('basicInfo', id);
+    const value = Number(rawRank);
+    if (!basic || !Number.isInteger(value) || value < 1 || value > 9) return;
+    const state = ensureApostleState(id);
+    if (Number(state.rank) === value) return;
+
+    const history = beginHistoryAction('使徒設定一覧Rank変更');
+    state.rank = value;
+    refreshSingleStatSnapshotImmediately(basic);
+    saveState({ renderStateManager: false, refreshSnapshots: false });
+    if (id === view.id) {
+      syncControlsFromState();
+      renderProfileQuick();
+      renderSkillLevelChange();
+    }
+    updateApostleBulkRow(id);
+    commitHistoryAction(history);
+  }
+
+  function applyApostleBulkLevelPreset(id, rawLevel) {
+    const basic = DATA.getById('basicInfo', id);
+    const value = Number(rawLevel);
+    if (!basic || !Number.isInteger(value)) return;
+    const state = ensureApostleState(id);
+    const level = normalizeApostleLevel(value, state.star);
+    if (state.level === level) return;
+
+    const history = beginHistoryAction('使徒設定一覧Lv変更');
+    state.level = level;
+    refreshSingleStatSnapshotImmediately(basic);
+    saveState({ renderStateManager: false, refreshSnapshots: false });
+    if (id === view.id) {
+      syncControlsFromState();
+      renderProfileQuick();
+    }
+    updateApostleBulkRow(id);
+    commitHistoryAction(history);
+  }
+
 
   function applyApostleBulkEquipmentPreset(id, preset) {
     const basic = DATA.getById('basicInfo', id);

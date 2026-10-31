@@ -14867,3 +14867,59 @@ button.apostle-picker-card.is-two-tone.is-selected,
   border-color: rgba(240, 160, 183, 0.78);
   background: rgba(105, 42, 64, 0.94);
 }
+
+.apostle-bulk-level-menu-trigger {
+  justify-self: start;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.apostle-bulk-level-menu-trigger:hover,
+.apostle-bulk-level-menu-trigger:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.apostle-bulk-level-menu-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent, #497baf) 76%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.apostle-bulk-popover-actions.is-rank {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.apostle-bulk-popover-actions.is-level {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.apostle-bulk-popover-section-label {
+  margin: 9px 0 5px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.apostle-bulk-popover-actions button.is-selected,
+.apostle-bulk-popover-actions button[aria-pressed="true"] {
+  border-color: rgba(49, 113, 81, 0.64);
+  color: #14532d;
+  background: rgba(198, 230, 203, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(49, 113, 81, 0.16);
+}
+
+:root[data-theme="dark"] .apostle-bulk-popover-actions button.is-selected,
+:root[data-theme="dark"] .apostle-bulk-popover-actions button[aria-pressed="true"] {
+  border-color: rgba(126, 194, 159, 0.76);
+  color: #dcfce7;
+  background: rgba(41, 92, 66, 0.98);
+}
