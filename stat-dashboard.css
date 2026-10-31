@@ -14770,3 +14770,100 @@ button.apostle-picker-card.is-two-tone.is-selected,
 :root[data-theme="dark"] button.apostle-picker-card.is-two-tone.is-selected {
   border-color: transparent !important;
 }
+
+.apostle-bulk-counts {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px 10px;
+  min-width: 0;
+}
+
+.apostle-bulk-follow-count {
+  flex: 0 0 auto;
+  color: #bd4566;
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.apostle-bulk-avatar {
+  position: relative;
+}
+
+.apostle-bulk-follow-toggle {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 2px;
+  border: 1px solid rgba(111, 86, 42, 0.34);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 4px rgba(23, 35, 27, 0.26);
+  cursor: pointer;
+  opacity: 0.58;
+  transition: opacity 120ms ease, transform 120ms ease, background-color 120ms ease;
+}
+
+.apostle-bulk-follow-toggle img {
+  display: block;
+  width: 12px;
+  height: 12px;
+  object-fit: contain;
+  filter: grayscale(1);
+}
+
+.apostle-bulk-follow-toggle:hover,
+.apostle-bulk-follow-toggle:focus-visible {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.apostle-bulk-follow-toggle:focus-visible {
+  outline: 2px solid #bd4566;
+  outline-offset: 1px;
+}
+
+.apostle-bulk-follow-toggle.is-active {
+  border-color: rgba(189, 69, 102, 0.72);
+  background: rgba(255, 231, 237, 0.98);
+  opacity: 1;
+}
+
+.apostle-bulk-follow-toggle.is-active img {
+  filter: none;
+}
+
+@media (max-width: 480px) {
+  .apostle-bulk-counts {
+    width: auto;
+    max-width: 100%;
+    justify-self: end;
+    gap: 3px 7px;
+  }
+
+  .apostle-bulk-follow-count {
+    font-size: 0.67rem;
+  }
+}
+
+:root[data-theme="dark"] .apostle-bulk-follow-count {
+  color: #f0a0b7;
+}
+
+:root[data-theme="dark"] .apostle-bulk-follow-toggle {
+  border-color: rgba(226, 190, 132, 0.45);
+  background: rgba(30, 41, 59, 0.94);
+}
+
+:root[data-theme="dark"] .apostle-bulk-follow-toggle.is-active {
+  border-color: rgba(240, 160, 183, 0.78);
+  background: rgba(105, 42, 64, 0.94);
+}

@@ -377,6 +377,7 @@
     apostleBulkSearch: document.getElementById('apostle-bulk-search'),
     apostleBulkSort: document.getElementById('apostle-bulk-sort'),
     apostleBulkCount: document.getElementById('apostle-bulk-count'),
+    apostleBulkFollowCount: document.getElementById('apostle-bulk-follow-count'),
     apostleBulkFilters: document.getElementById('apostle-bulk-filters'),
     apostleBulkFilterCount: document.getElementById('apostle-bulk-filter-count'),
     apostleBulkList: document.getElementById('apostle-bulk-list'),
@@ -2179,6 +2180,13 @@
     });
 
     elements.apostleBulkList?.addEventListener('click', event => {
+      const followToggle = event.target.closest('[data-apostle-bulk-follow-id]');
+      if (followToggle) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleApostleBulkFollow(followToggle.dataset.apostleBulkFollowId);
+        return;
+      }
       const trigger = event.target.closest('[data-apostle-bulk-menu-trigger]');
       if (!trigger) return;
       event.preventDefault();
@@ -7287,6 +7295,7 @@
 
   function renderApostleBulkSettings() {
     if (!elements.apostleBulkList) return;
+    renderApostleBulkFollowCount();
     if (elements.apostleBulkPopover && !elements.apostleBulkPopover.hidden) {
       closeApostleBulkPopover({ restoreFocus: false });
     }
@@ -7347,6 +7356,33 @@
     }
     elements.apostleBulkList.innerHTML = rows.map(renderApostleBulkRow).join('')
       || '<p class="empty-note">一致する使徒がいません。</p>';
+  }
+
+  function renderApostleBulkFollowCount() {
+    if (!elements.apostleBulkFollowCount) return;
+    const count = (DATA.sheets.basicInfo || []).reduce((total, basic) => {
+      if (isEldainApostle(basic)) return total;
+      return total + Number(!!appState.apostles?.[basic.id]?.follow);
+    }, 0);
+    elements.apostleBulkFollowCount.textContent = `♥ フォロー ${count}人`;
+  }
+
+  function toggleApostleBulkFollow(id) {
+    const basic = DATA.getById('basicInfo', id);
+    if (!basic || isEldainApostle(basic)) return;
+    const state = ensureApostleState(id);
+    const history = beginHistoryAction('フォロー変更');
+    state.follow = !state.follow;
+    refreshSingleStatSnapshotImmediately(basic);
+    saveState({ renderStateManager: false, refreshSnapshots: false });
+    renderApostleBulkFollowCount();
+    updateApostleBulkRow(id);
+    if (id === view.id) {
+      elements.followToggle.checked = state.follow;
+      renderProfileQuick();
+      scheduleRender();
+    }
+    commitHistoryAction(history);
   }
 
   function followResortedApostle(container, dataAttribute, id) {
@@ -7411,6 +7447,14 @@
     }));
     const skillOptions = createNumberOptions(1, maxSkillLevel);
     const equipment = DATA.getById('equipment', basic.id);
+    const followButton = isEldainApostle(basic) ? '' : `
+      <button type="button" class="apostle-bulk-follow-toggle ${state.follow ? 'is-active' : ''}"
+        data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-follow-id="${escapeAttr(basic.id)}"
+        aria-label="${escapeAttr(`${basic.使徒名 || basic.id}を${state.follow ? 'フォロー解除' : 'フォロー'}`)}"
+        aria-pressed="${state.follow ? 'true' : 'false'}"
+        title="${state.follow ? 'フォロー中: クリックで解除' : 'フォローなし: クリックで適用'}">
+        <img src="img/フォロー.webp" alt="">
+      </button>`;
     const equipmentControls = getApostleBulkEquipmentDefinitions(basic).map(item => {
       const available = isApostleBulkEquipmentAvailable(basic, state, item, equipment);
       const saved = state.equipment?.[item.key] || { enabled: false, enhance: 0 };
@@ -7438,6 +7482,7 @@
           <span class="apostle-bulk-avatar">
             <img loading="lazy" decoding="async" data-apostle-image
               src="${escapeAttr(getApostleSkillImagePath('high', basic.id) || getApostleImagePath(basic.id))}" alt="">
+            ${followButton}
           </span>
           <span>
             <strong>${escapeHtml(basic.使徒名 || basic.id)}</strong>
