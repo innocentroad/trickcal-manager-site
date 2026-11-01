@@ -28,6 +28,21 @@
       cta: null
     }),
     Object.freeze({
+      id: '20261101-game-data-rank10-equipment-estimate',
+      date: '2026-11-01',
+      title: 'Rank10装備の予想データを追加',
+      barTitle: 'Rank10装備を追加（数値は予想値）',
+      summary: 'Rank10装備を選択できるようになりました。数値は予想値です。',
+      body: Object.freeze([
+        'Rank10装備のデータを追加しました。装備Rankを10に設定すると確認できます。',
+        '装備の数値はゲーム内で確認する前の予想値です。実際の数値と異なる可能性があります。'
+      ]),
+      category: 'game-data',
+      profiles: Object.freeze(['new']),
+      autoRevision: '1',
+      cta: null
+    }),
+    Object.freeze({
       id: 'migration-file-first-20260914',
       date: '2026-09-14',
       title: '新サイトへの移行のお知らせ',

@@ -382,7 +382,7 @@
     }
 
     function isDismissed(article) {
-      return !!article?.id && state.dismissedIds.includes(article.id);
+      return article?.id === MIGRATION_ARTICLE_ID && state.dismissedIds.includes(MIGRATION_ARTICLE_ID);
     }
 
     function notificationArticles() {
@@ -697,7 +697,7 @@
     }
 
     function dismissArticle(article) {
-      if (!article?.id || isDismissed(article)) return false;
+      if (article?.id !== MIGRATION_ARTICLE_ID || isDismissed(article)) return false;
       const saved = applyNoticeTransition(latest => {
         latest.dismissedIds = [article.id].concat(latest.dismissedIds.filter(id => id !== article.id)).slice(0, MAX_STATE_ITEMS);
         return latest;
@@ -958,6 +958,7 @@
     }
 
     function appendDismissControl(parent, article) {
+      if (article?.id !== MIGRATION_ARTICLE_ID) return;
       if (isDismissed(article)) {
         appendElement(parent, 'p', 'この移行案内は表示設定から再表示できます。', 'trickcal-announcement-dismissed-note');
         return;

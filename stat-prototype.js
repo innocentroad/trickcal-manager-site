@@ -100,6 +100,7 @@
     5: 145
   };
   const APOSTLE_STAR_MAX = 5;
+  const EQUIPMENT_RANK_MAX = 10;
   const GRADE_MAX = 6;
   const RESEARCH_LIMITS = RESEARCH.getLimits(DATA.sheets.research || []);
   const FORMATION_COIN_BASE = 216;
@@ -901,7 +902,7 @@
       .map(row => `<option value="${escapeAttr(row.id)}">${escapeHtml(row.使徒名 || row.id)}</option>`)
       .join('');
 
-    elements.rankSelect.innerHTML = Array.from({ length: 9 }, (_, index) => {
+    elements.rankSelect.innerHTML = Array.from({ length: EQUIPMENT_RANK_MAX }, (_, index) => {
       const rank = index + 1;
       return `<option value="${rank}">Rank ${rank}</option>`;
     }).join('');
@@ -5180,7 +5181,7 @@
     const skills = normalizeSkillLevels(state.skillLevels, asideRank);
     const chips = [
       renderProfileMetaSelectChip('Lv', 'level', state.level, createNumberOptions(1, getLevelCapForStar(state.star)), 'level'),
-      renderProfileMetaSelectChip('Rank', 'rank', state.rank, createNumberOptions(1, 9), 'rank'),
+      renderProfileMetaSelectChip('Rank', 'rank', state.rank, createNumberOptions(1, EQUIPMENT_RANK_MAX), 'rank'),
       renderProfileMetaSelectChip('好感度Lv', 'bond', state.bond, createNumberOptions(1, 30), 'bond', bondLocked)
     ];
     if (hasAsideEffects(basic?.id)) {
@@ -5427,7 +5428,7 @@
       state.grade = normalizeGrade(value);
       state.gradeConfigured = true;
     } else if (field === 'rank') {
-      state.rank = Math.max(1, Math.min(9, value));
+      state.rank = Math.max(1, Math.min(EQUIPMENT_RANK_MAX, value));
       elements.rankSelect.value = String(state.rank);
     } else if (field === 'bond') {
       state.bond = normalizeBondForApostle(DATA.getById('basicInfo', view.id), value);
@@ -7623,7 +7624,7 @@
       : group === 'level'
         ? '<p class="apostle-bulk-popover-note">10刻みまたは現在の★上限を選びます。</p>'
         : '<p class="apostle-bulk-popover-note">「なし」は装備解除、「+0」は強化なしで装備します。</p>';
-    const rankActions = Array.from({ length: 9 }, (_, index) => index + 1);
+    const rankActions = Array.from({ length: EQUIPMENT_RANK_MAX }, (_, index) => index + 1);
     const rankSection = group === 'equipment' ? `
       <div class="apostle-bulk-popover-section-label">装備Rank</div>
       <div class="apostle-bulk-popover-actions is-rank" aria-label="装備Rank">
@@ -7850,7 +7851,7 @@
   function applyApostleBulkRank(id, rawRank) {
     const basic = DATA.getById('basicInfo', id);
     const value = Number(rawRank);
-    if (!basic || !Number.isInteger(value) || value < 1 || value > 9) return;
+    if (!basic || !Number.isInteger(value) || value < 1 || value > EQUIPMENT_RANK_MAX) return;
     const state = ensureApostleState(id);
     if (Number(state.rank) === value) return;
 
@@ -8004,7 +8005,7 @@
         <span class="rank-overview-name">${escapeHtml(row.使徒名 || row.id)}</span>
         <strong class="rank-overview-value">R${state.rank}</strong>
         <select data-rank-apostle-id="${escapeAttr(row.id)}" aria-label="${escapeAttr(row.使徒名 || row.id)} 装備Rank">
-          ${Array.from({ length: 9 }, (_, index) => {
+          ${Array.from({ length: EQUIPMENT_RANK_MAX }, (_, index) => {
             const rank = index + 1;
             return `<option value="${rank}" ${state.rank === rank ? 'selected' : ''}>Rank ${rank}</option>`;
           }).join('')}

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "650eb6565098cdef",
-  "sourceCommit": "4cf6dcd44d55124f9d9c3f33e89032b97d598188",
+  "candidateId": "c63adde877c50a8f",
+  "sourceCommit": "8dbc387cf18faf386beb120ee9e546d64c66f836",
   "profile": "new",
-  "contentDigest": "99e693ee4ff037b23b371aa802c8f3998e5e2f49e47516b5c98fdce4770f2940",
-  "outputDigest": "26ea5deba6363123",
+  "contentDigest": "d5e8820d423bd44f605449d332de75289d57b79b1b2961ca6db762638a1000b0",
+  "outputDigest": "5abc50c5ef5f1e8a",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -14,7 +14,7 @@
     },
     {
       "path": "announcements-data.js",
-      "sha256": "546d6bc81fd983f156d7227a4e15ff5f20def4ee558781f3e1d786ce97d1348c"
+      "sha256": "801f3b683fde52308be4e8576d6c8779131991950e1b3845f6e82c252027f771"
     },
     {
       "path": "announcements-release-config.js",
@@ -26,7 +26,7 @@
     },
     {
       "path": "announcements.js",
-      "sha256": "dc996dca901e0e98b90be4b49c5aca07b782c7cf033c78bc4c6654a44017f9e7"
+      "sha256": "3dad175a3f94bbf02e204d76cd34e636043b257a88f1d2542eed9336a4de2207"
     },
     {
       "path": "apostle-data.html",
@@ -46,11 +46,11 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "5240dd17c4fe1a6bda9b963cfce1a6eb3d296a0bc254f5409121a8cee8ca3e64"
+      "sha256": "9c4c8e884687c0fb009cee1635a2e5aa01a6b73285d569d57da6f1aa9bcaf773"
     },
     {
       "path": "calc/index.html",
-      "sha256": "63ee655741147a4bd4b24055d3add0b61fd9afef47ac0b23689655eeaf24bd61"
+      "sha256": "b71521199f790f7dc63c8fcd2e0ba806e1a4ce698fdf9c98d7a60fc5de9df0a5"
     },
     {
       "path": "cards.js",
@@ -62,23 +62,23 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "5594e7c72e4295ac82a56b40f90228bd9d57cc24355cca8500d0cf64ca6c6492"
+      "sha256": "0de98107855bd25179b1bf93e1823539b09ff4eb491cfaae6173a2a33b0b8b7f"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "137333c1e49266eb0f33517dc78ae2d3752aaf53df0c278928d0c8b87edd25d1"
+      "sha256": "d1800f210c1138961a62439d42403270f1ed66f1ff954a14ac45000820ffad21"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "3738f5570cd27bc267e54ca234b020ebd2df2feae911d31141fbd78f1443824a"
+      "sha256": "05fd1f6f5aaf17e040c70d1279e8bb49edfcf9283fe18cf8ffd2d22fd25fbbde"
     },
     {
       "path": "data/index.html",
-      "sha256": "6c1bb9b1b8ab7f601ea3e21fd501941ce0f6f4ac9adcf335223d31d43b4a8b6e"
+      "sha256": "0a8d4877c41a61bc81a01b92d467abb6424423eaef4df34f2e7776ff0f0f3b97"
     },
     {
       "path": "data/life-jobs/index.html",
-      "sha256": "de684026ef72ec39c01920da4de25c71c116e21b75ec2060ce3796abea56ea6d"
+      "sha256": "d909d81dff17b131ac3ead89eff6402c1ba9bfc96cef8bd347ed982e9ff1bbc6"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -158,7 +158,7 @@
     },
     {
       "path": "formation-share-create.js",
-      "sha256": "b83f4693a2035ff904d5e47801af8e54a1319958cafc52282d9c4b66bab994d9"
+      "sha256": "547a3195db44f32c78ca812ee036ed229c7ce3d92409073dca391a781d7a3546"
     },
     {
       "path": "formation-share-display-data.js",
@@ -3349,6 +3349,46 @@
       "sha256": "0a644f6210caceee86a9b7ba6a50a600259387b4cbc119f92d21c3d73e90ddfa"
     },
     {
+      "path": "img/equipicons/Equip_Accessory1001.webp",
+      "sha256": "d6d77abb68ac1127e97ff8729f6d0e364548b1f29cd7b3b5721a8e0a05d3acfb"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1002.webp",
+      "sha256": "8147e25bf3539cff76b46bf6c10163f5411baddb6bbee891c38d531def712f0d"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1003.webp",
+      "sha256": "0c89f53ff26b7bc160024fec4b28b87b7851dffc16b760879f3750f478d26455"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1004.webp",
+      "sha256": "299d06cd624d329876de844a24515ca54a0409f8966158ae1f701fd371f08a11"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1005.webp",
+      "sha256": "e8d7e555d24c927a26ab68fad8abfc193ca3816c865279026e07eec857be128a"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1006.webp",
+      "sha256": "750eeeeabf58dc5f6a4ee07a4e15c05d202ff9b9682abac721edb2a3326dc015"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1007.webp",
+      "sha256": "f33fc9d094a02e115da15a5fc9485ec178a7fc7591592bd2007dd68286122940"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1008.webp",
+      "sha256": "6c39323e9a7de4f98d860d439ab2dd71dee4368cdca1756d0274d425205b7c1c"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1009.webp",
+      "sha256": "ef20b41bac3750b782d0f9a8e1526359a0c48def8b008b027d7452390e44db71"
+    },
+    {
+      "path": "img/equipicons/Equip_Accessory1010.webp",
+      "sha256": "63e9f7f4cf60fe32bfed68d82c4ae972851b8f97e99a3ef58126a4bafe1dc16d"
+    },
+    {
       "path": "img/equipicons/Equip_Armor0101.webp",
       "sha256": "388e3125097231caf5048c115beec4a1d2cce376723601606fd5d9eeb4ed8d45"
     },
@@ -3889,6 +3929,66 @@
       "sha256": "9c08661df862514e2919e3b819fd88b5ef7b096965e7e7a1c037e28b4b711a7b"
     },
     {
+      "path": "img/equipicons/Equip_Armor1001.webp",
+      "sha256": "a7bc632d249b1ccaa4294ebf86bbcde7bbe54bdbc28794462f1fa3b4b841a4b4"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1002.webp",
+      "sha256": "7132ba98705bd0e467ab9bc40c3fe5bdd949e308d2fe25cccb05ddb41d6a5ac0"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1003.webp",
+      "sha256": "e8c09db7a9db1cabe36087bd12b5df2c3f670e2ff2684492d8f3f20bae8f3fa2"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1004.webp",
+      "sha256": "a564c56c4ad3e6252d24afbd7c593ea7452d85904465dbaca5daf87e7837b508"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1005.webp",
+      "sha256": "6cf62a5272dd9f941155257a7d66c8ccb9bca29e8306d73f7a85ca759cc45b83"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1006.webp",
+      "sha256": "282d04d280979cfeda483365824e9798dd6c8f04cf0bdcb2695a5405e8e0dcce"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1007.webp",
+      "sha256": "e231d38c167dd0e8de2cc7b640323984acb27e08ab50ed3a2ba247a1d85bf330"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1008.webp",
+      "sha256": "e15d7a2e34d4e26cbbe531a5e3b45c83d813c5a7113737fb33b5eba167189b67"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1009.webp",
+      "sha256": "23f828faabc795ca0a0dc98a514e5a7f093ade3ed4d7cf6dd4f60e6798dd9ea5"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1010.webp",
+      "sha256": "c1512c7bc92b733caf8eb47464ebc335fb2a79dc9d866ea4e96f2927a030d9b5"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1011.webp",
+      "sha256": "ecc42048a0701c64cfc3e6437e63610ea4c1ad1529ae570a9ea290e284d592d0"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1012.webp",
+      "sha256": "fb68e2d31bc7d458627f6fb2d1d01ba63b107d885414c7fce1bdd89fa522119b"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1013.webp",
+      "sha256": "f274e0272c94d810e81f883a5cdd83da68d8db7ba615f9efe02a8865edd350d2"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1014.webp",
+      "sha256": "581e7cd530a0e301551794e21b6dcf83402e647ee9b46dd11e968f68f9bd7508"
+    },
+    {
+      "path": "img/equipicons/Equip_Armor1015.webp",
+      "sha256": "bba095aa07e8793ccade6ccd945274833ade8e22af171bc793279a90b76cdf4b"
+    },
+    {
       "path": "img/equipicons/Equip_Weapon0101.webp",
       "sha256": "2bc98525c84b0336aca8dc43a8cf82917c2905b0958e480ece2f333cdbf756d8"
     },
@@ -4247,6 +4347,46 @@
     {
       "path": "img/equipicons/Equip_Weapon0910.webp",
       "sha256": "f6a34120fb4e7a60bc28793fadb3c96ac02c5d42a07ae78e3d6bea9fc9ca5f76"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1001.webp",
+      "sha256": "d59970f8faef826eba842a835113221ba7c34450794e08e7fe3a9ed630eb9a3d"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1002.webp",
+      "sha256": "ead0b9f931c45b50b25c24a93953f2799afcb1244fc2929e4fc3860154c37d39"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1003.webp",
+      "sha256": "461bd3eddac779dab9f033def6fa59c0c5362a10c1efbfdaeeabe1368843e2a2"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1004.webp",
+      "sha256": "3340de4bba2b2ebe92e3d8ee06e8996cb45727fe09a32f1c1bd478fb300cdc14"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1005.webp",
+      "sha256": "e6a97b39a002762cc74cb14504847d05a7e85aa529f4001f7e67780487787013"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1006.webp",
+      "sha256": "5cdc1f1a0fa2edfcca143f663e90e724aefe4e6dda3e09daece97f2129476eab"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1007.webp",
+      "sha256": "2cef47ba09225e95e91391fc4a6bd2101a4d37bfe6528c117d7dedf98f647874"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1008.webp",
+      "sha256": "011cd0b80595b5440aee3d70fb58ac02bdb5093c9aa9b029fefc9c7e6371daa2"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1009.webp",
+      "sha256": "077f061b05835fc7402fe52f68420c0720debb7b42191abde4e4258637704b0b"
+    },
+    {
+      "path": "img/equipicons/Equip_Weapon1010.webp",
+      "sha256": "4d597eed7cc0909356dd8411d8daeb75f64d5c7ffac300b762d2d4f16c2132ff"
     },
     {
       "path": "img/Grade_off.webp",
@@ -5090,7 +5230,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "4a5903b54ca58e3270b0cb7264cad533b87d728315d49f6c994f2294403ce3d2"
+      "sha256": "b7f0d1ff299d77019ceed2b548ed5aa97636d678171865dad8dff2b189aa83d1"
     },
     {
       "path": "public-release-config.js",
@@ -5098,7 +5238,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "f7e146e85fc97291d6db719804befb1ec4f77088f9876123375dc15a1f8eff2e"
+      "sha256": "737cdb747f8c8d0475327ae8d6fbbb23b6f2b0e08de888e13f8d6a81a1bbf8b5"
     },
     {
       "path": "public-site-runtime.js",
@@ -5190,7 +5330,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "9a02acd82552dfecb568de116ba814d02b68896a902f65e3a188ecc810f02efd"
+      "sha256": "864d5a9f3b2209d04d4bdfcd084e1465d869d8ad7ec9e96036963e2302dc9cb5"
     },
     {
       "path": "research-progress.js",
@@ -5202,11 +5342,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "fc14237341d5e45fee2a17e1456a486a3cd45ef944a663bae77158ea1298197c"
+      "sha256": "666bae5eae31d84be123628e099c51817c8561a1a5fa8e5d236c68b722150794"
     },
     {
       "path": "share/index.html",
-      "sha256": "21a7722d194897bba696207b3cabdde3467410ff6ff35f6b8af501adef924da2"
+      "sha256": "fdb73743a51b3d7de5f92e7c04173085f8746d61c9f682ae64df4df4861f60e2"
     },
     {
       "path": "shared-topbar.css",
@@ -5250,11 +5390,11 @@
     },
     {
       "path": "stat-prototype.js",
-      "sha256": "25b82c91e4ffed96261f7b365e04a716816478304da48d1b75e177314efa3bc1"
+      "sha256": "aef98261fe14fa24b6314deef658107008f800f7e80a7f5ccd966b220cb1e1de"
     },
     {
       "path": "statData.js",
-      "sha256": "3c7e493bbeff3001ad8fd662ba221f0bfbc94c3c6397506be0811be27081862c"
+      "sha256": "71c65aafb1973b2caaffb109c755dc0307a70d40fda1adb1cd21d449eff40976"
     },
     {
       "path": "storage-backup.js",
@@ -5302,23 +5442,23 @@
     },
     {
       "path": "tool/bingo/index.html",
-      "sha256": "f4fe1fcea6b9bb45bd3e0465321efa20174d22c0786b01e42b89ea7679b62c5d"
+      "sha256": "6dffb25ff27c7acc8a99154acdd3ec0dbc67ac4f4fa52cd2244b5c7edb03e405"
     },
     {
       "path": "tool/critical/index.html",
-      "sha256": "45b54506ac74f83614e6173a07860109b59df00c062b73a21febfef0a90bf724"
+      "sha256": "794baefd4e1dca1084ce574e47cbe339782d510d231ab8b9a155bc2b86813ed1"
     },
     {
       "path": "tool/growth-cost/index.html",
-      "sha256": "5cfc73759e53bf011093bb55aefe819e3d796110360329a62315ea5b80dd7af2"
+      "sha256": "089e56fbedb0ae9d98dd4a9173f9562ee5054cf29f49eac36cbf81a8b30cb324"
     },
     {
       "path": "tool/pvp/index.html",
-      "sha256": "4beabc2813d88c2b62b409dd778f527316333196b4a657a19539b059268c6c96"
+      "sha256": "bb36bb030750d2c905522d4af4eafcd4ff70e39fd9d800ce20c9afa72d2e3c70"
     },
     {
       "path": "transfer/index.html",
-      "sha256": "6fed88f6de057754c839d50c19d560956a16329ae343ac3fc89f48ea380cccf7"
+      "sha256": "ab94e6b166fed996103babc681064d89e6c0b2d761ff8ef72e955dd3f8c7c918"
     }
   ]
 }
