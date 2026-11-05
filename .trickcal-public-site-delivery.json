@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "c63adde877c50a8f",
-  "sourceCommit": "8dbc387cf18faf386beb120ee9e546d64c66f836",
+  "candidateId": "d22ffcbed91c7dbf",
+  "sourceCommit": "efe8e68f5107d96e1b78054af23d386a7c81faec",
   "profile": "new",
-  "contentDigest": "d5e8820d423bd44f605449d332de75289d57b79b1b2961ca6db762638a1000b0",
-  "outputDigest": "5abc50c5ef5f1e8a",
+  "contentDigest": "8026d84e2f898235cae4c38f7ac1cee5086437cda28c1f5021a31101cee4c962",
+  "outputDigest": "ba1c7551a3dd608b",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
@@ -14,7 +14,7 @@
     },
     {
       "path": "announcements-data.js",
-      "sha256": "801f3b683fde52308be4e8576d6c8779131991950e1b3845f6e82c252027f771"
+      "sha256": "c2db07469ec8ff78c3a0e257e5dc0e9f545c44c04db0d309a99034adf95dbda4"
     },
     {
       "path": "announcements-release-config.js",
@@ -34,11 +34,11 @@
     },
     {
       "path": "apostle-skill-image-data.js",
-      "sha256": "5ad3e43836501722da1101c889c52c0a6e84e1e56e29fad66e2aebaa44b89106"
+      "sha256": "d7c625dd0de07c4ebb9c9c5dee268e8278d3318371d927556167449a2e2dc4f3"
     },
     {
       "path": "apostles.js",
-      "sha256": "4af0b2f68dd57cdfb987c261d09827af7e4c594b720bcbaf9616f1c70c9d032d"
+      "sha256": "ad29c002031e5386f51d5ea77e96c335ae0e7c802d08cbc6ce85c2d9b83ec731"
     },
     {
       "path": "app-cache.js",
@@ -46,15 +46,15 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "9c4c8e884687c0fb009cee1635a2e5aa01a6b73285d569d57da6f1aa9bcaf773"
+      "sha256": "cc2a0ed760e3ca5e82feddbb723de170a1638c693ff1ef6be90a2eb5852add85"
     },
     {
       "path": "calc/index.html",
-      "sha256": "b71521199f790f7dc63c8fcd2e0ba806e1a4ce698fdf9c98d7a60fc5de9df0a5"
+      "sha256": "e5abc9b2d6c9b56bcdd2acdcce4af0e8c829b2cfb13f43153c86f1158ee72d36"
     },
     {
       "path": "cards.js",
-      "sha256": "6c628aa66a9235a135548955f120fe50c9fedbfb81970425cbee14798c0a00a6"
+      "sha256": "7488ad0f27c2eb391307cf2b6473f1d78f749f715e8dee36eccc5f359ae060ad"
     },
     {
       "path": "combat-scenario.js",
@@ -62,23 +62,23 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "0de98107855bd25179b1bf93e1823539b09ff4eb491cfaae6173a2a33b0b8b7f"
+      "sha256": "678695cc0eb3196fb08ea9b6a900a58b286e19cecd64d1d145e584a6e7b5f19d"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "d1800f210c1138961a62439d42403270f1ed66f1ff954a14ac45000820ffad21"
+      "sha256": "49ee5ec4d959c8269fe06c3f19832afc7f1f6e7b5a857c6592d8abf0e270a7be"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "05fd1f6f5aaf17e040c70d1279e8bb49edfcf9283fe18cf8ffd2d22fd25fbbde"
+      "sha256": "55f0ad000a322975878590bb267ca9c147d351e3432a293b081d6b1ff1b87c94"
     },
     {
       "path": "data/index.html",
-      "sha256": "0a8d4877c41a61bc81a01b92d467abb6424423eaef4df34f2e7776ff0f0f3b97"
+      "sha256": "edd69c5f2c2a55bd07bd322a100afb0fba43d9176b47839e21c911fa2bb54ef9"
     },
     {
       "path": "data/life-jobs/index.html",
-      "sha256": "d909d81dff17b131ac3ead89eff6402c1ba9bfc96cef8bd347ed982e9ff1bbc6"
+      "sha256": "22b607e643e63523510c625a278bbdf2fc5e051e39f59dd855979b1482f4bbca"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -150,7 +150,7 @@
     },
     {
       "path": "formation-share-catalog.js",
-      "sha256": "5e00187045e1990b98c64a4493b37d8c2728de94a9b302f9917bd76a1640e544"
+      "sha256": "bf37608ccc2d3f0b4be99dcdfcaa319a485bdbf33f7c74fca4067e9dcd83d3c5"
     },
     {
       "path": "formation-share-codec.js",
@@ -158,11 +158,11 @@
     },
     {
       "path": "formation-share-create.js",
-      "sha256": "547a3195db44f32c78ca812ee036ed229c7ce3d92409073dca391a781d7a3546"
+      "sha256": "451f90e29028dc00638b7c79d438cba40db9cfd4794c6631fea5ef15f0303198"
     },
     {
       "path": "formation-share-display-data.js",
-      "sha256": "713a45db32c3225b2222b9515af373a7de40472a8ee08d7d3fdbde47e2840073"
+      "sha256": "93519e60daa2c4e3040dadf0848b8d31c2798230318baf4371d01e084083b725"
     },
     {
       "path": "formation-share-image.js",
@@ -483,6 +483,10 @@
     {
       "path": "img/Card/Artifact/ふわふわチョッキ.webp",
       "sha256": "0e70d70bfbfd99cf19bce842d7d75efc8286203b4a12c67bbb3742e7d15ec60c"
+    },
+    {
+      "path": "img/Card/Artifact/ポランの制服帽子.webp",
+      "sha256": "d4706e80ca4f69c9bd2813cf5b4f4f399268e862d8c24023f73cc76e4977e8c7"
     },
     {
       "path": "img/Card/Artifact/ヨミの向月葵の花.webp",
@@ -1481,6 +1485,10 @@
       "sha256": "4c7f4bc4a215fa002b5c17b3ae23cff66d350b295cd2d5d9da3fe3e04187108d"
     },
     {
+      "path": "img/Chara/Aside/AsideIcon_Polan.webp",
+      "sha256": "4b49585115762ce94cf507292ac261adafbb22020085a6157f4600b706b73fae"
+    },
+    {
       "path": "img/Chara/Aside/AsideIcon_Posher.webp",
       "sha256": "9de0a853a591d8e7bd16dcd865410ad3c57b7d8ed00c4283978bdd1f320d9867"
     },
@@ -1763,6 +1771,10 @@
     {
       "path": "img/Chara/Pira.webp",
       "sha256": "3a20b0628244db71e46207c16b60f4dd9585d421004090814e44ac1c7acec075"
+    },
+    {
+      "path": "img/Chara/Polan.webp",
+      "sha256": "8470bcb8caadbd0442a5ee42cf115ec55b978d0ce54ef63613d588be212140bf"
     },
     {
       "path": "img/Chara/Posher.webp",
@@ -2055,6 +2067,10 @@
     {
       "path": "img/Chara/Skill/Skill_F_Pira.webp",
       "sha256": "027e52cb8a4882ff7a558c0b9b176b35b6318c4b751569736d0a6dad276935c6"
+    },
+    {
+      "path": "img/Chara/Skill/Skill_F_Polan.webp",
+      "sha256": "c06e4cd75cbe6a05fd4a41569621c15b124d1739c97a7ef5c9bac257824909d0"
     },
     {
       "path": "img/Chara/Skill/Skill_F_Posher.webp",
@@ -2389,6 +2405,10 @@
       "sha256": "5c6037aca7e7daa70cdec776cf592f2f771eef7a5895e458470f84d1a5a1cffe"
     },
     {
+      "path": "img/Chara/Skill/Skill_P_Polan.webp",
+      "sha256": "eb7f21a6fc26caeed29875008523d7fb6799188ab230c7642011fd6186fdd419"
+    },
+    {
       "path": "img/Chara/Skill/Skill_P_Posher.webp",
       "sha256": "6b8ea0bcd2c82b9f5efcf3f3b440e42d68be5cb6b50d4a842be4c4b52ca52f0a"
     },
@@ -2719,6 +2739,10 @@
     {
       "path": "img/Chara/Skill/Skill_S_Pira.webp",
       "sha256": "61fc364449a157cad1eec97015d3f38e8e9f1411117983646b1c37b0b80688cf"
+    },
+    {
+      "path": "img/Chara/Skill/Skill_S_Polan.webp",
+      "sha256": "0d5a87f34a94c963bd79ec0eb29e2b395ee355d2b9640caafeb9e4249658e848"
     },
     {
       "path": "img/Chara/Skill/Skill_S_Posher.webp",
@@ -5230,7 +5254,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "b7f0d1ff299d77019ceed2b548ed5aa97636d678171865dad8dff2b189aa83d1"
+      "sha256": "c2d9e7ec618c61ed2108a5bbd9e9a4928456eb0598dcb4702a340c0d64f87059"
     },
     {
       "path": "public-release-config.js",
@@ -5238,7 +5262,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "737cdb747f8c8d0475327ae8d6fbbb23b6f2b0e08de888e13f8d6a81a1bbf8b5"
+      "sha256": "b25ac93836f6097e9e4d95d46aff409040b7d2cc932f113930c6afd4ac465267"
     },
     {
       "path": "public-site-runtime.js",
@@ -5330,7 +5354,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "864d5a9f3b2209d04d4bdfcd084e1465d869d8ad7ec9e96036963e2302dc9cb5"
+      "sha256": "fb8222aaae930d95af76c41816459a588ed35a86e180eea5893cf0b864b27570"
     },
     {
       "path": "research-progress.js",
@@ -5342,11 +5366,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "666bae5eae31d84be123628e099c51817c8561a1a5fa8e5d236c68b722150794"
+      "sha256": "424b1d66c57b714e9f4e7d8d11ff184503fa1daef1e4b70f1b8c19a41b1102e2"
     },
     {
       "path": "share/index.html",
-      "sha256": "fdb73743a51b3d7de5f92e7c04173085f8746d61c9f682ae64df4df4861f60e2"
+      "sha256": "5a1689580dfa31686760e2edc1c9250c689abc834479d2af09cc59aae0590e0f"
     },
     {
       "path": "shared-topbar.css",
@@ -5394,7 +5418,7 @@
     },
     {
       "path": "statData.js",
-      "sha256": "71c65aafb1973b2caaffb109c755dc0307a70d40fda1adb1cd21d449eff40976"
+      "sha256": "7b5e650d19ece1948f2cd4537b68c1e943c782fc75750a70a1037c2f0295e6ce"
     },
     {
       "path": "storage-backup.js",
@@ -5442,23 +5466,23 @@
     },
     {
       "path": "tool/bingo/index.html",
-      "sha256": "6dffb25ff27c7acc8a99154acdd3ec0dbc67ac4f4fa52cd2244b5c7edb03e405"
+      "sha256": "251a4d0fbf251a316c57a1428f2938b3fef5ccb642bcb0502dc26152d18a3395"
     },
     {
       "path": "tool/critical/index.html",
-      "sha256": "794baefd4e1dca1084ce574e47cbe339782d510d231ab8b9a155bc2b86813ed1"
+      "sha256": "19a9887ca511fa58fc9720172ce721aef0466ee34af51878b010fcc1974f9d14"
     },
     {
       "path": "tool/growth-cost/index.html",
-      "sha256": "089e56fbedb0ae9d98dd4a9173f9562ee5054cf29f49eac36cbf81a8b30cb324"
+      "sha256": "d8b55d3410533aec77d4efcd76cafe166cf24fb58005578256254de79904ab2e"
     },
     {
       "path": "tool/pvp/index.html",
-      "sha256": "bb36bb030750d2c905522d4af4eafcd4ff70e39fd9d800ce20c9afa72d2e3c70"
+      "sha256": "9f26639f56e8ab7dd79193aa81dd0379d61282779a6e9d2c64ad0f9aca2b39fe"
     },
     {
       "path": "transfer/index.html",
-      "sha256": "ab94e6b166fed996103babc681064d89e6c0b2d761ff8ef72e955dd3f8c7c918"
+      "sha256": "145e6a298dde31de6abece9b34279bc3319fa5b317d0a79f8765a13f7601ee43"
     }
   ]
 }

@@ -17,7 +17,8 @@
       'Joanne',
       'Lethe',
       'KommySwim',
-      'Guin'
+      'Guin',
+      'Polan'
     ],
     artifacts: [
       'artifact_yomi_moonflower', 'artifact_erpin_ice_cream_cake', 'artifact_butter_yellow_card',
@@ -36,7 +37,8 @@
       'artifact_weathered_arrow', 'artifact_icy_charm', 'artifact_cotton_cloak', 'artifact_shining_tiara',
       'artifact_cardboard_armor', 'artifact_head_wrap',
       'artifact_rusty_awl', 'artifact_sherum_parchment_scroll',
-      'artifact_guin_tiny_penguin'
+      'artifact_guin_tiny_penguin',
+      'artifact_polan_hat'
     ],
     spells: [
       'spell_alice_fake_magic', 'spell_epica_hero_exaltation', 'spell_luc_ed_dream',

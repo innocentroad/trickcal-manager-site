@@ -276,6 +276,11 @@
     "low": "img/Chara/Skill/Skill_F_Pira.webp",
     "passive": "img/Chara/Skill/Skill_P_Pira.webp"
   },
+  "Polan": {
+    "high": "img/Chara/Skill/Skill_S_Polan.webp",
+    "low": "img/Chara/Skill/Skill_F_Polan.webp",
+    "passive": "img/Chara/Skill/Skill_P_Polan.webp"
+  },
   "Posher": {
     "high": "img/Chara/Skill/Skill_S_Posher.webp",
     "low": "img/Chara/Skill/Skill_F_Posher.webp",

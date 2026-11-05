@@ -10,6 +10,21 @@
   const ALLOWED_CTA = new Set(['migration-guide', null]);
   const ARTICLES = Object.freeze([
     Object.freeze({
+      id: '20261105-game-data-polan',
+      date: '2026-11-05',
+      title: 'ポランと専用遺物を追加',
+      barTitle: 'ポランと専用遺物を追加',
+      summary: 'ポランと「ポランの制服帽子」のデータを追加しました。',
+      body: Object.freeze([
+        'ポランの育成・装備・ボード・スキル・アサイドのデータを追加しました。',
+        '専用遺物「ポランの制服帽子」と愛用効果、アルバイトの仕事・休息素材を追加しました。'
+      ]),
+      category: 'game-data',
+      profiles: Object.freeze(['new']),
+      autoRevision: '1',
+      cta: null
+    }),
+    Object.freeze({
       id: '20261031-feature-apostle-bulk-settings',
       date: '2026-10-31',
       title: '使徒設定・全体ボードの一覧操作を改善',
