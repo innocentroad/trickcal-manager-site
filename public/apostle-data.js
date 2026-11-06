@@ -644,17 +644,25 @@
   function sortedRows(visibleRows) {
     const config = state.sort[state.view] || { key: 'name', direction: 'asc' };
     return visibleRows.map((row, index) => ({ row, index, value: sortValue(row, config.key) })).sort((a, b) => {
-      const aMissing = a.value === null || a.value === undefined || a.value === '' || Number.isNaN(Number(a.value));
-      const bMissing = b.value === null || b.value === undefined || b.value === '' || Number.isNaN(Number(b.value));
-      if (aMissing || bMissing) return aMissing === bMissing ? a.index - b.index : aMissing ? 1 : -1;
       const basicNumeric = state.view === 'basic' && (
         ['rarity', 'initialSP', 'spRegen'].includes(config.key)
         || BASIC_TIER_COLUMNS.some(column => column.key === config.key)
         || BASIC_COMBAT_COLUMNS.some(column => column.key === config.key)
       );
-      const aNumber = typeof a.value === 'number' || basicNumeric || (state.view !== 'basic' && /^-?\d+(?:\.\d+)?$/.test(String(a.value)));
-      let result = aNumber ? Number(a.value) - Number(b.value) : String(a.value).localeCompare(String(b.value), 'ja');
-      if (!result) result = a.index - b.index;
+      const numericSort = basicNumeric
+        || (state.view !== 'basic' && config.key !== 'name')
+        || typeof a.value === 'number'
+        || typeof b.value === 'number';
+      const isMissing = value => value === null || value === undefined
+        || (typeof value === 'string' && value.trim() === '')
+        || (numericSort && !Number.isFinite(Number(value)));
+      const aMissing = isMissing(a.value);
+      const bMissing = isMissing(b.value);
+      if (aMissing || bMissing) return aMissing === bMissing ? a.index - b.index : aMissing ? 1 : -1;
+      let result = numericSort
+        ? Number(a.value) - Number(b.value)
+        : String(a.value).localeCompare(String(b.value), 'ja');
+      if (!result) return a.index - b.index;
       return state.sort[state.view].direction === 'desc' ? -result : result;
     }).map(item => item.row);
   }

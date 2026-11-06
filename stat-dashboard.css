@@ -11210,6 +11210,13 @@ body.dashboard-page.is-booting::after {
   font-weight: 900;
 }
 
+.board-global-stat-summary-note {
+  margin: -2px 0 8px;
+  color: rgba(43, 74, 53, 0.72);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
 .board-global-stat-summary-counts {
   display: flex;
   flex-wrap: wrap;
@@ -11268,6 +11275,10 @@ body.dashboard-page.is-booting::after {
 
 :root[data-theme="dark"] .board-global-stat-summary-head span {
   color: rgba(226, 232, 240, 0.78);
+}
+
+:root[data-theme="dark"] .board-global-stat-summary-note {
+  color: rgba(226, 232, 240, 0.72);
 }
 
 :root[data-theme="dark"] .board-global-stat-summary-counts span {
@@ -12337,6 +12348,12 @@ button.apostle-picker-card[class*="personality-"] > strong.has-sort-value .apost
 }
 
 .apostle-bulk-field,
+.apostle-bulk-group label {
+  grid-template-rows: 12px 30px;
+  align-content: start;
+}
+
+.apostle-bulk-field,
 .apostle-bulk-group {
   height: 54px;
   box-sizing: border-box;
@@ -12353,6 +12370,32 @@ button.apostle-picker-card[class*="personality-"] > strong.has-sort-value .apost
 .apostle-bulk-field.is-level {
   border-color: rgba(54, 126, 181, 0.22);
   background: rgba(84, 165, 224, 0.09);
+}
+
+.apostle-bulk-level-menu-trigger {
+  justify-self: start;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+}
+
+.apostle-bulk-level-menu-trigger:hover,
+.apostle-bulk-level-menu-trigger:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.apostle-bulk-level-menu-trigger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent, #497baf) 76%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .apostle-bulk-skills {
@@ -12562,6 +12605,21 @@ button.apostle-picker-card[class*="personality-"] > strong.has-sort-value .apost
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.apostle-bulk-popover-actions.is-rank {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.apostle-bulk-popover-actions.is-level {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.apostle-bulk-popover-section-label {
+  margin: 9px 0 5px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
 .apostle-bulk-popover-actions button {
   min-width: 0;
   min-height: 36px;
@@ -12580,6 +12638,14 @@ button.apostle-picker-card[class*="personality-"] > strong.has-sort-value .apost
 .apostle-bulk-popover-actions button:focus-visible {
   border-color: rgba(49, 113, 81, 0.48);
   background: rgba(220, 239, 222, 0.96);
+}
+
+.apostle-bulk-popover-actions button.is-selected,
+.apostle-bulk-popover-actions button[aria-pressed="true"] {
+  border-color: rgba(49, 113, 81, 0.64);
+  color: #14532d;
+  background: rgba(198, 230, 203, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(49, 113, 81, 0.16);
 }
 
 .apostle-bulk-popover-actions button:focus-visible {
@@ -12604,6 +12670,13 @@ button.apostle-picker-card[class*="personality-"] > strong.has-sort-value .apost
 :root[data-theme="dark"] .apostle-bulk-popover-actions button:focus-visible {
   border-color: rgba(126, 194, 159, 0.58);
   background: rgba(41, 74, 63, 0.96);
+}
+
+:root[data-theme="dark"] .apostle-bulk-popover-actions button.is-selected,
+:root[data-theme="dark"] .apostle-bulk-popover-actions button[aria-pressed="true"] {
+  border-color: rgba(126, 194, 159, 0.76);
+  color: #dcfce7;
+  background: rgba(41, 92, 66, 0.98);
 }
 
 :root[data-theme="dark"] .apostle-bulk-equipment.is-off select {
@@ -14843,9 +14916,8 @@ button.apostle-picker-card.is-two-tone.is-selected,
 
 @media (max-width: 480px) {
   .apostle-bulk-counts {
-    width: auto;
+    width: 100%;
     max-width: 100%;
-    justify-self: end;
     gap: 3px 7px;
   }
 

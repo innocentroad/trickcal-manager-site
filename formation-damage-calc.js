@@ -1001,6 +1001,7 @@
     });
     el.enemyApostle?.addEventListener('change', () => {
       view.enemyApostleId = el.enemyApostle.value || '';
+      view.enemyPersonality = '';
       view.enemyStatDirty = false;
       view.enemyGlobalPercentDirty = false;
       view.enemyResearchPreset.dirty = false;
@@ -1497,7 +1498,10 @@
     syncDamageTypeUi(context);
     syncWeaknessFields(context.damageType);
     if (el.gradeOverride) {
-      const fixedGrade = Number(getActiveEnemyContentRules().fixedGrade) || 0;
+      const adjustable = isEliasFrontierGradeAdjustable();
+      const fixedGrade = adjustable ? 0 : Number(getActiveEnemyContentRules().fixedGrade) || 0;
+      const savedOption = el.gradeOverride.querySelector('option[value="saved"]');
+      if (savedOption) savedOption.textContent = adjustable ? '4年生（標準）' : '保存値';
       el.gradeOverride.value = getEffectiveGradeOverride();
       el.gradeOverride.disabled = fixedGrade > 0;
       el.gradeOverride.title = fixedGrade ? `敵コンテンツにより${fixedGrade}年生固定` : '';
@@ -1825,7 +1829,8 @@
       el.enemyApostleImage.src = member ? getApostleImage(member.id, member.name) : FALLBACK_IMAGE;
       el.enemyApostleImage.alt = member?.name || '';
     }
-    if (el.enemyPersonality) el.enemyPersonality.disabled = apostleMode;
+    if (el.enemyPersonality) el.enemyPersonality.disabled = apostleMode
+      && !formationPersonality.getPersonalityOptions(getApostle(view.enemyApostleId) || {}).length;
     const finalStatInputs = [el.inputs.enemyHp, el.inputs.enemyAtk, el.inputs.enemyCrit, el.inputs.enemyCritDmg, el.inputs.def, el.inputs.critRes, el.inputs.critDmgRes];
     finalStatInputs.forEach(input => {
       if (input) input.readOnly = false;
@@ -2354,7 +2359,12 @@
 
   function getEffectiveGradeOverride() {
     const fixedGrade = Number(getActiveEnemyContentRules().fixedGrade) || 0;
+    if (isEliasFrontierGradeAdjustable()) return view.gradeOverride === 'saved' ? String(fixedGrade || 4) : view.gradeOverride;
     return fixedGrade ? String(fixedGrade) : view.gradeOverride;
+  }
+
+  function isEliasFrontierGradeAdjustable() {
+    return getSelectedEnemyPreset()?.content?.type === 'eliasFrontier';
   }
 
   function getEnemyPresets() {
@@ -3126,7 +3136,8 @@
                                                                                
                                                                           
       view.selfSkillEffectEnabled = Object.fromEntries(Object.entries(view.selfSkillEffectEnabled)
-        .filter(([key]) => /^Momo:aside:2:1:/.test(key)
+        .filter(([key]) => isFdcPersistentScenarioSkillEffectKey(key, target)
+          || /^Momo:aside:2:1:/.test(key)
           || /^[^:]+:normal-status:Rollett:Rollett_aside_2_e0[357]:all$/.test(key)));
       view._selfSkillEffectActionCategory = actionCategory;
     }
@@ -3214,6 +3225,9 @@
     const settings = getEnemyIndividualOverride({ state }, member.id) || normalizeEnemyIndividualSettings({}, { state }, member.id);
     return {
       ...member,
+      personality: getEffectiveEnemyPersonality(),
+      resonanceSelection: member.isResonance ? getEffectiveEnemyPersonality() || null : member.resonanceSelection,
+      needsSelection: member.isResonance && !getEffectiveEnemyPersonality(),
       level: settings.level,
       star: settings.star,
       grade: settings.grade,
@@ -3722,6 +3736,7 @@
         enemyGlobalPercentDirty: !!savedView.enemyGlobalPercentDirty
       },
       effectAssumptions: {
+        masterPower: normalizeMasterPowerSettings(savedView.masterPower),
         effectSources: pickBooleanMap(savedView.effectSources || {}),
         selfSkillEffectEnabled: pickBooleanMap(savedView.selfSkillEffectEnabled || {}),
         conditionalEffectEnabled: pickBooleanMap(savedView.conditionalEffectEnabled || {}),
@@ -3882,6 +3897,10 @@
     }
     writeDamageCalculationInputs(snapshotInputs, loadOptions);
     const loadedContext = buildContext();
+                                                                              
+                                                                                  
+                                                                             
+    syncStatInputsFromLinkedSources(loadedContext);
     applyManualStatDraftToInputs('self', loadedContext);
     applyManualStatDraftToInputs('enemy', loadedContext);
     saveCalcSettings();
@@ -5147,6 +5166,12 @@
     writeCombatStatInput(el.inputs.selfCritDmgResBase, stats.critDmgRes);
   }
 
+  function syncStatInputsFromLinkedSources(context) {
+    syncStatsFromTarget(context);
+    syncStatsFromEnemyApostle(context);
+    syncStatsFromEnemyPreset(context);
+  }
+
   function writeCombatStatInput(input, value) {
     if (!input) return;
     if (value == null || value === '') {
@@ -6032,7 +6057,8 @@
         el.inputs.selfSkill.value = button.dataset.fdcSkillValue || '100';
         const nextSkillCategory = button.dataset.fdcSkillCategory || '';
         view.selfSkillEffectEnabled = Object.fromEntries(Object.entries(view.selfSkillEffectEnabled)
-          .filter(([key]) => /^Momo:aside:2:1:/.test(key)
+          .filter(([key]) => isFdcPersistentScenarioSkillEffectKey(key, target)
+            || /^Momo:aside:2:1:/.test(key)
             || /^[^:]+:normal-status:Rollett:Rollett_aside_2_e0[357]:all$/.test(key)));
         view.selectedSkillCategory = nextSkillCategory;
         view.selectedSkillOptionKey = button.dataset.fdcSkillKey || '';
@@ -7054,6 +7080,9 @@
   }
 
   function getFdcSkillEffectActionKey(effect, encodedActionKey = 'none', scopeOptions = {}) {
+                                                                      
+                                                                               
+    if (effect.conditionType === 'フィールド敵数') return 'all';
     if (effect.effectId === 'Momo_aside_2_e02') return 'all';
     if (effect.effectId === 'Hilde_aside_2_e01'
       && effect.triggerSourceId === 'Hilde_enhanced_e01') return 'all';
@@ -7065,6 +7094,14 @@
     const parts = String(key).split(':');
     parts.pop();
     return parts.join(':');
+  }
+
+  function isFdcPersistentScenarioSkillEffectKey(key, target) {
+    if (!target || !key) return false;
+    const canonical = getFdcSkillEffectCanonicalKey(key);
+    return buildSelfSkillEffectOptions(target, {target, actionCategory: ''}).some(option =>
+      option.conditionType === 'フィールド敵数'
+        && getFdcSkillEffectCanonicalKey(option.key) === canonical);
   }
 
   function buildSelfSkillEffectOptions(target, context) {
@@ -7643,6 +7680,7 @@
   }
 
   function getFdcFormationSkillEffectControlMode(effect = {}, effectText = '', context = null, actionCategory = '') {
+    if (effect.conditionType === 'フィールド敵数') return 'manual';
     if (isFdcFormationOwnerRuntimeTrigger(effect)) return 'manual';
     const structuredState = getFdcStructuredConditionState(effect, context);
     if (structuredState.hasCondition && structuredState.resolved) return 'automatic';
@@ -7680,6 +7718,9 @@
     if (option.conditionBlocked) return true;
     if (option.rangeAssumption) return false;
     if (option.normalCalculationOnly) return false;
+                                                                       
+                                                                            
+    if (option.conditionType === 'フィールド敵数') return false;
                                                                             
                                                                              
     if (option.effectId === 'Momo_aside_2_e02' && option.sourceId === 'aside:2'
@@ -8625,6 +8666,7 @@
                                                       
                                          
     const structuredConditionState = getFdcStructuredConditionState(effect, context);
+    if (effect?.conditionType === 'フィールド敵数') return false;
     if (structuredConditionState.hasCondition && structuredConditionState.resolved && !structuredConditionState.matched) return false;
     const structuredCondition = getFdcStructuredEffectConditionText(effect);
     const explicitCondition = String(effect?.condition || structuredCondition || '').trim();
@@ -11121,10 +11163,22 @@
     const rawAddRate = 1 + (attacker.addP - defender.takenDmgP) / 100;
     let addRate = Math.max(0.2, rawAddRate);
     const baseActionMultiplierP = Math.max(0, attacker.skill);
-    const actionMultiplierBonusP = Number(attacker.actionMultiplierBonusP) || 0;
+    const coefficientSuppliers = getEnabledEffectRows(context.effects || {})
+      .filter(row => !row.ownerId || String(row.ownerId).toLowerCase() === String(context.target?.id || '').toLowerCase())
+      .filter(row => getActiveActionMultiplierBonus(row.bonuses || {}, actionMultiplierContext) !== 0);
+    const coefficientReplacementRules = isEnemyAttack ? [] : getFdcSkillCoefficientReplacementRules(context.target);
+    const coefficientReplacement = !isEnemyAttack && combatMath?.resolveSkillCoefficientReplacement?.(
+      selectedSkillOption?.effectId,
+      coefficientSuppliers.map(row => ({effectId: row.effectId,
+        percent: getActiveActionMultiplierBonus(row.bonuses || {}, actionMultiplierContext)})),
+      coefficientReplacementRules);
+    const actionMultiplierBonusP = (Number(attacker.actionMultiplierBonusP) || 0)
+      - (coefficientReplacement?.consumedBonusP || 0);
+    const replacedActionMultiplierP = combatMath?.applySkillCoefficientReplacement?.(baseActionMultiplierP, coefficientReplacement)
+      ?? baseActionMultiplierP * (coefficientReplacement?.factor ?? 1);
     const finalActionMultiplierP = Math.max(
       0,
-      baseActionMultiplierP * (1 + actionMultiplierBonusP / 100)
+      replacedActionMultiplierP * (1 + actionMultiplierBonusP / 100)
     );
     const skill = finalActionMultiplierP / 100;
     const type = Math.max(0, attacker.type) / 100;
@@ -11187,38 +11241,24 @@
     if (isEnemyAttack || weaknessDamageP || conditionalTakenDmgP || targetDebuffTakenDmgP
       || getDebuffDamageP(isEnemyAttack ? 'enemy' : 'self')
       || getEnemyPresetFuryTakenDamageP()) reasons.push('敵・弱点・状態補正の供給位置が未確定');
-    const rimReplacementId = category === '低学年スキル' ? 'Rim_aside_2_e04'
-      : category === '高学年スキル' ? 'Rim_aside_2_e06' : '';
-    const coefficientSuppliers = getEnabledEffectRows(context.effects || {})
-      .filter(row => getActiveActionMultiplierBonus(row.bonuses || {},category) !== 0);
-    const rimCoefficientReplacement = !isEnemyAttack
-      && String(context.target?.id || '').toLowerCase() === 'rim'
-      && actionMultiplierBonusP === 50 && rimReplacementId
-      && coefficientSuppliers.length === 1
-      && coefficientSuppliers[0].effectId === rimReplacementId
-      && ['Rim_low_e02','Rim_high_e01','Rim_high_e02'].includes(selectedSkillOption?.effectId);
-                                                                        
-                                                                             
-                                                                                  
-    const erpinCoefficientReplacement = !isEnemyAttack && category === '高学年スキル'
-      && String(context.target?.id || '').toLowerCase() === 'erpin'
-      && selectedSkillOption?.effectId === 'Erpin_high_e01' && repeatCount === 1
-      && actionMultiplierBonusP === 50 && coefficientSuppliers.length === 1
-      && coefficientSuppliers[0].effectId === 'Erpin_aside_2_e04'
-      && !nativeMixedAllocationKnown
-      && (!nativeAllocationKnown || (nativeAllocation.coefficientP === baseActionMultiplierP
-        && nativeAllocation.effectDamage === 1));
-    const erpinPerHitCoefficientP = erpinCoefficientReplacement
-      ? (nativeAllocationKnown ? nativeAllocation.coefficientP : baseActionMultiplierP) * 1.5 : null;
+    const replacementPerHitCoefficientP = coefficientReplacement
+      ? combatMath?.applySkillCoefficientReplacement?.(nativeAllocationKnown ? nativeAllocation.coefficientP
+        : selectedSkillOption?.perHitCoefficientP ?? baseActionMultiplierP, coefficientReplacement)
+        * (1 + actionMultiplierBonusP / 100) : null;
+    if (coefficientReplacement && combatMath?.applySkillCoefficientReplacement?.(
+      baseActionMultiplierP, coefficientReplacement) == null) reasons.push('係数変更の処理または数値範囲が未対応です');
+    if (coefficientReplacement && nativeMixedAllocationKnown) {
+      reasons.push('係数置換の命中配分が未確定');
+    }
     if (attacker.special !== 100 || attacker.other !== 100
-      || (actionMultiplierBonusP && !rimCoefficientReplacement && !erpinCoefficientReplacement)) reasons.push('特殊・その他・行動倍率補正の供給位置が未確定');
+      || actionMultiplierBonusP) reasons.push('特殊・その他・行動倍率補正の供給位置が未確定');
     if (hasUnresolvedActionDamageRate(context)) reasons.push('行動別与ダメージのstat／effect指定率の分類が未確定');
     if (selectedSkillOption?.coefficientRange && !selectedSkillOption?.coefficientChoices) reasons.push('係数抽選範囲の期待値は未対応');
     const sourceSupported = reasons.length === 0 && !!hitEngine?.evaluateSingleHitDamage;
     const hitInput = sourceSupported ? {
       baseDamage: damageSource * defRate,
       coefficientP: finalActionMultiplierP,
-      perHitCoefficientP: erpinPerHitCoefficientP ?? selectedSkillOption?.perHitCoefficientP ?? finalActionMultiplierP,
+      perHitCoefficientP: replacementPerHitCoefficientP ?? selectedSkillOption?.perHitCoefficientP ?? finalActionMultiplierP,
       perHitDefinition: !!selectedSkillOption?.perHitDefinition,
       singleHitDefinition: allocationKnown && repeatCount === 1,
       ...(selectedSkillOption?.coefficientChoices ? { coefficientChoices: selectedSkillOption.coefficientChoices } : {}),
@@ -11254,7 +11294,7 @@
       const mixedResults = nativeMixedAllocationKnown ? nativeMixedHits.map(hit =>
         hitEngine.evaluateSingleHitDamage({ ...hitInput, coefficientP: hit.coefficientP, effectDamage: hit.effectDamage })) : null;
       const rounded = mixedResults ? mixedResults[0] : hitEngine.evaluateSingleHitDamage({ ...hitInput,
-        coefficientP: erpinPerHitCoefficientP ?? (nativeAllocationKnown ? haleyLowKindMultiplier === 1 ? nativeAllocation.coefficientP
+        coefficientP: replacementPerHitCoefficientP ?? (nativeAllocationKnown ? haleyLowKindMultiplier === 1 ? nativeAllocation.coefficientP
           : Math.trunc(Math.fround(Math.fround(nativeAllocation.coefficientP) * haleyLowKindMultiplier))
           : selectedSkillOption?.perHitCoefficientP ?? finalActionMultiplierP),
         effectDamage: nativeAllocationKnown ? nativeAllocation.effectDamage : hitInput.effectDamage });
@@ -11353,6 +11393,8 @@
           actionMultiplierBonusP,
           baseActionMultiplierP,
           finalActionMultiplierP,
+          coefficientReplacement: coefficientReplacement || null,
+          skillCoefficientReplacements: coefficientReplacementRules,
           typeP: attacker.type,
           specialP: attacker.special,
           otherP: attacker.other,
@@ -11705,14 +11747,25 @@
 
   function getEffectiveEnemyPersonality() {
     if (view.enemySourceMode === 'apostle') {
-      return normalizePersonalityName(getApostle(view.enemyApostleId)?.性格);
+      return formationPersonality.resolveFormationPersonality(
+        getApostle(view.enemyApostleId) || {}, view.enemyPersonality
+      ).effectivePersonality || '';
     }
     return normalizePersonalityName(view.enemyPersonality);
   }
 
   function syncEnemyPersonalityUi() {
     const personality = getEffectiveEnemyPersonality();
-    if (el.enemyPersonality) el.enemyPersonality.value = personality;
+    if (el.enemyPersonality) {
+      const options = view.enemySourceMode === 'apostle'
+        ? formationPersonality.getPersonalityOptions(getApostle(view.enemyApostleId) || {}) : [];
+      for (const option of el.enemyPersonality.options) {
+        option.hidden = !!option.value && options.length > 0 && !options.includes(option.value);
+        option.disabled = option.hidden;
+        if (!option.value) option.textContent = options.length ? '性格を選択' : 'なし';
+      }
+      el.enemyPersonality.value = personality;
+    }
     if (el.enemyPersonalityIcon) {
       el.enemyPersonalityIcon.src = personality ? `img/性格_${personality}.webp` : 'img/性格_なし.webp';
       el.enemyPersonalityIcon.alt = personality || 'なし';
@@ -12096,10 +12149,14 @@
         self: scenarioStatInputState ? normalizeStatInputSide(scenarioStatInputState.self, true) : normalizeStatInputSide(null, true),
         enemy: scenarioStatInputState ? normalizeStatInputSide(scenarioStatInputState.enemy, true) : normalizeStatInputSide(null, true)
       };
-      for (const key of ['effectSources', 'selfSkillEffectEnabled', 'conditionalEffectEnabled',
+      for (const key of ['masterPower', 'effectSources', 'selfSkillEffectEnabled', 'conditionalEffectEnabled',
         'conditionalEffectStackCounts', 'enemyGlobalPercentEnabled', 'enemyGlobalAdditiveEnabled',
         'enemyBoardPresetSelections', 'enemyIndividualOverrides', 'enemyRankPreset', 'enemyResearchPreset']) {
         if (Object.prototype.hasOwnProperty.call(assumptions, key)) view[key] = clonePlain(assumptions[key]);
+      }
+      if (!Object.prototype.hasOwnProperty.call(assumptions, 'masterPower')
+          && Object.prototype.hasOwnProperty.call(assumptions, 'masterPowerId')) {
+        view.masterPower = normalizeMasterPowerSettings({ id: assumptions.masterPowerId, targetCount: 1 });
       }
       view.perspective = battleConditions.perspective === 'enemy' ? 'enemy' : 'self';
       view.defensiveShield = normalizeDefensiveShield(battleConditions.defensiveShield, targetId);
@@ -15641,6 +15698,27 @@
     return levels.default ?? levels.low ?? 1;
   }
 
+  function getFdcSkillCoefficientReplacementRules(target) {
+    const apostle = getApostleSkillData(target);
+    if (!apostle) return [];
+    const levels = getFdcEffectiveSkillLevels(target);
+    return normalizeFdcArray(apostle.skillCoefficientReplacements).flatMap(rule => {
+      const skill = normalizeFdcArray(apostle.skills).find(skill =>
+        normalizeFdcArray(skill.effects).some(effect => effect.effectId === rule.targetEffectId));
+      const effect = normalizeFdcArray(skill?.effects).find(effect => effect.effectId === rule.targetEffectId);
+      if (!effect) return [];
+      const level = getFdcSkillLevelForEffect(levels, effect, getFdcApostleSkillCategory(skill, '通常'));
+      const value = rule.levels ? rule.levels[String(level)] : rule.fixedValue;
+      const base = getFdcEffectLevelInfo(effect, level);
+      const factor = rule.mode === 'scale' ? value
+        : rule.mode === 'value' && base && !base.isRange && base.value > 0 ? value / base.value : null;
+      return typeof factor === 'number' && Number.isFinite(factor) && factor >= 0
+        ? [{sourceEffectId: rule.sourceEffectId, targetEffectId: rule.targetEffectId,
+          factor, consumedBonusP: rule.consumedBonusP,
+          ...(rule.coefficientTransform ? {coefficientTransform: rule.coefficientTransform} : {})}] : [];
+    });
+  }
+
   function getFdcSkillLevelForEffect(levels, effect = {}, fallbackCategory = '') {
     if (effect.snorkyPassiveLevelSource && effect.effectId === 'Snorky_aside_2_e05') return levels.passive ?? 1;
     if (effect.sistLowLevelSource && ['Sist_aside_2_e02','Sist_aside_2_e04'].includes(effect.effectId)) return levels.low ?? 1;
@@ -16179,6 +16257,7 @@
       },
       effectAssumptions: {
         masterPowerId: getSelectedMasterPower(context)?.id || '',
+        masterPower: normalizeMasterPowerSettings(view.masterPower),
         effectSources: pickBooleanMap(view.effectSources),
         selfSkillEffectEnabled: Object.fromEntries(Object.entries(pickBooleanMap(view.selfSkillEffectEnabled))
           .filter(([key]) => !options.excludeNormalCalculationOnlyEffects || !key.startsWith('Joanne:formation-dispersion:'))),
@@ -17502,6 +17581,7 @@
     return Object.fromEntries(buildSelfSkillEffectOptions(target, context)
       .filter(option => {
         if (option.normalCalculationOnly) return false;
+        if (option.conditionType === 'フィールド敵数') return true;
         if (!option.actionScoped || managedKeys.has(getFdcSkillEffectCanonicalKey(option.key))) return true;
         return isDpsUnsupportedRuntimeTrigger(option, [
           option.condition,
@@ -20210,6 +20290,8 @@
         personalityRate: Number(result.detail?.mods?.typeP) / 100,
         addRate: Number(result.detail?.mods?.addRate) || 1,
         baseActionMultiplierP: actionMultiplier(result.detail?.mods?.baseActionMultiplierP,result.detail?.mods?.skillP),
+        coefficientReplacement: result.detail?.mods?.coefficientReplacement || null,
+        skillCoefficientReplacements: result.detail?.mods?.skillCoefficientReplacements || [],
         actionMultiplierBonusP: Number(result.detail?.mods?.actionMultiplierBonusP) || 0,
         finalActionMultiplierP: actionMultiplier(result.detail?.mods?.finalActionMultiplierP,result.detail?.mods?.skillP),
         specialP: Number(result.detail?.mods?.specialP) || 100,

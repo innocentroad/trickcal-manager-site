@@ -2045,6 +2045,106 @@ const CARD_LIBRARY = {
             ]
         },
         {
+            "id": "artifact_polan_hat",
+            "kind": "artifact",
+            "rarity": "伝説",
+            "name": "ポランの制服帽子",
+            "signature": true,
+            "favoriteCharacter": "ポラン",
+            "cost": 24,
+            "bonusesByStar": [
+                {
+                    "critDmgResP": 6.4
+                },
+                {
+                    "critDmgResP": 8
+                },
+                {
+                    "critDmgResP": 9.6
+                },
+                {
+                    "critDmgResP": 11.2
+                },
+                {
+                    "critDmgResP": 12.8
+                }
+            ],
+            "conditionalEffects": [
+                {
+                    "id": "artifact_polan_hat_e01",
+                    "type": "toggle",
+                    "label": "カード効果によるシールドには発動しない。スタックしない。 シールド効果増加",
+                    "effectType": "バフ",
+                    "effectStack": false,
+                    "condition": "カード効果によるシールドには発動しない。スタックしない。",
+                    "shortLabel": "シールド効果増加",
+                    "valueClass": "倍率",
+                    "description": "自身 / 倍率",
+                    "descriptionByStar": [
+                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
+                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
+                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
+                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
+                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)"
+                    ],
+                    "bonusesByStar": [
+                        {
+                            "shieldEffectP": 30
+                        },
+                        {
+                            "shieldEffectP": 30
+                        },
+                        {
+                            "shieldEffectP": 30
+                        },
+                        {
+                            "shieldEffectP": 30
+                        },
+                        {
+                            "shieldEffectP": 30
+                        }
+                    ]
+                },
+                {
+                    "id": "artifact_polan_hat_e02",
+                    "type": "toggle",
+                    "label": "カード効果によるシールドには発動しない。スタックしない。 攻撃力増加",
+                    "triggerType": "シールド付与時",
+                    "effectType": "バフ",
+                    "effectStack": false,
+                    "condition": "カード効果によるシールドには発動しない。スタックしない。",
+                    "shortLabel": "攻撃力増加",
+                    "valueClass": "倍率",
+                    "duration": "8",
+                    "description": "シールドを付与した味方 / 持続:8 / 倍率",
+                    "descriptionByStar": [
+                        "攻撃力増加6% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
+                        "攻撃力増加8% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
+                        "攻撃力増加10% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
+                        "攻撃力増加12% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
+                        "攻撃力増加14% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)"
+                    ],
+                    "bonusesByStar": [
+                        {
+                            "atkP": 6
+                        },
+                        {
+                            "atkP": 8
+                        },
+                        {
+                            "atkP": 10
+                        },
+                        {
+                            "atkP": 12
+                        },
+                        {
+                            "atkP": 14
+                        }
+                    ]
+                }
+            ]
+        },
+        {
             "id": "artifact_dragonlight_sword",
             "kind": "artifact",
             "rarity": "伝説",
@@ -3531,106 +3631,6 @@ const CARD_LIBRARY = {
                 },
                 {
                     "critRateP": 8.7
-                }
-            ]
-        },
-        {
-            "id": "artifact_polan_hat",
-            "kind": "artifact",
-            "rarity": "伝説",
-            "name": "ポランの制服帽子",
-            "signature": true,
-            "favoriteCharacter": "ポラン",
-            "cost": 24,
-            "bonusesByStar": [
-                {
-                    "critDmgResP": 6.4
-                },
-                {
-                    "critDmgResP": 8
-                },
-                {
-                    "critDmgResP": 9.6
-                },
-                {
-                    "critDmgResP": 11.2
-                },
-                {
-                    "critDmgResP": 12.8
-                }
-            ],
-            "conditionalEffects": [
-                {
-                    "id": "artifact_polan_hat_e01",
-                    "type": "toggle",
-                    "label": "カード効果によるシールドには発動しない。スタックしない。 シールド効果増加",
-                    "effectType": "バフ",
-                    "effectStack": false,
-                    "condition": "カード効果によるシールドには発動しない。スタックしない。",
-                    "shortLabel": "シールド効果増加",
-                    "valueClass": "倍率",
-                    "description": "自身 / 倍率",
-                    "descriptionByStar": [
-                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
-                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
-                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
-                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)",
-                        "シールド効果増加30% (カード効果によるシールドには発動しない。スタックしない。 / 自身)"
-                    ],
-                    "bonusesByStar": [
-                        {
-                            "shieldEffectP": 30
-                        },
-                        {
-                            "shieldEffectP": 30
-                        },
-                        {
-                            "shieldEffectP": 30
-                        },
-                        {
-                            "shieldEffectP": 30
-                        },
-                        {
-                            "shieldEffectP": 30
-                        }
-                    ]
-                },
-                {
-                    "id": "artifact_polan_hat_e02",
-                    "type": "toggle",
-                    "label": "カード効果によるシールドには発動しない。スタックしない。 攻撃力増加",
-                    "triggerType": "シールド付与時",
-                    "effectType": "バフ",
-                    "effectStack": false,
-                    "condition": "カード効果によるシールドには発動しない。スタックしない。",
-                    "shortLabel": "攻撃力増加",
-                    "valueClass": "倍率",
-                    "duration": "8",
-                    "description": "シールドを付与した味方 / 持続:8 / 倍率",
-                    "descriptionByStar": [
-                        "攻撃力増加6% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
-                        "攻撃力増加8% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
-                        "攻撃力増加10% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
-                        "攻撃力増加12% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)",
-                        "攻撃力増加14% (カード効果によるシールドには発動しない。スタックしない。 / シールドを付与した味方)"
-                    ],
-                    "bonusesByStar": [
-                        {
-                            "atkP": 6
-                        },
-                        {
-                            "atkP": 8
-                        },
-                        {
-                            "atkP": 10
-                        },
-                        {
-                            "atkP": 12
-                        },
-                        {
-                            "atkP": 14
-                        }
-                    ]
                 }
             ]
         }
@@ -5824,6 +5824,14 @@ const CARD_SOLDER_DATA = {
             "critDmgResP": 2.3
         }
     },
+    "artifact_polan_hat": {
+        "1": {
+            "critDmgResP": 1.6
+        },
+        "2": {
+            "critDmgResP": 3.3
+        }
+    },
     "artifact_dragonlight_sword": {
         "1": {
             "atkP": 10
@@ -6416,14 +6424,6 @@ const CARD_SOLDER_DATA = {
         },
         "2": {
             "hpP": 0.8
-        }
-    },
-    "artifact_polan_hat": {
-        "1": {
-            "critDmgResP": 1.6
-        },
-        "2": {
-            "critDmgResP": 3.3
         }
     }
 };

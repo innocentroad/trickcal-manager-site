@@ -61,9 +61,7 @@
   }
   function read(){
     try{
-      const store=window.TRICKCAL_STORAGE_FACADE?.localStorage;
-      if(!store)throw Error('Storage unavailable');
-      const raw=store.getItem('trickcal_stat_prototype_v1'),parsed=raw?JSON.parse(raw):null;
+      const raw=window.TRICKCAL_STORAGE_FACADE.localStorage.getItem('trickcal_stat_prototype_v1'),parsed=raw?JSON.parse(raw):null;
       if(parsed&&(!parsed.apostles||typeof parsed.apostles!=='object'||Array.isArray(parsed.apostles)))throw Error('Invalid state');
       apostles=parsed?.apostles||{};readError=false;
       $('state-note').textContent=raw?'管理画面の保存済み状態を使用。予定がない使徒は現在ボードを使用します。':'保存状態なし：初期★・未取得ボードを基準に計算します。';

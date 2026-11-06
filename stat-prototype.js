@@ -550,6 +550,7 @@
   let statSnapshotRefreshTimer = 0;
   let statSnapshotRefreshWorkTimer = 0;
   let pendingStatSnapshotRefreshIds = new Set();
+  let pendingRankOverviewCardsAfterSnapshotRefresh = false;
   let stateSlotSavePending = false;
   let stateManagerRenderTimer = 0;
   let renderTimer = 0;
@@ -615,8 +616,7 @@
     installStatEngineApi();
     const storageParticipant = storageRuntime?.registerParticipant?.({
       flush() {
-        const flushed = flushPendingStateSave();
-        isLiveStatePublisher = false;
+        const flushed = flushStateForStorageSuspend();
         return flushed
           ? { ok: true }
           : { ok: false, code: 'write-failed', retryable: true };
@@ -2197,6 +2197,7 @@
     elements.apostleBulkPopover?.addEventListener('click', event => {
       const rankOption = event.target.closest('[data-apostle-bulk-rank-value]');
       if (rankOption && apostleBulkPopoverTrigger) {
+                                                                                                         
         event.stopPropagation();
         const context = { apostleId: apostleBulkPopoverTrigger.apostleId, group: apostleBulkPopoverTrigger.group };
         if (context.group === 'equipment') applyApostleBulkRank(context.apostleId, rankOption.dataset.apostleBulkRankValue);
@@ -2677,7 +2678,7 @@
         ['position', row.配列]
       ].every(([group, value]) => {
         const selected = view.apostleFilters[group];
-        return selected.size === 0 || selected.has(value);
+        return matchesApostleFilterSelection(group, selected, value);
       });
       return matchesQuery && matchesFilters;
     }).sort(compareApostlePickerRows);
@@ -2732,32 +2733,56 @@
   }
 
   function getApostleFilterGroups() {
+    const dataFields = {
+      personality: '性格',
+      species: '種族',
+      role: '役割',
+      position: '配列'
+    };
+    const valuesWithDataAdditions = (key, defaults) => {
+      const field = dataFields[key];
+      const present = new Set((DATA.sheets.basicInfo || [])
+        .map(row => String(row[field] ?? '').trim())
+        .filter(Boolean));
+      const additions = Array.from(present)
+        .filter(value => !defaults.includes(value))
+        .sort((a, b) => a.localeCompare(b, 'ja', { sensitivity: 'base' }));
+      return [...defaults, ...additions];
+    };
     return [
       {
         key: 'personality',
         label: '性格',
-        values: ['純粋', '冷静', '狂気', '活発', '憂鬱'],
+        values: valuesWithDataAdditions('personality', ['純粋', '冷静', '狂気', '活発', '憂鬱']),
         icon: value => `img/性格_${value}.webp`
       },
       {
         key: 'species',
         label: '種族',
-        values: ['妖精', '獣人', 'エルフ', '精霊', '幽霊', '竜族', '魔女', 'ミスティック'],
+        values: valuesWithDataAdditions('species', ['妖精', '獣人', 'エルフ', '精霊', '幽霊', '竜族', '魔女', 'ミスティック']),
         icon: value => window.TRICKCAL_SPECIES?.iconPath(value) || ''
       },
       {
         key: 'role',
         label: '役割',
-        values: ['守備', '攻撃', '支援'],
+        values: valuesWithDataAdditions('role', ['守備', '攻撃', '支援']),
         icon: value => `img/役割_${getRoleAssetName(value)}.webp`
       },
       {
         key: 'position',
         label: '配置',
-        values: ['前列', '中列', '後列'],
+        values: valuesWithDataAdditions('position', ['前列', '中列', '後列']),
         icon: value => `img/配置列_${value}.webp`
       }
     ];
+  }
+
+  function matchesApostleFilterSelection(group, selected, value) {
+    if (!selected?.size) return true;
+    const normalized = String(value ?? '').trim();
+    if (selected.has(normalized)) return true;
+    return group === 'position' && normalized === '全列'
+      && ['前列', '中列', '後列'].some(position => selected.has(position));
   }
 
   function renderApostleFilterControls(groups, filters, prefix) {
@@ -4750,6 +4775,7 @@
     if (statSnapshotRefreshWorkTimer) window.clearTimeout(statSnapshotRefreshWorkTimer);
     statSnapshotRefreshWorkTimer = 0;
     isRefreshingStatSnapshots = false;
+    pendingRankOverviewCardsAfterSnapshotRefresh = false;
   }
 
   function tryApplyExternalApostleSelection() {
@@ -4842,6 +4868,7 @@
       const result = historyEngine[direction]((action, operation) => {
         const expected = operation === 'undo' ? action.after : action.before;
         const next = operation === 'undo' ? action.before : action.after;
+        const overviewOrder = action.kind === 'edit' ? captureOverviewOrderForHistoryAction(action) : null;
         if (action.kind === 'navigation') {
           if (!window.TRICKCAL_STAT_HISTORY.same(historyLocator(), expected)) return { applied: false, reason: 'context' };
           applyHistoryNavigation(next);
@@ -4858,7 +4885,8 @@
           catch (_) { return { applied: false, reason: 'validation' }; }
           applyHistoryValues(action.scope, next);
         }
-        syncControlsFromState(); renderResearchControls(); render();
+        syncControlsFromState(); renderResearchControls(); render({ preserveOverviewOrder: !!overviewOrder });
+        if (overviewOrder) restoreApostleOverviewOrder(overviewOrder.container, overviewOrder.dataAttribute, overviewOrder.ids);
         if (action.kind === 'navigation') document.dispatchEvent(new CustomEvent('stat-state-applied'));
         return { applied: true };
       });
@@ -5004,7 +5032,9 @@
     renderRankBonuses(rankBonus);
     applyAllRankGlobalBonuses(totals, activeEffects, breakdown);
     renderActiveResearch(basic, totals, activeEffects, breakdown);
-    if (!options.skipActiveGlobal && isDashboardPanelActive('global')) renderActiveGlobalSettingPanel();
+    if (!options.skipActiveGlobal && isDashboardPanelActive('global')) {
+      renderActiveGlobalSettingPanel({ preserveOverviewOrder: !!options.preserveOverviewOrder });
+    }
     if (isDashboardPanelActive('formation')) renderFormation({ deferSpellCatalog: options.deferFormationSpellCatalog });
     if (isDashboardPanelActive('board') || editor?.open) {
       renderBoardSpecial(boardRows);
@@ -5785,10 +5815,10 @@
     return !!document.querySelector(`[data-setting-panel="${name}"]`)?.classList.contains('is-active');
   }
 
-  function renderActiveGlobalSettingPanel() {
+  function renderActiveGlobalSettingPanel(options = {}) {
     if (!isDashboardPanelActive('global')) return;
     if (isGlobalSettingPanelActive('apostles')) renderApostleBulkSettings();
-    if (isGlobalSettingPanelActive('rank')) renderRankOverview();
+    if (isGlobalSettingPanelActive('rank')) renderRankOverview(options);
     if (isGlobalSettingPanelActive('bond')) renderBondOverview();
     if (isGlobalSettingPanelActive('aside')) renderAsideOverview();
     if (isGlobalSettingPanelActive('board-global')) renderBoardGlobalOverview();
@@ -6710,7 +6740,7 @@
 
   function applyRankBonusToTotals(rankBonus, rankValue, totals, commonFlat = false) {
     if (!rankBonus) return;
-    const rankLimit = Math.min(Number(rankValue) - 1, 9);
+    const rankLimit = Math.min(Number(rankValue) - 1, EQUIPMENT_RANK_MAX - 1);
     for (let rank = 1; rank <= rankLimit; rank++) {
       for (let index = 1; index <= 2; index++) {
         const type = rankBonus[`Rank${rank}to${rank + 1}_type${index}`];
@@ -7336,7 +7366,7 @@
         ['position', row.配列]
       ].every(([group, value]) => {
         const selected = view.apostleBulkFilters[group];
-        return selected.size === 0 || selected.has(value);
+        return matchesApostleFilterSelection(group, selected, value);
       }));
     const orderContext = JSON.stringify([
       view.apostleBulkSort,
@@ -7411,6 +7441,60 @@
       item.classList.add('is-sort-followed');
       window.setTimeout(() => item.classList.remove('is-sort-followed'), 2200);
     });
+  }
+
+  function replaceApostleOverviewCardInPlace(container, dataAttribute, id, html) {
+    if (!container || !id) return false;
+    const card = Array.from(container.querySelectorAll(`[${dataAttribute}]`))
+      .find(item => item.getAttribute(dataAttribute) === id);
+    if (!card) return false;
+    const active = document.activeElement;
+    const focusAttributes = card.contains(active)
+      ? Array.from(active.attributes || [])
+        .filter(attribute => attribute.name.startsWith('data-') || attribute.name === 'aria-label')
+        .map(attribute => [attribute.name, attribute.value])
+      : [];
+    const template = document.createElement('template');
+    template.innerHTML = String(html || '').trim();
+    const replacement = template.content.firstElementChild;
+    if (!replacement) return false;
+    card.replaceWith(replacement);
+    if (focusAttributes.length) {
+      const nextFocus = Array.from(replacement.querySelectorAll('input, select, button')).find(control =>
+        focusAttributes.every(([name, value]) => control.getAttribute(name) === value));
+      nextFocus?.focus({ preventScroll: true });
+    }
+    return true;
+  }
+
+  function captureOverviewOrderForHistoryAction(action) {
+    const configurations = [
+      { panel: 'rank', labels: ['一覧Rank変更'], container: elements.rankOverviewGrid, dataAttribute: 'data-rank-card-id' },
+      { panel: 'bond', labels: ['一覧好感度変更'], container: elements.bondOverviewGrid, dataAttribute: 'data-bond-card-id' },
+      { panel: 'aside', labels: ['一覧アサイド変更', '一覧アサイドLv変更'], container: elements.asideOverviewGrid, dataAttribute: 'data-aside-card-id' }
+    ];
+    const configuration = configurations.find(item => item.labels.includes(action?.label)
+      && isGlobalSettingPanelActive(item.panel));
+    if (!configuration) return null;
+    return {
+      container: configuration.container,
+      dataAttribute: configuration.dataAttribute,
+      ids: Array.from(configuration.container.querySelectorAll(`[${configuration.dataAttribute}]`),
+        card => card.getAttribute(configuration.dataAttribute))
+    };
+  }
+
+  function restoreApostleOverviewOrder(container, dataAttribute, ids) {
+    if (!container || !Array.isArray(ids) || !ids.length) return;
+    const cards = new Map(Array.from(container.querySelectorAll(`[${dataAttribute}]`), card =>
+      [card.getAttribute(dataAttribute), card]));
+    ids.forEach(id => {
+      const card = cards.get(id);
+      if (!card) return;
+      container.appendChild(card);
+      cards.delete(id);
+    });
+    cards.forEach(card => container.appendChild(card));
   }
 
   function compareApostleBulkRows(a, b) {
@@ -7929,10 +8013,32 @@
     renderRankOverviewCards();
   }
 
-  function renderRankOverview() {
+  function renderRankOverview(options = {}) {
     renderRankOverviewFilters();
-    renderRankOverviewCards();
     renderRankOverviewSummaryFromState();
+    if (options.preserveOverviewOrder) {
+      pendingRankOverviewCardsAfterSnapshotRefresh = false;
+      renderRankOverviewCards();
+      return;
+    }
+    if (view.rankSort !== 'name' && (statSnapshotRefreshTimer || isRefreshingStatSnapshots)) {
+      pendingRankOverviewCardsAfterSnapshotRefresh = true;
+      flushScheduledStatSnapshotRefresh();
+      return;
+    }
+    pendingRankOverviewCardsAfterSnapshotRefresh = false;
+    renderRankOverviewCards();
+  }
+
+  function finishPendingRankOverviewSort() {
+    if (!pendingRankOverviewCardsAfterSnapshotRefresh) return;
+    if (!isGlobalSettingPanelActive('rank')) {
+      pendingRankOverviewCardsAfterSnapshotRefresh = false;
+      return;
+    }
+    if (flushScheduledStatSnapshotRefresh()) return;
+    pendingRankOverviewCardsAfterSnapshotRefresh = false;
+    renderRankOverviewCards();
   }
 
   function renderRankOverviewSummaryFromState() {
@@ -7941,7 +8047,7 @@
     DATA.sheets.rankGlobalBonuses.forEach(row => {
       const state = ensureApostleState(row.id);
       applyRankBonusToTotals(row, state.rank, effects);
-      applyRankBonusToTotals(row, 9, maximumEffects);
+      applyRankBonusToTotals(row, EQUIPMENT_RANK_MAX, maximumEffects);
     });
     elements.rankOverviewSummary.innerHTML = renderRankOverviewSummary(effects, maximumEffects);
   }
@@ -7967,7 +8073,7 @@
         ['position', row.配列]
       ].every(([group, value]) => {
         const selected = view.rankFilters[group];
-        return selected.size === 0 || selected.has(value);
+        return matchesApostleFilterSelection(group, selected, value);
       }))
       .sort((a, b) => {
         const nameOrder = String(a.使徒名 || a.id).localeCompare(
@@ -8016,15 +8122,9 @@
 
   function updateRankOverviewAfterChange(id) {
     renderRankOverviewSummaryFromState();
-    if (view.rankSort === 'rank' || view.rankSort === 'combatPower') {
-      renderRankOverviewCards();
-      followResortedApostle(elements.rankOverviewGrid, 'data-rank-card-id', id);
-      return;
-    }
     const basic = DATA.getById('basicInfo', id);
-    const card = Array.from(elements.rankOverviewGrid.querySelectorAll('[data-rank-card-id]'))
-      .find(element => element.dataset.rankCardId === id);
-    if (basic && card) card.outerHTML = renderRankOverviewCard(basic);
+    if (basic) replaceApostleOverviewCardInPlace(
+      elements.rankOverviewGrid, 'data-rank-card-id', id, renderRankOverviewCard(basic));
   }
 
   function renderRankOverviewSummary(totals, maximumTotals = totals) {
@@ -8098,7 +8198,7 @@
         ['position', row.配列]
       ].every(([group, value]) => {
         const selected = view.bondFilters[group];
-        return selected.size === 0 || selected.has(value);
+        return matchesApostleFilterSelection(group, selected, value);
       }))
       .sort((a, b) => {
         const nameOrder = String(a.使徒名 || a.id).localeCompare(
@@ -8135,15 +8235,9 @@
 
   function updateBondOverviewAfterChange(id) {
     renderBondOverviewSummary();
-    if (view.bondSort === 'bond') {
-      renderBondOverviewCards();
-      followResortedApostle(elements.bondOverviewGrid, 'data-bond-card-id', id);
-      return;
-    }
     const basic = DATA.getById('basicInfo', id);
-    const card = Array.from(elements.bondOverviewGrid.querySelectorAll('[data-bond-card-id]'))
-      .find(element => element.dataset.bondCardId === id);
-    if (basic && card) card.outerHTML = renderBondOverviewCard(basic);
+    if (basic) replaceApostleOverviewCardInPlace(
+      elements.bondOverviewGrid, 'data-bond-card-id', id, renderBondOverviewCard(basic));
   }
 
   function getBondOverviewTone(level) {
@@ -8221,7 +8315,7 @@
         ['position', row.配列]
       ].every(([group, value]) => {
         const selected = view.asideFilters[group];
-        return selected.size === 0 || selected.has(value);
+        return matchesApostleFilterSelection(group, selected, value);
       }))
       .sort((a, b) => {
         const nameOrder = String(a.使徒名 || a.id).localeCompare(
@@ -8269,15 +8363,9 @@
 
   function updateAsideOverviewAfterChange(id) {
     renderAsideOverviewSummaryFromState();
-    if (view.asideSort === 'aside') {
-      renderAsideOverviewCards();
-      followResortedApostle(elements.asideOverviewGrid, 'data-aside-card-id', id);
-      return;
-    }
     const basic = DATA.getById('basicInfo', id);
-    const card = Array.from(elements.asideOverviewGrid.querySelectorAll('[data-aside-card-id]'))
-      .find(element => element.dataset.asideCardId === id);
-    if (basic && card) card.outerHTML = renderAsideOverviewCard(basic);
+    if (basic) replaceApostleOverviewCardInPlace(
+      elements.asideOverviewGrid, 'data-aside-card-id', id, renderAsideOverviewCard(basic));
   }
 
   function renderCardManager() {
@@ -10743,16 +10831,17 @@
     return `
       <section class="board-global-stat-summary">
         <div class="board-global-stat-summary-head">
-          <strong>表示中の統計</strong>
-          <span>${formatNumber(rows.length)}使徒 / ${formatNumber(selected)}マス選択中</span>
+          <strong>表示中の使徒の全ボード集計</strong>
+          <span>${formatNumber(rows.length)}使徒 / ${formatNumber(selected)}マス塗り済み</span>
         </div>
+        <p class="board-global-stat-summary-note">B層・特殊マスの絞り込みは表示する使徒を選びます。集計は表示中の使徒の全階層が対象で、ゲートはマス件数から除外し費用に含めます。</p>
         <div class="board-global-stat-summary-counts">
           <span><img src="img/Board/Tileicon_1.webp" alt="">通常 ${formatNumber(summary.counts.lower)}</span>
           <span><img src="img/Board/Tileicon_2.webp" alt="">上級 ${formatNumber(summary.counts.advanced)}</span>
           <span><img src="img/Board/Tileicon_3.webp" alt="">特殊 ${formatNumber(summary.counts.special)}</span>
         </div>
         <div class="summary-table-grid board-global-stat-summary-grid">
-          ${renderGlobalBoardCostSummary(summary.costs, { signed: false, emptyText: 'コストなし' })}
+          ${renderGlobalBoardCostSummary(summary.costs, { signed: false, emptyText: 'コストなし', ariaLabel: '表示中の使徒の全ボード消費アイテム' })}
           ${renderBoardDraftEffectMatrix(summary.effectGroups, { title: '合計' })}
         </div>
       </section>
@@ -10799,7 +10888,8 @@
   function getBoardSummaryTileGroup(tileType) {
     if (tileType === '特殊') return 'special';
     if (tileType === '上級') return 'advanced';
-    return 'lower';
+    if (tileType === '通常') return 'lower';
+    return null;
   }
 
   function getSavedBoardPlanApostleIds() {
@@ -14553,7 +14643,7 @@
     return snapshot;
   }
 
-  function publishLiveState() {
+  function publishLiveState(options = {}) {
     let previousRevision = 0;
     let raw;
     try {
@@ -14567,6 +14657,14 @@
       if (!previous || typeof previous !== 'object' || Array.isArray(previous)
         || !Number.isInteger(Number(previous.revision)) || Number(previous.revision) < 0) {
         throw createStorageRuntimeError('recovery-required', 'read', 'stat.liveMirror');
+      }
+                                                                               
+                                                                                        
+      if (options.verifyCurrentPublisher === true
+        && previous.sourceTabInstanceId
+        && previous.sourceTabInstanceId !== TAB_INSTANCE_ID) {
+        isLiveStatePublisher = false;
+        return false;
       }
       previousRevision = Number(previous.revision);
     }
@@ -14599,6 +14697,7 @@
       throw createStorageRuntimeError('write-failed', 'write', 'stat.legacyCurrent');
     }
     postStateSyncMessage({ type: 'live-published', revision });
+    return true;
   }
 
   function postStateSyncMessage(message) {
@@ -14683,8 +14782,7 @@
     });
     window.addEventListener('focus', claimLiveStatePublisher);
     window.addEventListener('blur', () => {
-      flushPendingStateSave();
-      isLiveStatePublisher = false;
+      flushStateForStorageSuspend();
     });
   }
 
@@ -14798,15 +14896,25 @@
     }, 120);
   }
 
-  function flushPendingStateSave() {
+  function flushPendingStateSave(options = {}) {
     if (stateSaveTimer) {
       window.clearTimeout(stateSaveTimer);
       stateSaveTimer = 0;
     }
-    return safePersistState();
+    return safePersistState(options);
   }
 
-  function persistState() {
+  function flushStateForStorageSuspend() {
+                                                                               
+    const allowHiddenLivePublish = isLiveStatePublisher
+      && document.visibilityState === 'hidden'
+      && Boolean(stateSaveTimer);
+    const flushed = flushPendingStateSave({ allowHiddenLivePublish });
+    isLiveStatePublisher = false;
+    return flushed;
+  }
+
+  function persistState(options = {}) {
     appState.syncRevision = Math.max(0, Number(appState.syncRevision) || 0) + 1;
     let persisted = true;
     try {
@@ -14815,9 +14923,9 @@
       persisted = false;
       reportStorageFailure(error);
     }
-    if (isLiveStatePublisher && document.visibilityState !== 'hidden') {
+    if (isLiveStatePublisher && (document.visibilityState !== 'hidden' || options.allowHiddenLivePublish === true)) {
       try {
-        publishLiveState();
+        publishLiveState({ verifyCurrentPublisher: options.allowHiddenLivePublish === true });
       } catch (error) {
         persisted = false;
         reportStorageFailure(error);
@@ -14826,9 +14934,9 @@
     return persisted;
   }
 
-  function safePersistState() {
+  function safePersistState(options = {}) {
     try {
-      return persistState();
+      return persistState(options);
     } catch (error) {
       reportStorageFailure(error);
       return false;
@@ -14844,6 +14952,21 @@
       statSnapshotRefreshTimer = 0;
       refreshScheduledStatSnapshots(idsToRefresh);
     }, 350);
+  }
+
+  function flushScheduledStatSnapshotRefresh() {
+    if (!statSnapshotRefreshTimer || isRefreshingStatSnapshots) return false;
+    window.clearTimeout(statSnapshotRefreshTimer);
+    statSnapshotRefreshTimer = 0;
+    const idsToRefresh = pendingStatSnapshotRefreshIds;
+    pendingStatSnapshotRefreshIds = new Set();
+    const rows = getStatSnapshotRefreshRows(idsToRefresh);
+    if (!rows.length) {
+      safePersistState();
+      return false;
+    }
+    refreshStatSnapshotsForRowsChunked(rows);
+    return true;
   }
 
   function queueStatSnapshotRefreshIds(ids = null) {
@@ -14895,11 +15018,16 @@
       updateFormationCoinSummary();
       isRefreshingStatSnapshots = false;
       safePersistState();
+      finishPendingRankOverviewSort();
     };
     const failRefresh = error => {
       console.error(error);
       isRefreshingStatSnapshots = false;
       safePersistState();
+      if (pendingRankOverviewCardsAfterSnapshotRefresh) {
+        pendingRankOverviewCardsAfterSnapshotRefresh = false;
+        if (isGlobalSettingPanelActive('rank')) renderRankOverviewCards();
+      }
     };
     const runChunk = () => {
       if (generation !== statCalculationGeneration) return;

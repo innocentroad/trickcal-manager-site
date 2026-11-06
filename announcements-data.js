@@ -10,6 +10,21 @@
   const ALLOWED_CTA = new Set(['migration-guide', null]);
   const ARTICLES = Object.freeze([
     Object.freeze({
+      id: '20261106-feature-ef-grade',
+      date: '2026-11-06',
+      title: 'エーリアスフロンティアの学年調整に対応',
+      barTitle: 'ダメージ計算の学年調整に対応',
+      summary: 'エーリアスフロンティアの敵を選んだ場合も、学年を変更できるようにしました。',
+      body: Object.freeze([
+        'ダメージ計算の「学年」で、エーリアスフロンティアの標準の4年生から5年生・6年生へ変更できます。',
+        'エピカの愛用スペルなどで学年が上がった場合の比較に利用できます。'
+      ]),
+      category: 'feature',
+      profiles: Object.freeze(['new']),
+      autoRevision: '1',
+      cta: null
+    }),
+    Object.freeze({
       id: '20261105-game-data-polan',
       date: '2026-11-05',
       title: 'ポランと専用遺物を追加',

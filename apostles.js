@@ -1719,7 +1719,7 @@ const APOSTLE_LIBRARY = [
               "valueKind": "スキルダメージ増加",
               "valueClass": "倍率",
               "effectType": "バフ",
-              "damageModifierCategory": "行動倍率",
+              "damageModifierCategory": "与ダメージ量",
               "effectTarget": "自身",
               "fixedValue": 33.0
             },
@@ -5351,7 +5351,32 @@ const APOSTLE_LIBRARY = [
         }
       }
     },
-    "board": null
+    "board": null,
+    "skillCoefficientReplacements": [
+      {
+        "sourceEffectId": "Erpin_aside_2_e04",
+        "targetEffectId": "Erpin_high_e01",
+        "mode": "value",
+        "levels": {
+          "1": 750.0,
+          "2": 825.0,
+          "3": 900.0,
+          "4": 975.0,
+          "5": 1050.0,
+          "6": 1125.0,
+          "7": 1200.0,
+          "8": 1275.0,
+          "9": 1350.0,
+          "10": 1425.0,
+          "11": 1500.0,
+          "12": 1575.0,
+          "13": 1650.0,
+          "14": 1725.0,
+          "15": 1800.0
+        },
+        "consumedBonusP": 50.0
+      }
+    ]
   },
   {
     "id": "elena",
@@ -8260,7 +8285,7 @@ const APOSTLE_LIBRARY = [
               "fixedValue": 6.0
             }
           ],
-          "description": "着用者の最大HP、物理防御力、魔法防御力、会心抵抗、会心ダメージ抵抗が増加する。"
+          "description": "戦闘時ステータス増加"
         },
         "2": {
           "name": "ワクワクする冒険だ！",
@@ -13152,9 +13177,13 @@ const APOSTLE_LIBRARY = [
               "damageModifierCategory": "行動倍率",
               "triggerType": "低学年スキル使用時",
               "triggerSourceId": "低学年スキル",
-              "condition": "低学年スキル使用時",
+              "conditionType": "フィールド敵数",
+              "conditionValue": 1.0,
+              "condition": "低学年スキル使用時、フィールド上の指定敵数が1体の場合",
+              "effectTarget": "自身",
               "targetSkill": "低学年スキル",
-              "fixedValue": 100.0
+              "fixedValue": 100.0,
+              "displayCondition": "フィールドの敵が1体の場合（手動指定）"
             }
           ],
           "description": "最大HPが増加し、基本攻撃命中時、HPを回復する。低学年スキル、高学年スキル使用後、攻撃速度が増加する。\n低学年スキル使用中、敵が一体しかいない場合、ダメージが増加する。"
@@ -13201,7 +13230,17 @@ const APOSTLE_LIBRARY = [
         }
       }
     },
-    "board": null
+    "board": null,
+    "skillCoefficientReplacements": [
+      {
+        "sourceEffectId": "Xion_aside_2_e06",
+        "targetEffectId": "Xion_low_e01",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "coefficientTransform": "float32-trunc",
+        "consumedBonusP": 100.0
+      }
+    ]
   },
   {
     "id": "sist",
@@ -17633,7 +17672,65 @@ const APOSTLE_LIBRARY = [
         }
       }
     },
-    "board": null
+    "board": null,
+    "skillCoefficientReplacements": [
+      {
+        "sourceEffectId": "Tig_high_e04",
+        "targetEffectId": "Tig_basic_e01",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      },
+      {
+        "sourceEffectId": "Tig_high_e04",
+        "targetEffectId": "Tig_basic_e02",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      },
+      {
+        "sourceEffectId": "Tig_high_e04",
+        "targetEffectId": "Tig_enhanced_e01",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      },
+      {
+        "sourceEffectId": "Tig_high_e04",
+        "targetEffectId": "Tig_enhanced_e02",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      },
+      {
+        "sourceEffectId": "Tig_favorite_1_e04",
+        "targetEffectId": "Tig_basic_e01",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      },
+      {
+        "sourceEffectId": "Tig_favorite_1_e04",
+        "targetEffectId": "Tig_basic_e02",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      },
+      {
+        "sourceEffectId": "Tig_favorite_1_e04",
+        "targetEffectId": "Tig_enhanced_e01",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      },
+      {
+        "sourceEffectId": "Tig_favorite_1_e04",
+        "targetEffectId": "Tig_enhanced_e02",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "consumedBonusP": 100.0
+      }
+    ]
   },
   {
     "id": "naia",
@@ -25067,6 +25164,541 @@ const APOSTLE_LIBRARY = [
     "board": null
   },
   {
+    "id": "polan",
+    "name": "ポラン",
+    "basic": {
+      "rarity": 3.0,
+      "personality": "狂気",
+      "race": "妖精",
+      "role": "支援",
+      "position": "後列",
+      "attackType": "物理",
+      "initialSp": 160.0,
+      "spRecoveryPerSecond": 33.0,
+      "baseAttackSpeed": 100.0,
+      "combatPowerCorrection": 0.485,
+      "combatPowerLowSkillCoefficient": 0.02,
+      "combatPowerHighSkillCoefficient": 0.02,
+      "combatPowerPassiveCoefficient": 0.02,
+      "combatPowerAsideCoefficient": 0.7
+    },
+    "statTypes": {
+      "hp": 3.0,
+      "atkP": 2.0,
+      "atkM": 0.0,
+      "defP": 3.0,
+      "defM": 3.0,
+      "crit": 3.0,
+      "critDmg": 3.0,
+      "critRes": 3.0,
+      "critDmgRes": 3.0
+    },
+    "skills": [
+      {
+        "effects": [
+          {
+            "effectId": "Polan_basic_e01",
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "範囲内の敵",
+            "fixedValue": 75.0
+          }
+        ],
+        "skillId": "Polan_basic",
+        "skillType": "普通攻撃_基本",
+        "skillName": "基本",
+        "description": "マスケットを発射して敵に範囲物理ダメージを与える。"
+      },
+      {
+        "effects": [
+          {
+            "effectId": "Polan_enhanced_e01",
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "範囲内の敵",
+            "fixedValue": 150.0
+          },
+          {
+            "effectId": "Polan_enhanced_e02",
+            "valueKind": "HP回復",
+            "valueClass": "倍率",
+            "effectType": "回復",
+            "effectTarget": "残りHP割合が最も低い味方",
+            "reference": "対象の最大HP",
+            "fixedValue": 15.0
+          }
+        ],
+        "skillId": "Polan_enhanced",
+        "skillType": "普通攻撃_強化",
+        "skillName": "強化",
+        "description": "3回目の攻撃ごとにマスケットを装填し、残りHPの割合が最も低い味方使徒のHPを回復させる。その後、敵に発射して範囲物理ダメージを与える。",
+        "triggerType": "n回ごと",
+        "triggerValue": 3.0
+      },
+      {
+        "effects": [
+          {
+            "effectId": "Polan_low_e01",
+            "valueKind": "HP回復",
+            "valueClass": "倍率",
+            "effectType": "回復",
+            "effectTarget": "味方全員",
+            "reference": "対象の最大HP",
+            "levels": {
+              "1": 10.0,
+              "2": 11.0,
+              "3": 12.0,
+              "4": 13.0,
+              "5": 14.0,
+              "6": 15.0,
+              "7": 16.0,
+              "8": 17.0,
+              "9": 18.0,
+              "10": 19.0,
+              "11": 20.0,
+              "12": 21.0,
+              "13": 22.0,
+              "14": 23.0,
+              "15": 24.0
+            }
+          },
+          {
+            "effectId": "Polan_low_e02",
+            "processGroupId": "Polan_low_skill",
+            "processOrder": 1.0,
+            "valueKind": "スキルダメージ量増加",
+            "valueClass": "倍率",
+            "effectType": "バフ",
+            "damageModifierCategory": "与ダメージ量",
+            "attackCategory": "スキル",
+            "effectTarget": "味方全員",
+            "levels": {
+              "1": 36.0,
+              "2": 36.0,
+              "3": 36.0,
+              "4": 36.0,
+              "5": 36.0,
+              "6": 36.0,
+              "7": 36.0,
+              "8": 36.0,
+              "9": 36.0,
+              "10": 36.0,
+              "11": 36.0,
+              "12": 36.0,
+              "13": 36.0,
+              "14": 36.0,
+              "15": 36.0
+            }
+          },
+          {
+            "effectId": "Polan_low_e03",
+            "processGroupId": "Polan_low_skill",
+            "processOrder": 2.0,
+            "valueKind": "スキルダメージ量増加",
+            "valueClass": "持続時間",
+            "effectType": "バフ",
+            "effectTarget": "味方全員",
+            "fixedValue": 10.0
+          }
+        ],
+        "skillId": "Polan_low",
+        "skillType": "低学年",
+        "skillName": "妖精王国に敬礼",
+        "description": "基本教練を行って味方の士気を高める。味方使徒全員のHPを回復させ、一定時間、スキルダメージ量を増加させる。"
+      },
+      {
+        "effects": [
+          {
+            "effectId": "Polan_high_e01",
+            "valueKind": "物理ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "砲撃が命中した敵",
+            "levels": {
+              "1": 400.0,
+              "2": 440.0,
+              "3": 480.0,
+              "4": 520.0,
+              "5": 560.0,
+              "6": 600.0,
+              "7": 640.0,
+              "8": 680.0,
+              "9": 720.0,
+              "10": 760.0,
+              "11": 800.0,
+              "12": 840.0,
+              "13": 880.0,
+              "14": 920.0,
+              "15": 960.0
+            }
+          },
+          {
+            "effectId": "Polan_high_e02",
+            "processGroupId": "Polan_high_hp",
+            "processOrder": 1.0,
+            "valueKind": "最大HP増加",
+            "valueClass": "倍率",
+            "effectType": "バフ",
+            "effectTarget": "砲撃が命中した味方",
+            "levels": {
+              "1": 12.0,
+              "2": 13.0,
+              "3": 14.0,
+              "4": 15.0,
+              "5": 16.0,
+              "6": 17.0,
+              "7": 18.0,
+              "8": 19.0,
+              "9": 20.0,
+              "10": 21.0,
+              "11": 22.0,
+              "12": 23.0,
+              "13": 24.0,
+              "14": 25.0,
+              "15": 26.0
+            }
+          },
+          {
+            "effectId": "Polan_high_e03",
+            "processGroupId": "Polan_high_hp",
+            "processOrder": 2.0,
+            "valueKind": "最大HP増加",
+            "valueClass": "持続時間",
+            "effectType": "バフ",
+            "effectTarget": "砲撃が命中した味方",
+            "fixedValue": 6.0
+          },
+          {
+            "effectId": "Polan_high_e04",
+            "valueKind": "HP回復",
+            "valueClass": "倍率",
+            "effectType": "回復",
+            "effectTarget": "砲撃が命中した味方",
+            "reference": "対象の最大HP",
+            "levels": {
+              "1": 14.0,
+              "2": 15.0,
+              "3": 16.0,
+              "4": 17.0,
+              "5": 18.0,
+              "6": 19.0,
+              "7": 20.0,
+              "8": 21.0,
+              "9": 22.0,
+              "10": 23.0,
+              "11": 24.0,
+              "12": 25.0,
+              "13": 26.0,
+              "14": 27.0,
+              "15": 28.0
+            }
+          }
+        ],
+        "skillId": "Polan_high",
+        "skillType": "高学年",
+        "skillName": "ロイヤルストレート",
+        "description": "大砲を発射して敵に範囲物理ダメージを与える。一定時間、砲撃が命中した味方の最大HPを増加させ、HPを回復させる。",
+        "cooldownSeconds": 17.0
+      },
+      {
+        "effects": [
+          {
+            "effectId": "Polan_passive_e01",
+            "processGroupId": "Polan_passive_shield",
+            "processOrder": 1.0,
+            "valueKind": "シールド付与",
+            "valueClass": "倍率",
+            "effectType": "バフ",
+            "condition": "強化攻撃・低学年・高学年スキルでHP回復を適用した時",
+            "effectTarget": "回復を受けた後列の味方",
+            "levels": {
+              "1": 20.0,
+              "2": 22.0,
+              "3": 24.0,
+              "4": 26.0,
+              "5": 28.0,
+              "6": 30.0,
+              "7": 32.0,
+              "8": 34.0,
+              "9": 36.0,
+              "10": 38.0,
+              "11": 40.0,
+              "12": 42.0,
+              "13": 44.0,
+              "14": 46.0,
+              "15": 48.0
+            }
+          },
+          {
+            "effectId": "Polan_passive_e02",
+            "processGroupId": "Polan_passive_shield",
+            "processOrder": 2.0,
+            "valueKind": "シールド付与",
+            "valueClass": "持続時間",
+            "effectType": "バフ",
+            "effectTarget": "回復を受けた後列の味方",
+            "fixedValue": 6.0
+          }
+        ],
+        "skillId": "Polan_passive",
+        "skillType": "パッシブ",
+        "skillName": "パッシブスキル",
+        "description": "後列の味方に強化攻撃、低学年スキル、高学年スキルでHP回復を適用時、追加でシールドを付与する。"
+      }
+    ],
+    "favoriteCard": {
+      "name": "ポランの制服帽子",
+      "kind": "遺物",
+      "levels": {
+        "1": [
+          {
+            "effects": [
+              {
+                "effectId": "Polan_favorite_1_e01",
+                "targetSkill": "普通攻撃_強化",
+                "valueKind": "物理ダメージ",
+                "valueClass": "倍率",
+                "effectType": "攻撃",
+                "effectTarget": "範囲内の敵",
+                "fixedValue": 300.0
+              },
+              {
+                "effectId": "Polan_favorite_1_e02",
+                "targetSkill": "普通攻撃_強化",
+                "valueKind": "HP回復",
+                "valueClass": "倍率",
+                "effectType": "回復",
+                "effectTarget": "残りHP割合が最も低い味方3名",
+                "reference": "対象の最大HP",
+                "fixedValue": 25.0
+              },
+              {
+                "effectId": "Polan_favorite_1_e03",
+                "valueKind": "強化攻撃間隔",
+                "valueClass": "回数",
+                "effectType": "スキル変更",
+                "effectTarget": "自身",
+                "fixedValue": 2.0
+              }
+            ],
+            "skillId": "Polan_favorite_1",
+            "skillName": "愛用Lv1",
+            "description": "2回目の攻撃ごとにマスケットを装填し、残りHPの割合が最も低い味方使徒3名のHPを回復させる。その後、敵に発射して範囲物理ダメージを与える。"
+          }
+        ],
+        "3": [
+          {
+            "effects": [
+              {
+                "effectId": "Polan_favorite_3_e01",
+                "valueKind": "最大HP増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9.0
+              },
+              {
+                "effectId": "Polan_favorite_3_e02",
+                "valueKind": "会心抵抗増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9.0
+              },
+              {
+                "effectId": "Polan_favorite_3_e03",
+                "valueKind": "会心ダメージ抵抗増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9.0
+              }
+            ],
+            "skillId": "Polan_favorite_3",
+            "skillName": "愛用Lv3",
+            "description": "ポランのHP、会心抵抗、会心ダメージ抵抗が9%増加する。"
+          }
+        ]
+      }
+    },
+    "aside": {
+      "name": "内なる少女",
+      "levels": {
+        "1": {
+          "name": "私だって少女であります",
+          "stats": [],
+          "effects": [
+            {
+              "skillId": "Polan_aside_1",
+              "effectId": "Polan_aside_1_e01",
+              "valueKind": "最大HP増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Polan_aside_1",
+              "effectId": "Polan_aside_1_e02",
+              "valueKind": "物理防御力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Polan_aside_1",
+              "effectId": "Polan_aside_1_e03",
+              "valueKind": "魔法防御力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Polan_aside_1",
+              "effectId": "Polan_aside_1_e04",
+              "valueKind": "会心抵抗増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Polan_aside_1",
+              "effectId": "Polan_aside_1_e05",
+              "valueKind": "会心ダメージ抵抗増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            }
+          ],
+          "description": "戦闘時ステータス増加"
+        },
+        "2": {
+          "name": "ポランバスター",
+          "stats": [],
+          "effects": [
+            {
+              "skillId": "Polan_aside_2",
+              "effectId": "Polan_aside_2_e01",
+              "processGroupId": "Polan_aside2_0",
+              "processOrder": 1.0,
+              "valueKind": "被ダメージ量増加",
+              "valueClass": "倍率",
+              "effectType": "デバフ",
+              "triggerType": "強化攻撃命中時",
+              "effectTarget": "命中した敵",
+              "fixedValue": 15.0
+            },
+            {
+              "skillId": "Polan_aside_2",
+              "effectId": "Polan_aside_2_e02",
+              "processGroupId": "Polan_aside2_0",
+              "processOrder": 2.0,
+              "valueKind": "被ダメージ量増加",
+              "valueClass": "持続時間",
+              "effectType": "デバフ",
+              "effectTarget": "命中した敵",
+              "fixedValue": 2.0
+            },
+            {
+              "skillId": "Polan_aside_2",
+              "effectId": "Polan_aside_2_e03",
+              "processGroupId": "Polan_aside2_1",
+              "processOrder": 1.0,
+              "valueKind": "気絶",
+              "valueClass": "状態付与",
+              "effectType": "デバフ",
+              "triggerType": "高学年スキル命中時",
+              "effectTarget": "砲撃が命中した敵"
+            },
+            {
+              "skillId": "Polan_aside_2",
+              "effectId": "Polan_aside_2_e04",
+              "processGroupId": "Polan_aside2_1",
+              "processOrder": 2.0,
+              "valueKind": "気絶",
+              "valueClass": "持続時間",
+              "effectType": "デバフ",
+              "effectTarget": "砲撃が命中した敵",
+              "fixedValue": 1.5
+            },
+            {
+              "skillId": "Polan_aside_2",
+              "effectId": "Polan_aside_2_e05",
+              "processGroupId": "Polan_aside2_2",
+              "processOrder": 1.0,
+              "valueKind": "攻撃力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "triggerType": "高学年スキル命中時",
+              "effectTarget": "砲撃が命中した味方",
+              "fixedValue": 25.0
+            },
+            {
+              "skillId": "Polan_aside_2",
+              "effectId": "Polan_aside_2_e06",
+              "processGroupId": "Polan_aside2_2",
+              "processOrder": 2.0,
+              "valueKind": "攻撃力増加",
+              "valueClass": "持続時間",
+              "effectType": "バフ",
+              "effectTarget": "砲撃が命中した味方",
+              "fixedValue": 6.0
+            }
+          ],
+          "description": "強化攻撃命中時、敵の被ダメージ量を増加させる。\n高学年スキルの範囲が増加する。砲撃が命中した敵は気絶が付与され、味方は攻撃力が増加する。"
+        },
+        "3": {
+          "name": "エルフィンランド進軍旗",
+          "stats": [
+            {
+              "skillId": "Polan_aside_3_global",
+              "effectId": "Polan_aside_3_global_e01",
+              "statApplyTo": "全体",
+              "statName": "物理攻撃力",
+              "increaseP": 3.0
+            },
+            {
+              "skillId": "Polan_aside_3_global",
+              "effectId": "Polan_aside_3_global_e02",
+              "statApplyTo": "全体",
+              "statName": "物理防御力",
+              "increaseP": 3.0
+            }
+          ],
+          "effects": [
+            {
+              "skillId": "Polan_aside_3_battle",
+              "effectId": "Polan_aside_3_battle_e01",
+              "valueKind": "与ダメージ量増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "damageModifierCategory": "与ダメージ量",
+              "effectTarget": "味方全員",
+              "fixedValue": 10.5
+            },
+            {
+              "skillId": "Polan_aside_3_battle",
+              "effectId": "Polan_aside_3_battle_e02",
+              "valueKind": "被ダメージ量減少",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "味方全員",
+              "fixedValue": 4.5
+            }
+          ],
+          "description": "味方全員の敵への与ダメージ量を増加させ、味方全員の敵からの被ダメージ量を減少させる。"
+        }
+      }
+    },
+    "board": null
+  },
+  {
     "id": "mago",
     "name": "マーゴ",
     "basic": {
@@ -29879,7 +30511,78 @@ const APOSTLE_LIBRARY = [
         }
       }
     },
-    "board": null
+    "board": null,
+    "skillCoefficientReplacements": [
+      {
+        "sourceEffectId": "Rim_aside_2_e04",
+        "targetEffectId": "Rim_low_e02",
+        "mode": "value",
+        "levels": {
+          "1": 375.0,
+          "2": 420.0,
+          "3": 465.0,
+          "4": 510.0,
+          "5": 555.0,
+          "6": 600.0,
+          "7": 645.0,
+          "8": 690.0,
+          "9": 735.0,
+          "10": 780.0,
+          "11": 825.0,
+          "12": 870.0,
+          "13": 915.0,
+          "14": 960.0,
+          "15": 1005.0
+        },
+        "consumedBonusP": 50.0
+      },
+      {
+        "sourceEffectId": "Rim_aside_2_e06",
+        "targetEffectId": "Rim_high_e01",
+        "mode": "value",
+        "levels": {
+          "1": 600.0,
+          "2": 645.0,
+          "3": 690.0,
+          "4": 735.0,
+          "5": 780.0,
+          "6": 825.0,
+          "7": 870.0,
+          "8": 915.0,
+          "9": 960.0,
+          "10": 1005.0,
+          "11": 1050.0,
+          "12": 1095.0,
+          "13": 1140.0,
+          "14": 1185.0,
+          "15": 1230.0
+        },
+        "consumedBonusP": 50.0
+      },
+      {
+        "sourceEffectId": "Rim_aside_2_e06",
+        "targetEffectId": "Rim_high_e02",
+        "mode": "value",
+        "levels": {
+          "1": 900.0,
+          "2": 945.0,
+          "3": 990.0,
+          "4": 1035.0,
+          "5": 1080.0,
+          "6": 1125.0,
+          "7": 1170.0,
+          "8": 1215.0,
+          "9": 1260.0,
+          "10": 1305.0,
+          "11": 1350.0,
+          "12": 1395.0,
+          "13": 1440.0,
+          "14": 1485.0,
+          "15": 1530.0
+        },
+        "consumedBonusP": 50.0
+      }
+    ]
   },
   {
     "id": "rudd",
@@ -30759,7 +31462,7 @@ const APOSTLE_LIBRARY = [
               "valueKind": "普通攻撃ダメージ量増加",
               "valueClass": "倍率",
               "effectType": "バフ",
-              "damageModifierCategory": "行動倍率",
+              "damageModifierCategory": "与ダメージ量",
               "effectTarget": "自身",
               "targetSkill": "普通攻撃",
               "fixedValue": 200.0
@@ -32306,541 +33009,6 @@ const APOSTLE_LIBRARY = [
             }
           ],
           "description": "後列の味方の敵への与ダメージ量を増加させ、後列の味方の敵からの被ダメージ量を減少させる。"
-        }
-      }
-    },
-    "board": null
-  },
-  {
-    "id": "polan",
-    "name": "ポラン",
-    "basic": {
-      "rarity": 3.0,
-      "personality": "狂気",
-      "race": "妖精",
-      "role": "支援",
-      "position": "後列",
-      "attackType": "物理",
-      "initialSp": 160.0,
-      "spRecoveryPerSecond": 33.0,
-      "baseAttackSpeed": 100.0,
-      "combatPowerCorrection": 0.485,
-      "combatPowerLowSkillCoefficient": 0.02,
-      "combatPowerHighSkillCoefficient": 0.02,
-      "combatPowerPassiveCoefficient": 0.02,
-      "combatPowerAsideCoefficient": 0.7
-    },
-    "statTypes": {
-      "hp": 3.0,
-      "atkP": 2.0,
-      "atkM": 0.0,
-      "defP": 3.0,
-      "defM": 3.0,
-      "crit": 3.0,
-      "critDmg": 3.0,
-      "critRes": 3.0,
-      "critDmgRes": 3.0
-    },
-    "skills": [
-      {
-        "effects": [
-          {
-            "effectId": "Polan_basic_e01",
-            "valueKind": "物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "範囲内の敵",
-            "fixedValue": 75.0
-          }
-        ],
-        "skillId": "Polan_basic",
-        "skillType": "普通攻撃_基本",
-        "skillName": "基本",
-        "description": "マスケットを発射して敵に範囲物理ダメージを与える。"
-      },
-      {
-        "effects": [
-          {
-            "effectId": "Polan_enhanced_e01",
-            "valueKind": "物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "範囲内の敵",
-            "fixedValue": 150.0
-          },
-          {
-            "effectId": "Polan_enhanced_e02",
-            "valueKind": "HP回復",
-            "valueClass": "倍率",
-            "effectType": "回復",
-            "effectTarget": "残りHP割合が最も低い味方",
-            "reference": "対象の最大HP",
-            "fixedValue": 15.0
-          }
-        ],
-        "skillId": "Polan_enhanced",
-        "skillType": "普通攻撃_強化",
-        "skillName": "強化",
-        "description": "3回目の攻撃ごとにマスケットを装填し、残りHPの割合が最も低い味方使徒のHPを回復させる。その後、敵に発射して範囲物理ダメージを与える。",
-        "triggerType": "n回ごと",
-        "triggerValue": 3.0
-      },
-      {
-        "effects": [
-          {
-            "effectId": "Polan_low_e01",
-            "valueKind": "HP回復",
-            "valueClass": "倍率",
-            "effectType": "回復",
-            "effectTarget": "味方全員",
-            "reference": "対象の最大HP",
-            "levels": {
-              "1": 10.0,
-              "2": 11.0,
-              "3": 12.0,
-              "4": 13.0,
-              "5": 14.0,
-              "6": 15.0,
-              "7": 16.0,
-              "8": 17.0,
-              "9": 18.0,
-              "10": 19.0,
-              "11": 20.0,
-              "12": 21.0,
-              "13": 22.0,
-              "14": 23.0,
-              "15": 24.0
-            }
-          },
-          {
-            "effectId": "Polan_low_e02",
-            "processGroupId": "Polan_low_skill",
-            "processOrder": 1.0,
-            "valueKind": "スキルダメージ量増加",
-            "valueClass": "倍率",
-            "effectType": "バフ",
-            "damageModifierCategory": "与ダメージ量",
-            "attackCategory": "スキル",
-            "effectTarget": "味方全員",
-            "levels": {
-              "1": 36.0,
-              "2": 36.0,
-              "3": 36.0,
-              "4": 36.0,
-              "5": 36.0,
-              "6": 36.0,
-              "7": 36.0,
-              "8": 36.0,
-              "9": 36.0,
-              "10": 36.0,
-              "11": 36.0,
-              "12": 36.0,
-              "13": 36.0,
-              "14": 36.0,
-              "15": 36.0
-            }
-          },
-          {
-            "effectId": "Polan_low_e03",
-            "processGroupId": "Polan_low_skill",
-            "processOrder": 2.0,
-            "valueKind": "スキルダメージ量増加",
-            "valueClass": "持続時間",
-            "effectType": "バフ",
-            "effectTarget": "味方全員",
-            "fixedValue": 10.0
-          }
-        ],
-        "skillId": "Polan_low",
-        "skillType": "低学年",
-        "skillName": "妖精王国に敬礼",
-        "description": "基本教練を行って味方の士気を高める。味方使徒全員のHPを回復させ、一定時間、スキルダメージ量を増加させる。"
-      },
-      {
-        "effects": [
-          {
-            "effectId": "Polan_high_e01",
-            "valueKind": "物理ダメージ",
-            "valueClass": "倍率",
-            "effectType": "攻撃",
-            "effectTarget": "砲撃が命中した敵",
-            "levels": {
-              "1": 400.0,
-              "2": 440.0,
-              "3": 480.0,
-              "4": 520.0,
-              "5": 560.0,
-              "6": 600.0,
-              "7": 640.0,
-              "8": 680.0,
-              "9": 720.0,
-              "10": 760.0,
-              "11": 800.0,
-              "12": 840.0,
-              "13": 880.0,
-              "14": 920.0,
-              "15": 960.0
-            }
-          },
-          {
-            "effectId": "Polan_high_e02",
-            "processGroupId": "Polan_high_hp",
-            "processOrder": 1.0,
-            "valueKind": "最大HP増加",
-            "valueClass": "倍率",
-            "effectType": "バフ",
-            "effectTarget": "砲撃が命中した味方",
-            "levels": {
-              "1": 12.0,
-              "2": 13.0,
-              "3": 14.0,
-              "4": 15.0,
-              "5": 16.0,
-              "6": 17.0,
-              "7": 18.0,
-              "8": 19.0,
-              "9": 20.0,
-              "10": 21.0,
-              "11": 22.0,
-              "12": 23.0,
-              "13": 24.0,
-              "14": 25.0,
-              "15": 26.0
-            }
-          },
-          {
-            "effectId": "Polan_high_e03",
-            "processGroupId": "Polan_high_hp",
-            "processOrder": 2.0,
-            "valueKind": "最大HP増加",
-            "valueClass": "持続時間",
-            "effectType": "バフ",
-            "effectTarget": "砲撃が命中した味方",
-            "fixedValue": 6.0
-          },
-          {
-            "effectId": "Polan_high_e04",
-            "valueKind": "HP回復",
-            "valueClass": "倍率",
-            "effectType": "回復",
-            "effectTarget": "砲撃が命中した味方",
-            "reference": "対象の最大HP",
-            "levels": {
-              "1": 14.0,
-              "2": 15.0,
-              "3": 16.0,
-              "4": 17.0,
-              "5": 18.0,
-              "6": 19.0,
-              "7": 20.0,
-              "8": 21.0,
-              "9": 22.0,
-              "10": 23.0,
-              "11": 24.0,
-              "12": 25.0,
-              "13": 26.0,
-              "14": 27.0,
-              "15": 28.0
-            }
-          }
-        ],
-        "skillId": "Polan_high",
-        "skillType": "高学年",
-        "skillName": "ロイヤルストレート",
-        "description": "大砲を発射して敵に範囲物理ダメージを与える。一定時間、砲撃が命中した味方の最大HPを増加させ、HPを回復させる。",
-        "cooldownSeconds": 17.0
-      },
-      {
-        "effects": [
-          {
-            "effectId": "Polan_passive_e01",
-            "processGroupId": "Polan_passive_shield",
-            "processOrder": 1.0,
-            "valueKind": "シールド付与",
-            "valueClass": "倍率",
-            "effectType": "バフ",
-            "condition": "強化攻撃・低学年・高学年スキルでHP回復を適用した時",
-            "effectTarget": "回復を受けた後列の味方",
-            "levels": {
-              "1": 20.0,
-              "2": 22.0,
-              "3": 24.0,
-              "4": 26.0,
-              "5": 28.0,
-              "6": 30.0,
-              "7": 32.0,
-              "8": 34.0,
-              "9": 36.0,
-              "10": 38.0,
-              "11": 40.0,
-              "12": 42.0,
-              "13": 44.0,
-              "14": 46.0,
-              "15": 48.0
-            }
-          },
-          {
-            "effectId": "Polan_passive_e02",
-            "processGroupId": "Polan_passive_shield",
-            "processOrder": 2.0,
-            "valueKind": "シールド付与",
-            "valueClass": "持続時間",
-            "effectType": "バフ",
-            "effectTarget": "回復を受けた後列の味方",
-            "fixedValue": 6.0
-          }
-        ],
-        "skillId": "Polan_passive",
-        "skillType": "パッシブ",
-        "skillName": "パッシブスキル",
-        "description": "後列の味方に強化攻撃、低学年スキル、高学年スキルでHP回復を適用時、追加でシールドを付与する。"
-      }
-    ],
-    "favoriteCard": {
-      "name": "ポランの制服帽子",
-      "kind": "遺物",
-      "levels": {
-        "1": [
-          {
-            "effects": [
-              {
-                "effectId": "Polan_favorite_1_e01",
-                "targetSkill": "普通攻撃_強化",
-                "valueKind": "物理ダメージ",
-                "valueClass": "倍率",
-                "effectType": "攻撃",
-                "effectTarget": "範囲内の敵",
-                "fixedValue": 300.0
-              },
-              {
-                "effectId": "Polan_favorite_1_e02",
-                "targetSkill": "普通攻撃_強化",
-                "valueKind": "HP回復",
-                "valueClass": "倍率",
-                "effectType": "回復",
-                "effectTarget": "残りHP割合が最も低い味方3名",
-                "reference": "対象の最大HP",
-                "fixedValue": 25.0
-              },
-              {
-                "effectId": "Polan_favorite_1_e03",
-                "valueKind": "強化攻撃間隔",
-                "valueClass": "回数",
-                "effectType": "スキル変更",
-                "effectTarget": "自身",
-                "fixedValue": 2.0
-              }
-            ],
-            "skillId": "Polan_favorite_1",
-            "skillName": "愛用Lv1",
-            "description": "2回目の攻撃ごとにマスケットを装填し、残りHPの割合が最も低い味方使徒3名のHPを回復させる。その後、敵に発射して範囲物理ダメージを与える。"
-          }
-        ],
-        "3": [
-          {
-            "effects": [
-              {
-                "effectId": "Polan_favorite_3_e01",
-                "valueKind": "最大HP増加",
-                "valueClass": "倍率",
-                "effectType": "バフ",
-                "effectTarget": "自身",
-                "fixedValue": 9.0
-              },
-              {
-                "effectId": "Polan_favorite_3_e02",
-                "valueKind": "会心抵抗増加",
-                "valueClass": "倍率",
-                "effectType": "バフ",
-                "effectTarget": "自身",
-                "fixedValue": 9.0
-              },
-              {
-                "effectId": "Polan_favorite_3_e03",
-                "valueKind": "会心ダメージ抵抗増加",
-                "valueClass": "倍率",
-                "effectType": "バフ",
-                "effectTarget": "自身",
-                "fixedValue": 9.0
-              }
-            ],
-            "skillId": "Polan_favorite_3",
-            "skillName": "愛用Lv3",
-            "description": "ポランのHP、会心抵抗、会心ダメージ抵抗が9%増加する。"
-          }
-        ]
-      }
-    },
-    "aside": {
-      "name": "内なる少女",
-      "levels": {
-        "1": {
-          "name": "私だって少女であります",
-          "stats": [],
-          "effects": [
-            {
-              "skillId": "Polan_aside_1",
-              "effectId": "Polan_aside_1_e01",
-              "valueKind": "最大HP増加",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "effectTarget": "自身",
-              "fixedValue": 6.0
-            },
-            {
-              "skillId": "Polan_aside_1",
-              "effectId": "Polan_aside_1_e02",
-              "valueKind": "物理防御力増加",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "effectTarget": "自身",
-              "fixedValue": 6.0
-            },
-            {
-              "skillId": "Polan_aside_1",
-              "effectId": "Polan_aside_1_e03",
-              "valueKind": "魔法防御力増加",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "effectTarget": "自身",
-              "fixedValue": 6.0
-            },
-            {
-              "skillId": "Polan_aside_1",
-              "effectId": "Polan_aside_1_e04",
-              "valueKind": "会心抵抗増加",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "effectTarget": "自身",
-              "fixedValue": 6.0
-            },
-            {
-              "skillId": "Polan_aside_1",
-              "effectId": "Polan_aside_1_e05",
-              "valueKind": "会心ダメージ抵抗増加",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "effectTarget": "自身",
-              "fixedValue": 6.0
-            }
-          ],
-          "description": "戦闘時ステータス増加"
-        },
-        "2": {
-          "name": "ポランバスター",
-          "stats": [],
-          "effects": [
-            {
-              "skillId": "Polan_aside_2",
-              "effectId": "Polan_aside_2_e01",
-              "processGroupId": "Polan_aside2_0",
-              "processOrder": 1.0,
-              "valueKind": "被ダメージ量増加",
-              "valueClass": "倍率",
-              "effectType": "デバフ",
-              "triggerType": "強化攻撃命中時",
-              "effectTarget": "命中した敵",
-              "fixedValue": 15.0
-            },
-            {
-              "skillId": "Polan_aside_2",
-              "effectId": "Polan_aside_2_e02",
-              "processGroupId": "Polan_aside2_0",
-              "processOrder": 2.0,
-              "valueKind": "被ダメージ量増加",
-              "valueClass": "持続時間",
-              "effectType": "デバフ",
-              "effectTarget": "命中した敵",
-              "fixedValue": 2.0
-            },
-            {
-              "skillId": "Polan_aside_2",
-              "effectId": "Polan_aside_2_e03",
-              "processGroupId": "Polan_aside2_1",
-              "processOrder": 1.0,
-              "valueKind": "気絶",
-              "valueClass": "状態付与",
-              "effectType": "デバフ",
-              "triggerType": "高学年スキル命中時",
-              "effectTarget": "砲撃が命中した敵"
-            },
-            {
-              "skillId": "Polan_aside_2",
-              "effectId": "Polan_aside_2_e04",
-              "processGroupId": "Polan_aside2_1",
-              "processOrder": 2.0,
-              "valueKind": "気絶",
-              "valueClass": "持続時間",
-              "effectType": "デバフ",
-              "effectTarget": "砲撃が命中した敵",
-              "fixedValue": 1.5
-            },
-            {
-              "skillId": "Polan_aside_2",
-              "effectId": "Polan_aside_2_e05",
-              "processGroupId": "Polan_aside2_2",
-              "processOrder": 1.0,
-              "valueKind": "攻撃力増加",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "triggerType": "高学年スキル命中時",
-              "effectTarget": "砲撃が命中した味方",
-              "fixedValue": 25.0
-            },
-            {
-              "skillId": "Polan_aside_2",
-              "effectId": "Polan_aside_2_e06",
-              "processGroupId": "Polan_aside2_2",
-              "processOrder": 2.0,
-              "valueKind": "攻撃力増加",
-              "valueClass": "持続時間",
-              "effectType": "バフ",
-              "effectTarget": "砲撃が命中した味方",
-              "fixedValue": 6.0
-            }
-          ],
-          "description": "強化攻撃命中時、敵の被ダメージ量を増加させる。\n高学年スキルの範囲が増加する。砲撃が命中した敵は気絶が付与され、味方は攻撃力が増加する。"
-        },
-        "3": {
-          "name": "エルフィンランド進軍旗",
-          "stats": [
-            {
-              "skillId": "Polan_aside_3_global",
-              "effectId": "Polan_aside_3_global_e01",
-              "statApplyTo": "全体",
-              "statName": "物理攻撃力",
-              "increaseP": 3.0
-            },
-            {
-              "skillId": "Polan_aside_3_global",
-              "effectId": "Polan_aside_3_global_e02",
-              "statApplyTo": "全体",
-              "statName": "物理防御力",
-              "increaseP": 3.0
-            }
-          ],
-          "effects": [
-            {
-              "skillId": "Polan_aside_3_battle",
-              "effectId": "Polan_aside_3_battle_e01",
-              "valueKind": "与ダメージ量増加",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "damageModifierCategory": "与ダメージ量",
-              "effectTarget": "味方全員",
-              "fixedValue": 10.5
-            },
-            {
-              "skillId": "Polan_aside_3_battle",
-              "effectId": "Polan_aside_3_battle_e02",
-              "valueKind": "被ダメージ量減少",
-              "valueClass": "倍率",
-              "effectType": "バフ",
-              "effectTarget": "味方全員",
-              "fixedValue": 4.5
-            }
-          ],
-          "description": "味方全員の敵への与ダメージ量を増加させ、味方全員の敵からの被ダメージ量を減少させる。"
         }
       }
     },

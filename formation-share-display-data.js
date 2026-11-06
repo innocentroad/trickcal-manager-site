@@ -435,6 +435,13 @@ const FORMATION_SHARE_DISPLAY_DATA = {
       "role": "支援",
       "imagePath": "img/Chara/Posher.webp?v=077c975ba5c32b52"
     },
+    "Polan": {
+      "name": "ポラン",
+      "personality": "狂気",
+      "position": "後列",
+      "role": "支援",
+      "imagePath": "img/Chara/Polan.webp?v=8470bcb8caadbd04"
+    },
     "Mago": {
       "name": "マーゴ",
       "personality": "純粋",
@@ -581,13 +588,6 @@ const FORMATION_SHARE_DISPLAY_DATA = {
       "position": "後列",
       "role": "攻撃",
       "imagePath": "img/Chara/Rollett.webp?v=a86184071864b083"
-    },
-    "Polan": {
-      "name": "ポラン",
-      "personality": "狂気",
-      "position": "後列",
-      "role": "支援",
-      "imagePath": "img/Chara/Polan.webp?v=8470bcb8caadbd04"
     }
   },
   "artifacts": {
@@ -798,6 +798,15 @@ const FORMATION_SHARE_DISPLAY_DATA = {
       "kind": "artifact",
       "imagePath": "img/Card/Artifact/グウィンの小さなペンギンの友達.webp?v=beb5cd4b01ce5846"
     },
+    "artifact_polan_hat": {
+      "name": "ポランの制服帽子",
+      "rarity": "伝説",
+      "cost": 24,
+      "signature": true,
+      "favoriteCharacter": "ポラン",
+      "kind": "artifact",
+      "imagePath": "img/Card/Artifact/ポランの制服帽子.webp?v=d4706e80ca4f69c9"
+    },
     "artifact_dragonlight_sword": {
       "name": "竜光剣",
       "rarity": "伝説",
@@ -1007,15 +1016,6 @@ const FORMATION_SHARE_DISPLAY_DATA = {
       "cost": 6,
       "kind": "artifact",
       "imagePath": "img/Card/Artifact/錆びついた錐.webp?v=33ec30588c322119"
-    },
-    "artifact_polan_hat": {
-      "name": "ポランの制服帽子",
-      "rarity": "伝説",
-      "cost": 24,
-      "signature": true,
-      "favoriteCharacter": "ポラン",
-      "kind": "artifact",
-      "imagePath": "img/Card/Artifact/ポランの制服帽子.webp?v=d4706e80ca4f69c9"
     }
   },
   "spells": {

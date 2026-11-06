@@ -1066,6 +1066,34 @@
     return value;
   }
 
+                                                                                 
+                                                                          
+  function resolveSkillCoefficientReplacement(effectId, suppliers = [], rules = []) {
+    const matches = [];
+    for (const rule of rules) {
+      if (rule.targetEffectId !== effectId || !Number.isFinite(rule.factor) || rule.factor < 0
+        || !(rule.consumedBonusP > 0)) continue;
+      for (const source of suppliers) {
+        if (source.effectId === rule.sourceEffectId && source.percent === rule.consumedBonusP)
+          matches.push({effectId: rule.sourceEffectId, factor: rule.factor,
+            consumedBonusP: rule.consumedBonusP,
+            ...(rule.coefficientTransform ? {coefficientTransform: rule.coefficientTransform} : {})});
+      }
+    }
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  function applySkillCoefficientReplacement(coefficient, replacement) {
+    if (!replacement) return coefficient;
+    if (!Number.isFinite(coefficient) || coefficient < 0
+      || !Number.isFinite(replacement.factor) || replacement.factor < 0) return null;
+    if (!replacement.coefficientTransform) return coefficient * replacement.factor;
+    if (replacement.coefficientTransform !== 'float32-trunc') return null;
+    const product = Math.fround(Math.fround(coefficient) * Math.fround(replacement.factor));
+    return Number.isFinite(product) && product >= 0 && product < 2147483648
+      ? Math.trunc(product) : null;
+  }
+
   function getRuntimeActionMultiplierModifierP(modifiers, actionKey = '', eventType = '') {
     let value = toFiniteNumber(modifiers?.actionMultiplierBonusP);
     if (actionKey === 'basicAttack' || actionKey === 'enhancedAttack') {
@@ -4665,17 +4693,17 @@
     input = { ...input, actionKey: base.runtimeActionKey ?? input.actionKey };
     const delta = input.modifierDelta || {};
                                                                               
-                                                                          
-                                                                            
+                                                                              
     const actionMultiplier = getRuntimeActionMultiplierModifierP(delta, input.actionKey, input.generatedEventType);
-    const tigOverdrive = String(input.apostleId || '').toLowerCase() === 'tig'
-      && ['Tig_basic_e01','Tig_basic_e02','Tig_enhanced_e01','Tig_enhanced_e02'].includes(input.effectId)
-      && ['basicAttack','enhancedAttack'].includes(input.actionKey)
-      && !input.generatedEventType && !base.actionMultiplierBonusP
-      && actionMultiplier === 100 && delta.normalAttackMultiplierBonusP === 100
-      && normalizeArray(input.activeEffects).some(e => ['Tig_high_e04:owner:Tig',
-        'Tig_favorite_1_e04:owner:Tig'].includes(e.id)
-        && e.modifiers?.normalAttackMultiplierBonusP === 100);
+    const coefficientReplacement = !input.generatedEventType && !base.coefficientReplacement
+      && resolveSkillCoefficientReplacement(input.effectId,
+        normalizeArray(input.activeEffects).filter(row => String(row.id || '').split(':owner:')[1]?.toLowerCase()
+          === String(input.apostleId || '').toLowerCase()).map(row => ({
+          effectId: String(row.id || '').split(':owner:')[0],
+          percent: getRuntimeActionMultiplierModifierP(row.modifiers, input.actionKey)
+        })), base.skillCoefficientReplacements || []);
+    const activeReplacement = coefficientReplacement
+      && actionMultiplier === coefficientReplacement.consumedBonusP ? coefficientReplacement : null;
                                                                          
                                                                              
                                                                         
@@ -4750,7 +4778,7 @@
         && source.stacks * source.perStack === input.heldAddP);
                                                                                
                                                                              
-    if ((actionMultiplier && !tigOverdrive)
+    if ((actionMultiplier && !activeReplacement)
       || toFiniteNumber(delta.specialP) || toFiniteNumber(delta.otherP)
       || ['normalAttackAddP', 'basicAddP', 'enhancedAddP', 'lowSkillAddP', 'highSkillAddP', 'skillAddP']
         .some(key => toFiniteNumber(delta[key])
@@ -4772,7 +4800,8 @@
       calcRuntimeCritRate(finalCrit, finalCritRes), base.critRateP + toFiniteNumber(delta.critRateP), base.critResAddP);
     const critMult = clampCombatCritMultiplier(
       calcRuntimeCritMultiplier(finalCritDmg, finalCritDmgRes) + (base.critDmgAddP + toFiniteNumber(delta.critDmgAddP) - base.critDmgResAddP) / 100);
-    let coefficientP = (component.coefficientP ?? hit.coefficientP) * (tigOverdrive ? 2 : 1);
+    let coefficientP = applySkillCoefficientReplacement(component.coefficientP ?? hit.coefficientP, activeReplacement);
+    if (coefficientP == null) return {supported: false, reason: '係数変更の処理または数値範囲が未対応です'};
     if (input.nativeCoefficientMultiplier != null) {
       const multiplier = input.nativeCoefficientMultiplier;
       if (typeof multiplier !== 'number' || !Number.isFinite(multiplier) || multiplier <= 0
@@ -4987,7 +5016,8 @@
       );
       const newActionMultiplierP = Math.max(
         0,
-        baseActionMultiplierP * (
+        (applySkillCoefficientReplacement(baseActionMultiplierP, base.coefficientReplacement)
+          ?? baseActionMultiplierP) * (
           1 + (toFiniteNumber(base.actionMultiplierBonusP) + actionMultiplierP) / 100
         )
       );
@@ -10100,6 +10130,8 @@
     evaluateDamageAtHit,
     resolveNativeStatusCoefficientSelection,
     evaluateSingleHitDamage,
+    resolveSkillCoefficientReplacement,
+    applySkillCoefficientReplacement,
     buildEpicaDedicatedHitQuery,
     evaluateEpicaDedicatedHitQuery,
     evaluateDotDamage,
