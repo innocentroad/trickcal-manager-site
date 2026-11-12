@@ -21,6 +21,12 @@
         '敵データでもステージ・階層ごとのステータス、攻撃倍率、特徴を確認できます。進軍ではワールド内のステージを一覧で表示し、各ステージのウェーブを開閉できます。',
         '選択したステージに登場しないモンスターも候補に含まれます。特徴の一部は説明表示のみの対応です。'
       ]),
+      relatedLinks: Object.freeze([
+        Object.freeze({
+          label: '解説note：進軍と世界樹採掘の敵ステータス予測',
+          url: 'https://note.com/innocentroad/n/n9b8d7e1b2753'
+        })
+      ]),
       category: 'game-data',
       profiles: Object.freeze(['new']),
       autoRevision: '1',
@@ -151,6 +157,17 @@
     if (!Array.isArray(article.body) || !article.body.length
       || article.body.some(paragraph => typeof paragraph !== 'string' || !paragraph.trim())) {
       return `${label}.body is invalid`;
+    }
+    if (article.relatedLinks !== undefined) {
+      if (!Array.isArray(article.relatedLinks)) return `${label}.relatedLinks is invalid`;
+      for (const link of article.relatedLinks) {
+        if (typeof link?.label !== 'string' || !link.label.trim()
+          || typeof link.url !== 'string') return `${label}.relatedLinks is invalid`;
+        try {
+          const url = new URL(link.url);
+          if (url.protocol !== 'https:' || url.username || url.password) return `${label}.relatedLinks is invalid`;
+        } catch (_) { return `${label}.relatedLinks is invalid`; }
+      }
     }
     if (!Array.isArray(article.profiles) || !article.profiles.length
       || article.profiles.some(profile => !ALLOWED_PROFILES.has(profile))) {

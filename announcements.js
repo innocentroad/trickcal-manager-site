@@ -941,6 +941,13 @@
       });
       appendElement(dialogBody, 'p', `${article.date} · ${article.category}`, 'trickcal-announcement-meta');
       article.body.forEach(paragraph => appendArticleParagraph(dialogBody, paragraph));
+      (article.relatedLinks || []).forEach(item => {
+        const paragraph = appendElement(dialogBody, 'p', undefined, 'trickcal-announcement-paragraph');
+        const link = appendElement(paragraph, 'a', item.label, 'trickcal-announcement-site-link');
+        link.href = item.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      });
       if (article.cta === 'migration-guide') {
         const guideButton = appendElement(dialogBody, 'button', '移行方法を見る', 'trickcal-announcement-guide-button');
         guideButton.type = 'button';
