@@ -47,8 +47,9 @@
       const names = Object.fromEntries([...groups].map(([key, variants]) => {
         const name = variants[0].baseName || variants[0].name;
         const personalities = [...new Set(variants.map(monster => monster.personality).filter(Boolean))];
-        return [key, (counts.get(name) > 1 || /ウイスパー/.test(name)) && personalities.length
-          ? `${name}（${personalities.join('・')}）` : name];
+        const label = (counts.get(name) > 1 || /ウイスパー/.test(name)) && personalities.length
+          ? `${name}（${personalities.join('・')}）` : name;
+        return [key, label];
       }));
       controls += field('monster', 'モンスター', [...groups.keys()], names);
       const condition = rows.find(row => row.wave === state.wave);
@@ -59,6 +60,13 @@
       dialog.innerHTML = `<header><h2 id="fdc-enemy-preset-title">${content === 'crusade' ? '進軍' : '世界樹採掘基地'}</h2><button type="button" data-stage-cancel aria-label="閉じる">×</button></header><div class="fdc-enemy-preset-filters">${controls}</div><footer><button type="button" data-stage-back>コンテンツを変更</button><button type="button" data-stage-cancel>取消</button><button type="button" data-stage-apply ${selection ? '' : 'disabled'}>反映</button></footer>`;
       dialog.querySelectorAll('[data-stage-pick]').forEach(input => input.addEventListener('change', () => {
         state[input.dataset.stagePick] = input.dataset.stagePick === 'monster' ? input.value : Number(input.value);
+        if (input.dataset.stagePick === 'strength' && selectedMonster) {
+          const next = monsters.find(monster => monster.strength === state.strength
+            && monster.baseName === selectedMonster.baseName
+            && monster.personality === selectedMonster.personality
+            && JSON.stringify(monster.skills) === JSON.stringify(selectedMonster.skills));
+          if (next) state.monster = groupKey(next);
+        }
         render();
         dialog.querySelector(`[data-stage-pick="${input.dataset.stagePick}"]`)?.focus();
       }));

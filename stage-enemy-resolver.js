@@ -31,6 +31,7 @@
         ? selection.damageType : monster.dmgType;
       return {
         ...stats, name: monster.name, dmgType: damageType === 'magic' ? 'mag' : 'phys',
+        projected: !!monster.projected,
         personality: monster.personality, strength: monster.strength,
         content: { type: condition.content, world: condition.world, stage: condition.stage },
         special: factor(damageType === 'magic' ? condition.magicBonus : condition.physicalBonus) * 100,

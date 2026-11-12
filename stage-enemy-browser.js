@@ -7,6 +7,7 @@
     el.monster.closest('.enemy-selection-panel').append(panel);
     const state = { content: '', world: 1, stage: 1, difficulty: 3, strength: 1, monster: '', personality: '' };
     const openStages = new Set();
+    let previousMonster;
     const labels = { crusade: '進軍', yggdrasilDigSite: '世界樹採掘基地' };
     const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
     const unique = (rows, key) => [...new Set(rows.map(row => row[key]))].sort((a, b) => a - b);
@@ -45,7 +46,12 @@
         if (!groups.has(key)) groups.set(key, []);
         groups.get(key).push(monster);
       });
-      if (!groups.has(state.monster)) state.monster = groups.keys().next().value || '';
+      if (!groups.has(state.monster)) {
+        const matching = [...groups].find(([, variants]) => variants.some(monster =>
+          monster.baseName === previousMonster?.baseName && monster.personality === previousMonster?.personality
+          && JSON.stringify(monster.skills) === JSON.stringify(previousMonster?.skills)));
+        state.monster = matching?.[0] || groups.keys().next().value || '';
+      }
       const variants = groups.get(state.monster) || [];
       const personalities = [...new Set(variants.map(monster => monster.personality))];
       if (personalities.length) html += select('personality', '敵の性格', personalities);
@@ -68,6 +74,7 @@
       el.monster.value = state.monster;
       el.monster.disabled = !monsters.length;
       const selectedMonster = variants.find(monster => monster.personality === state.personality);
+      previousMonster = selectedMonster;
       const rows = conditions.slice().sort((a, b) => a.stage - b.stage || a.wave - b.wave);
       const numbers = new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 2 });
       const firstWaves = new Map();
@@ -94,7 +101,7 @@
       const features = selectedMonster?.features || [];
       el.detail.innerHTML = `<div class="detail-head"><div class="detail-title-row"><h2>${escape(selectedMonster?.baseName || selectedMonster?.name || '')}</h2>
         <div class="detail-context"><span class="detail-context-item">${labels[content]}</span><span class="detail-context-item">${escape(selectedMonster?.personality || '')}</span></div></div></div>
-        <div class="detail-chips"><span class="detail-chip ${selectedMonster?.dmgType === 'magic' ? 'is-magic' : 'is-physical'}">${selectedMonster?.dmgType === 'magic' ? '魔法攻撃' : '物理攻撃'}</span>
+        <div class="detail-chips">${selectedMonster?.projected ? '<span class="detail-chip" title="このコンテンツ・強度での能力値は生成式による推定です。攻撃と特徴は元のモンスターを引き継いでいます。">推定値</span>' : ''}<span class="detail-chip ${selectedMonster?.dmgType === 'magic' ? 'is-magic' : 'is-physical'}">${selectedMonster?.dmgType === 'magic' ? '魔法攻撃' : '物理攻撃'}</span>
           ${features.map(feature => `<span class="detail-chip">${escape(feature.label)}</span>`).join('')}</div>
         ${features.length ? '<details class="enemy-variant-info"><summary aria-label="特徴の計算対応について" title="計算対応">i</summary><div class="enemy-variant-info-content"><p>これらの特徴は説明表示のみ対応しています。</p></div></details>' : ''}
         <div class="enemy-variant-heading"><div class="enemy-variant-heading-main"><h2>攻撃</h2>
