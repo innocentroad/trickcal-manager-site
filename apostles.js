@@ -32218,7 +32218,10 @@ const APOSTLE_LIBRARY = [
               "9": 36.0,
               "10": 38.0,
               "11": 40.0,
-              "12": 42.0
+              "12": 42.0,
+              "13": 44.0,
+              "14": 46.0,
+              "15": 48.0
             }
           },
           {
@@ -32257,7 +32260,10 @@ const APOSTLE_LIBRARY = [
               "9": 36.0,
               "10": 38.0,
               "11": 40.0,
-              "12": 42.0
+              "12": 42.0,
+              "13": 44.0,
+              "14": 46.0,
+              "15": 48.0
             }
           },
           {
@@ -32314,7 +32320,10 @@ const APOSTLE_LIBRARY = [
               "9": 18.0,
               "10": 19.0,
               "11": 20.0,
-              "12": 21.0
+              "12": 21.0,
+              "13": 22.0,
+              "14": 23.0,
+              "15": 24.0
             }
           },
           {
@@ -32352,7 +32361,10 @@ const APOSTLE_LIBRARY = [
               "9": 36.0,
               "10": 38.0,
               "11": 40.0,
-              "12": 42.0
+              "12": 42.0,
+              "13": 44.0,
+              "14": 46.0,
+              "15": 48.0
             }
           },
           {
@@ -32374,7 +32386,10 @@ const APOSTLE_LIBRARY = [
               "9": 0.9,
               "10": 1.2,
               "11": 1.2,
-              "12": 1.2
+              "12": 1.2,
+              "13": 1.5,
+              "14": 1.5,
+              "15": 1.5
             }
           }
         ],
@@ -32435,9 +32450,160 @@ const APOSTLE_LIBRARY = [
     ],
     "favoriteCard": {},
     "aside": {
-      "levels": {}
+      "name": "あの頃のトンカツ",
+      "levels": {
+        "1": {
+          "name": "あの頃の給食トレー",
+          "stats": [],
+          "effects": [
+            {
+              "skillId": "Rohne_aside_1",
+              "effectId": "Rohne_aside_1_e01",
+              "valueKind": "最大HP増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Rohne_aside_1",
+              "effectId": "Rohne_aside_1_e02",
+              "valueKind": "物理防御力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Rohne_aside_1",
+              "effectId": "Rohne_aside_1_e03",
+              "valueKind": "魔法防御力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Rohne_aside_1",
+              "effectId": "Rohne_aside_1_e04",
+              "valueKind": "会心抵抗増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "Rohne_aside_1",
+              "effectId": "Rohne_aside_1_e05",
+              "valueKind": "会心ダメージ抵抗増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            }
+          ],
+          "description": "着用者の最大HP、物理防御力、魔法防御力、会心抵抗、会心ダメージ抵抗が増加する。"
+        },
+        "2": {
+          "name": "神々しいトンカツ",
+          "stats": [],
+          "effects": [
+            {
+              "skillId": "Rohne_aside_2",
+              "effectId": "Rohne_aside_2_e01",
+              "processGroupId": "Rohne_aside_2_proc01",
+              "processOrder": 1.0,
+              "valueKind": "被ダメージ量減少",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "triggerType": "低学年スキル使用時",
+              "triggerSourceId": "低学年スキル",
+              "condition": "低学年スキル使用時",
+              "effectTarget": "自身",
+              "fixedValue": 30.0
+            },
+            {
+              "skillId": "Rohne_aside_2",
+              "effectId": "Rohne_aside_2_e02",
+              "processGroupId": "Rohne_aside_2_proc01",
+              "processOrder": 2.0,
+              "valueKind": "被ダメージ量減少",
+              "valueClass": "持続時間",
+              "effectType": "バフ",
+              "triggerType": "低学年スキル使用時",
+              "triggerSourceId": "低学年スキル",
+              "condition": "低学年スキル使用時",
+              "effectTarget": "自身",
+              "fixedValue": 9.0
+            },
+            {
+              "skillId": "Rohne_aside_2",
+              "effectId": "Rohne_aside_2_e03",
+              "valueKind": "高学年スキル変更",
+              "valueClass": "スキル変更",
+              "effectType": "スキル変更",
+              "effectTarget": "自身"
+            }
+          ],
+          "description": "低学年スキル使用時、9秒間、自身の被ダメージ量が30%減少する。\n高学年スキルの攻撃力減少値が2倍になり、攻撃力減少および挑発の持続時間が9秒になる。"
+        },
+        "3": {
+          "name": "怒りの空気カツレツ",
+          "stats": [
+            {
+              "skillId": "Rohne_aside_3_global",
+              "effectId": "Rohne_aside_3_global_e01",
+              "statApplyTo": "全体",
+              "statName": "HP",
+              "increaseP": 3.0
+            },
+            {
+              "skillId": "Rohne_aside_3_global",
+              "effectId": "Rohne_aside_3_global_e02",
+              "statApplyTo": "全体",
+              "statName": "物理防御力",
+              "increaseP": 3.0
+            }
+          ],
+          "effects": [
+            {
+              "skillId": "Rohne_aside_3_battle",
+              "effectId": "Rohne_aside_3_battle_e01",
+              "valueKind": "被ダメージ量減少",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "味方/前列",
+              "fixedValue": 9.7
+            }
+          ],
+          "description": "前列の味方の敵からの被ダメージ量を9.7%減少させる。"
+        }
+      }
     },
-    "board": null
+    "board": null,
+    "skillEffectReplacements": [
+      {
+        "sourceEffectId": "Rohne_aside_2_e03",
+        "targetEffectId": "Rohne_high_e03",
+        "mode": "scale",
+        "fixedValue": 2.0,
+        "asideRank": 2
+      },
+      {
+        "sourceEffectId": "Rohne_aside_2_e03",
+        "targetEffectId": "Rohne_high_e02",
+        "mode": "value",
+        "fixedValue": 9.0,
+        "asideRank": 2
+      },
+      {
+        "sourceEffectId": "Rohne_aside_2_e03",
+        "targetEffectId": "Rohne_high_e04",
+        "mode": "value",
+        "fixedValue": 9.0,
+        "asideRank": 2
+      }
+    ]
   },
   {
     "id": "rollett",

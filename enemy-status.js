@@ -15,6 +15,9 @@
       .sort((a, b) => compareEnemyPresetEntries([a.key, a.preset], [b.key, b.preset]));
     const entryByKey = new Map(entries.map(entry => [entry.key, entry]));
     const { contents, groupsByContent } = indexEntries(entries);
+    for (const [key, label] of [['crusade', '進軍'], ['yggdrasilDigSite', '世界樹採掘基地']]) {
+      if (!contents.has(key)) contents.set(key, { key, label, monsters: [] });
+    }
     const params = new URLSearchParams(location.search);
     const rawRequestedKey = params.get('preset');
     const requestedKey = typeof resolveEnemyPresetKey === 'function' ? resolveEnemyPresetKey(rawRequestedKey) : rawRequestedKey;
@@ -48,6 +51,7 @@
       theme: document.getElementById('enemy-status-theme')
     };
 
+    const stageBrowser = createStageEnemyBrowser(el, TRICKCAL_STAGE_ENEMY_DATA);
     initTheme();
     bindEvents();
     render();
@@ -126,6 +130,11 @@
     function bindEvents() {
       el.content?.addEventListener('change', () => {
         const contentKey = el.content.value;
+        if (contentKey === 'crusade' || contentKey === 'yggdrasilDigSite') {
+          state.contentKey = contentKey;
+          render();
+          return;
+        }
         const firstMonster = contents.get(contentKey)?.monsters[0];
         state.contentKey = contentKey;
         state.monsterKey = firstMonster?.key || '';
@@ -226,6 +235,7 @@
 
     function render(interaction = null) {
       renderSelectors();
+      if (stageBrowser.render(state.contentKey)) return;
       renderVariants(interaction);
       renderDetail();
     }

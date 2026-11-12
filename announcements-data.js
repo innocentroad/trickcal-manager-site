@@ -10,6 +10,23 @@
   const ALLOWED_CTA = new Set(['migration-guide', null]);
   const ARTICLES = Object.freeze([
     Object.freeze({
+      id: '20261112-game-data-rohne-stage-enemies',
+      date: '2026-11-12',
+      title: 'ローネのアサイドと進軍・世界樹の敵データを追加',
+      barTitle: 'ローネのアサイド・進軍と世界樹の敵を追加',
+      summary: 'ローネのアサイドを追加し、進軍・世界樹採掘基地の敵をダメージ計算と敵データで選べるようにしました。',
+      body: Object.freeze([
+        'ローネのアサイド「あの頃のトンカツ」を追加しました。能力値、A1～A3の効果とアイコンに対応しました。',
+        'ダメージ計算のモンスター選択に「進軍」「世界樹採掘基地」を追加しました。進軍では難易度・ワールド・ステージ・ウェーブ・敵強度、世界樹採掘基地では性格・階層・敵強度を選んで比較できます。',
+        '敵データでもステージ・階層ごとのステータス、攻撃倍率、特徴を確認できます。進軍ではワールド内のステージを一覧で表示し、各ステージのウェーブを開閉できます。',
+        '選択したステージに登場しないモンスターも候補に含まれます。特徴の一部は説明表示のみの対応です。'
+      ]),
+      category: 'game-data',
+      profiles: Object.freeze(['new']),
+      autoRevision: '1',
+      cta: null
+    }),
+    Object.freeze({
       id: '20261106-feature-ef-grade',
       date: '2026-11-06',
       title: 'エーリアスフロンティアの学年調整に対応',

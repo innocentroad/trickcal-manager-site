@@ -986,7 +986,7 @@
       view.enemySkillIndex = -1;
       view.enemySelectedSkillCategory = '';
       if (el.inputs.enemySkill) el.inputs.enemySkill.value = '100';
-      if (view.enemySourceMode === 'apostle' && el.inputs.enemySpecial) el.inputs.enemySpecial.value = '100';
+      if (view.enemySourceMode === 'apostle') writeEnemySpecialMultiplier(100);
       if (view.enemySourceMode === 'apostle' && !view.enemyApostleId) {
         view.enemyApostleId = el.enemyApostle?.value || '';
       }
@@ -1204,6 +1204,14 @@
     });
     el.enemyPersonality?.addEventListener('change', () => {
       view.enemyPersonality = el.enemyPersonality.value || '';
+      if (view.enemySourceMode !== 'apostle' && view.enemyPresetKey?.startsWith('stage:')) {
+        const key = getStageEnemyResolver().changePersonality(view.enemyPresetKey, view.enemyPersonality);
+        if (key) {
+          view.enemyPresetKey = key;
+          populateEnemyPresets();
+          applyEnemyPreset();
+        }
+      }
       saveCalcSettings();
       render();
     });
@@ -1289,6 +1297,7 @@
     el.enemyPreset?.addEventListener('change', () => {
       const nextPresetKey = el.enemyPreset.value || '';
       if (nextPresetKey !== view.enemyPresetKey) {
+        if (nextPresetKey) writeEnemySpecialMultiplier(100);
         if (el.inputs.enemySequence) el.inputs.enemySequence.value = '';
         resetEnemyManualStates();
         view.enemySeasonRuleKey = '';
@@ -1387,7 +1396,7 @@
       if (source) showFdcInfoPopover(button, source.label, [source.meta,
         source.condition ? `付与条件：${source.condition}` : '',
         `参照HP：${source.hpReference === 'caster' ? source.casterName : '受ける使徒'}の最大HP`,
-        `シールド倍率：${source.coefficientP}%`, '付与済みとして選択してください。発動判定・時間経過は再現しません。']);
+        `シールド倍率：${formatPlainNumber(source.coefficientP)}%`, '付与済みとして選択してください。発動判定・時間経過は再現しません。']);
     });
     el.shieldSourceOptions?.addEventListener('change', event => {
       const modifier = event.target.closest('[data-fdc-shield-modifier]');
@@ -1421,6 +1430,10 @@
     Object.values(el.inputs).forEach(input => {
       if (!input || isEnemyCorrectionInput(input) || [el.inputs.selfHp, el.inputs.atk, el.inputs.selfDef, el.inputs.crit, el.inputs.critDmg, el.inputs.selfCritResBase, el.inputs.selfCritDmgResBase].includes(input)) return;
       input.addEventListener('input', () => {
+        if (input === el.inputs.enemySpecial) {
+          delete input.dataset.specialRaw;
+          delete input.dataset.specialDisplay;
+        }
         if (input === el.inputs.selfSkill) {
           view.selectedSkillCategory = '';
           view.selectedSkillOptionKey = '';
@@ -1831,6 +1844,9 @@
     }
     if (el.enemyPersonality) el.enemyPersonality.disabled = apostleMode
       && !formationPersonality.getPersonalityOptions(getApostle(view.enemyApostleId) || {}).length;
+    if (!apostleMode && view.enemyPresetKey?.startsWith('stage:') && el.enemyPersonality) {
+      el.enemyPersonality.disabled = new Set(getStageEnemyResolver().personalityVariants(view.enemyPresetKey).map(monster => monster.personality)).size <= 1;
+    }
     const finalStatInputs = [el.inputs.enemyHp, el.inputs.enemyAtk, el.inputs.enemyCrit, el.inputs.enemyCritDmg, el.inputs.def, el.inputs.critRes, el.inputs.critDmgRes];
     finalStatInputs.forEach(input => {
       if (input) input.readOnly = false;
@@ -1931,7 +1947,7 @@
       writeCombatStatInput(el.inputs.critRes, scaled.critRes);
       writeCombatStatInput(el.inputs.critDmgRes, scaled.critDmgRes);
     }
-    if (scaled.special != null) el.inputs.enemySpecial.value = formatPlainNumber(scaled.special);
+    if (scaled.special != null) writeEnemySpecialMultiplier(scaled.special);
     const weaknessInfo = getEnemyPresetWeaknessInfo(preset, selfType);
     if (el.inputs.enemyWeaknessP) el.inputs.enemyWeaknessP.value = formatPlainNumber(weaknessInfo.add);
     syncWeaknessFields(selfType);
@@ -2372,10 +2388,23 @@
       ...(typeof ENEMY_PRESETS === 'undefined' ? {} : ENEMY_PRESETS),
       ...getCustomEnemyPresets()
     };
+    const selectedKey = view.enemyPresetKey || el.enemyPreset?.value || '';
+    if (typeof TRICKCAL_STAGE_ENEMY_DATA !== 'undefined' && typeof TRICKCAL_STAGE_ENEMY_RESOLVER !== 'undefined') {
+      const resolver = getStageEnemyResolver();
+      const preset = resolver.resolveKey(selectedKey, view.enemyDamageType);
+      if (preset) presets[selectedKey] = preset;
+    }
     if(typeof ENEMY_PRESET_KEY_ALIASES!=='undefined') for(const [oldKey,key] of Object.entries(ENEMY_PRESET_KEY_ALIASES)) {
       if(!Object.prototype.hasOwnProperty.call(presets,oldKey)&&presets[key])Object.defineProperty(presets,oldKey,{value:presets[key],enumerable:false});
     }
     return presets;
+  }
+
+  function getStageEnemyResolver() {
+    if (!getStageEnemyResolver.instance) {
+      getStageEnemyResolver.instance = TRICKCAL_STAGE_ENEMY_RESOLVER.createResolver(TRICKCAL_STAGE_ENEMY_DATA);
+    }
+    return getStageEnemyResolver.instance;
   }
 
   function getCustomEnemyPresets() {
@@ -2416,7 +2445,7 @@
       critDmg: readNumber(el.inputs.enemyCritDmg),
       critRes: readNumber(el.inputs.critRes),
       critDmgRes: readNumber(el.inputs.critDmgRes),
-      special: readNumber(el.inputs.enemySpecial) || 100,
+      special: readEnemySpecialMultiplier(),
       size: typeof normalizeEnemySize === 'function' ? normalizeEnemySize(base?.size ?? base?.enemySize) : (base?.size || ''),
       personality: normalizePersonalityName(view.enemyPersonality || base?.personality),
       content: base?.content ? JSON.parse(JSON.stringify(base.content)) : undefined,
@@ -2477,13 +2506,64 @@
     const key = view.enemyPresetKey || el.enemyPreset?.value || '';
     const button = document.getElementById('fdc-enemy-preset-open');
     if (button) {
-      button.textContent = key ? formatEnemyPresetDisplayName(getEnemyPresets()[key] || {}, key) : '手動入力';
-      button.setAttribute('aria-label', `モンスターを選択：${button.textContent}`);
+      const preset = getEnemyPresets()[key] || {};
+      const fullLabel = key ? formatEnemyPresetDisplayName(preset, key) : '手動入力';
+      const metadata = getEnemyPresetMetadata(preset, key);
+      const name = key ? metadata.name || fullLabel : '手動入力';
+      const conditions = key ? [metadata.contentLabel, metadata.difficultyLabel, metadata.stageLabel].filter(Boolean).join(' / ') : '';
+      button.innerHTML = `<span class="fdc-enemy-preset-name">${escapeHtml(name)}</span>${conditions ? `<small class="fdc-enemy-preset-summary"> / ${escapeHtml(conditions)}</small>` : ''}`;
+      button.title = fullLabel;
+      button.setAttribute('aria-label', `モンスターを選択：${fullLabel}`);
     }
     if (el.enemyPresetDelete) el.enemyPresetDelete.disabled = !key.startsWith('custom:');
+    syncStageEnemyQuickControls();
   }
 
-  function openEnemyPresetDialog() {
+  function applyStageEnemyKey(key) {
+    if (!key || key === view.enemyPresetKey) return;
+    if (![...el.enemyPreset.options].some(option => option.value === key)) {
+      el.enemyPreset.add(new Option('ステージ選択', key));
+    }
+    el.enemyPreset.value = key;
+    el.enemyPreset.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function syncStageEnemyQuickControls() {
+    let container = document.getElementById('fdc-stage-enemy-quick');
+    const active = view.enemySourceMode !== 'apostle' && view.enemyPresetKey?.startsWith('stage:');
+    if (!active) { if (container) container.hidden = true; return; }
+    const resolver = getStageEnemyResolver();
+    const preset = resolver.resolveKey(view.enemyPresetKey);
+    if (!preset) { if (container) container.hidden = true; return; }
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'fdc-stage-enemy-quick';
+      container.className = 'fdc-stage-enemy-quick';
+      el.enemyPhaseField.insertAdjacentElement('beforebegin', container);
+    }
+    container.hidden = false;
+    const monster = resolver.monsters.find(row => row.key === preset.stageSelection.monsterKey);
+    const current = resolver.conditions.find(row => row.key === preset.stageSelection.conditionKey);
+    const waves = resolver.conditions.filter(row => row.content === current.content && row.world === current.world
+      && row.stage === current.stage && row.difficulty === current.difficulty && row.group === current.group);
+    const alternatives = resolver.monsters.filter(row => row.contents.includes(current.content)
+      && row.baseName === monster.baseName && row.personality === monster.personality);
+    const strengths = [...new Set(alternatives.map(row => row.strength))].sort((a,b) => a-b);
+    const strengthNames = ['小型', '通常', '強敵', 'ボス'];
+    container.innerHTML = `${current.content === 'crusade' ? `<label><span>ウェーブ</span><select data-stage-quick="wave" aria-label="ウェーブ">${waves.map(row => `<option value="${escapeAttr(row.key)}" ${row.key === current.key ? 'selected' : ''}>${row.wave}</option>`).join('')}</select></label>` : ''}
+      <label><span>強度</span><select data-stage-quick="strength" aria-label="敵強度">${strengths.map(value => `<option value="${value}" ${value === monster.strength ? 'selected' : ''}>${strengthNames[value] || value}</option>`).join('')}</select></label>`;
+    container.querySelectorAll('select').forEach(input => input.addEventListener('change', () => {
+      if (input.dataset.stageQuick === 'wave') {
+        applyStageEnemyKey(resolver.selectionKey({ ...preset.stageSelection, conditionKey: input.value }));
+      } else {
+        const candidates = alternatives.filter(row => row.strength === Number(input.value));
+        const target = candidates.find(row => row.key === monster.key) || candidates[0];
+        if (target) applyStageEnemyKey(resolver.selectionKey({ ...preset.stageSelection, monsterKey: target.key }));
+      }
+    }));
+  }
+
+  function openEnemyPresetDialog(skipStage = false) {
     let dialog = document.getElementById('fdc-enemy-preset-dialog');
     if (!dialog) {
       dialog = document.createElement('dialog');
@@ -2501,6 +2581,18 @@
     }
     const presets = getEnemyPresets();
     const savedKey = view.enemyPresetKey || '';
+    const applyStageKey = key => {
+      if (![...el.enemyPreset.options].some(option => option.value === key)) {
+        el.enemyPreset.add(new Option('ステージ選択', key));
+      }
+      el.enemyPreset.value = key;
+      el.enemyPreset.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    const selectedStage = getStageEnemyResolver().resolveKey(savedKey);
+    if (selectedStage && skipStage !== true) {
+      openStageEnemyPicker(dialog, getStageEnemyResolver(), savedKey, selectedStage.content.type, applyStageKey, () => openEnemyPresetDialog(true));
+      return;
+    }
     const currentKey = presets[savedKey]?.selectionAliasOf
       || (typeof resolveEnemyPresetKey === 'function' ? resolveEnemyPresetKey(savedKey) : savedKey);
     const entries = Object.entries(presets).filter(([key, preset]) =>
@@ -2535,6 +2627,9 @@
       <footer><button type="button" data-enemy-cancel>取消</button><button type="button" data-enemy-confirm>選択を反映</button></footer>`;
     const search = dialog.querySelector('[data-enemy-search]');
     const content = dialog.querySelector('[data-enemy-content]');
+    for (const [value, label] of [['crusade', '進軍'], ['yggdrasilDigSite', '世界樹採掘基地']]) {
+      content.add(new Option(label, value));
+    }
     const enemy = dialog.querySelector('[data-enemy-name]');
     const variant = dialog.querySelector('[data-enemy-variant]');
     const confirm = dialog.querySelector('[data-enemy-confirm]');
@@ -2596,7 +2691,13 @@
       else enemy.value = '';
       renderVariants();
     };
-    content.addEventListener('change', () => renderEnemies());
+    content.addEventListener('change', () => {
+      if (content.value === 'crusade' || content.value === 'yggdrasilDigSite') {
+        openStageEnemyPicker(dialog, getStageEnemyResolver(), savedKey, content.value, applyStageKey, () => openEnemyPresetDialog(true));
+        return;
+      }
+      renderEnemies();
+    });
     enemy.addEventListener('change', () => {
       selectedGroupKey = enemy.value || null;
       pending = selectedGroupKey === '__manual__' ? '' : null;
@@ -2747,7 +2848,7 @@
     const tokens=[];let position=1;
     const samePower=definition.hits.length===1;
     for (const hit of definition.hits) {
-      const power=hit.coefficientP==null?'未確認':`${hit.coefficientP}%`;
+      const power=hit.coefficientP==null?'未確認':`${formatPlainNumber(hit.coefficientP)}%`;
       if (total!=null&&total<=8&&!samePower) {
         for(let n=0;n<hit.count;n++,position++)tokens.push({label:`${position}発目 ${power}`,selected:active&&start!=null&&position>=start&&position<=end});
       } else {
@@ -2871,7 +2972,7 @@
       ${seq.rows.map((row,i)=>{
         const shield=result.defensiveShield?.segments?.[i]?.expected;
         const sourceLabel=row.source==='indirect'?'間接':row.source==='direct'?'直接':'区分未確認';
-        return `<p>${escapeHtml(row.label)}・${sourceLabel}：${row.coefficientP}% × ${row.selectedCount}発 ／ ${shield?'盾あり時の1発':'1発'} ${formatNumber(row.single.expected)} ／ 合計 ${formatNumber(row.expected)}${shield?` ／ HPへ ${formatNumber(shield.hpDamage)}・残盾 ${formatNumber(shield.remaining)}`:''}</p>`;
+        return `<p>${escapeHtml(row.label)}・${sourceLabel}：${formatPlainNumber(row.coefficientP)}% × ${row.selectedCount}発 ／ ${shield?'盾あり時の1発':'1発'} ${formatNumber(row.single.expected)} ／ 合計 ${formatNumber(row.expected)}${shield?` ／ HPへ ${formatNumber(shield.hpDamage)}・残盾 ${formatNumber(shield.remaining)}`:''}</p>`;
       }).join('')}
       <p>命中ごとの概算${seq.assumed?'・回数指定の仮定あり':''}。シールド消費以外の状態は固定。補正表示は先頭命中。</p>
       ${result.defensiveShield?.expectedModel==='mean-route'?'<p>設定した盾量を選択範囲の先頭から消費。「期待」は期待ダメージで消費した目安で、生存確率ではありません。非会心・全会心も確認してください。</p>':''}</details>`;
@@ -3063,6 +3164,26 @@
       if (scaled[key] != null) scaled[key] = Number(scaled[key]) * Number(phase.mult);
     });
     return scaled;
+  }
+
+  function readEnemySpecialMultiplier() {
+    const input = el.inputs.enemySpecial;
+    if (input?.dataset?.specialDisplay === input.value && input.dataset.specialRaw != null) {
+      const raw = Number(input.dataset.specialRaw);
+      if (Number.isFinite(raw) && raw >= 0) return raw;
+    }
+    const value = el.inputs.enemySpecial?.value;
+    if (value == null || !String(value).trim()) return 100;
+    const number = Number(value);
+    return Number.isFinite(number) && number >= 0 ? number : 100;
+  }
+
+  function writeEnemySpecialMultiplier(value) {
+    const input = el.inputs.enemySpecial;
+    if (!input) return;
+    input.value = formatPlainNumber(value);
+    input.dataset.specialRaw = String(value);
+    input.dataset.specialDisplay = input.value;
   }
 
   function getEnemyPresetInputNumber(value, fallback = 0) {
@@ -3994,7 +4115,7 @@
   function readDamageCalculationInputs() {
     return Object.fromEntries(Object.entries(el.inputs || {})
       .filter(([, input]) => input && 'value' in input)
-      .map(([key, input]) => [key, input.value]));
+      .map(([key, input]) => [key, key === 'enemySpecial' ? String(readEnemySpecialMultiplier()) : input.value]));
   }
 
   function writeDamageCalculationInputs(values = {}, options = { settings: true, enemy: true }) {
@@ -4014,6 +4135,14 @@
       const enemyInput = isEnemyDamageInputKey(key);
       if (enemyInput && !options.enemy) return;
       if (!enemyInput && !options.settings) return;
+      if (key === 'enemySpecial' && value != null && String(value).trim() && Number.isFinite(Number(value))) {
+        writeEnemySpecialMultiplier(Number(value));
+        return;
+      }
+      if (key === 'enemySpecial') {
+        delete input.dataset.specialRaw;
+        delete input.dataset.specialDisplay;
+      }
       input.value = value == null ? '' : String(value);
     });
     if (options.settings) {
@@ -7750,7 +7879,7 @@
       'actionMultiplierBonusP', 'normalAttackMultiplierBonusP', 'basicMultiplierBonusP',
       'enhancedMultiplierBonusP', 'skillActionMultiplierBonusP', 'lowSkillMultiplierBonusP',
       'highSkillMultiplierBonusP', 'selfDestructMultiplierBonusP',
-      'takenDmgP', 'attackerDmgDownP', 'enemyDefDownP',
+      'takenDmgP', 'atkDownP', 'attackerDmgDownP', 'enemyDefDownP',
       'enemyCritResDownP', 'enemyCritDmgResDownP'
     ]);
     return !bonusKeys.some(key => singleHitBonusKeys.has(key));
@@ -7858,6 +7987,7 @@
       'highSkillMultiplierBonusP',
       'selfDestructMultiplierBonusP',
       'takenDmgP',
+      'atkDownP',
       'attackerDmgDownP',
       'enemyDefDownP',
       'enemyCritResDownP',
@@ -8071,6 +8201,10 @@
       return result(false, false, '本人は対象外');
     }
     if (/敵/.test(text)) {
+      if (effect?.valueKind === '攻撃力減少' && effect.effectType === 'デバフ'
+        && effect.conditionType !== 'ランダム分岐') {
+        return result(true, false, '選択した敵に付与済みの場合にON');
+      }
       if (String(sourceMember?.id || '').toLowerCase() === 'sherum'
         && effect?.effectId === 'Sherum_aside_2_e03'
         && effect.triggerSourceId === 'Sherum_aside_2_e03'
@@ -8311,6 +8445,8 @@
     else if (/攻撃速度/.test(valueKind) && !targetEnemy) add('hasteP');
     else if (/最大?HP/.test(valueKind) && !targetEnemy) addSigned('hpP');
     else if (/攻撃力/.test(valueKind) && !targetEnemy) addSigned('atkP');
+    else if (/攻撃力/.test(valueKind) && targetEnemy && decrease
+      && effect.conditionType !== 'ランダム分岐') add('atkDownP');
     else if (/防御力/.test(valueKind)) {
       if (targetEnemy && decrease) add('enemyDefDownP');
       else if (!targetEnemy && /物理防御力/.test(valueKind)) addSigned('physicalDefP');
@@ -8347,7 +8483,10 @@
     const levelInfo = getFdcEffectLevelInfo(effect, skillLevel);
     const rawValue = levelInfo?.raw || (levelInfo?.value ?? effect?.fixedValue);
     if (rawValue === undefined || rawValue === null || rawValue === '') return '';
-    const text = levelInfo?.raw || formatPlainNumber(rawValue);
+    const text = levelInfo?.isRange
+      ? `${formatPlainNumber(levelInfo.min)}～${formatPlainNumber(levelInfo.max)}`
+      : Number.isFinite(Number(rawValue)) && String(rawValue).trim()
+        ? formatPlainNumber(Number(rawValue)) : levelInfo?.raw || formatPlainNumber(rawValue);
     const unit = shouldAppendFdcPercentUnit(effect) ? '%' : '';
     return `${text}${unit}`;
   }
@@ -10615,11 +10754,11 @@
       const checked = isMode ? row.id === selection.sourceId || row.id === '__list__' && !['none','__manual__','__list__'].includes(selection.sourceId) : selection.sourceId === '__list__'
         ? (Object.prototype.hasOwnProperty.call(selection.sourceEnabled,row.id) ? selection.sourceEnabled[row.id] : isDefaultDefensiveShieldSource(row,candidates))
         : row.id === selection.sourceId;
-      return `<label class="fdc-skill-effect-toggle"><input type="${isMode ? 'radio' : 'checkbox'}" ${isMode ? 'name="fdc-shield-source"' : ''} data-fdc-shield-source value="${escapeAttr(row.id)}" ${checked ? 'checked' : ''}><span class="fdc-skill-effect-text"><strong>${escapeHtml(row.label)}${Number.isFinite(row.coefficientP) ? ` / ${escapeHtml(row.coefficientP)}%` : ''}</strong>${row.meta ? `<small>${escapeHtml(row.meta)}${resolved?.supported ? ` → ${escapeHtml(formatNumber(resolved.amount))}${resolved.modifierP ? `（盾効果＋${escapeHtml(resolved.modifierP)}%）` : ''}` : resolved ? ` / ${escapeHtml(resolved.reason)}` : ''}${row.provisional ? ' / 暫定' : ''}</small>` : ''}</span>${row.meta ? `<button type="button" class="fdc-skill-effect-info" data-fdc-shield-source-info="${escapeAttr(row.id)}" aria-label="${escapeAttr(row.label)}の説明">i</button>` : ''}</label>`;
+      return `<label class="fdc-skill-effect-toggle"><input type="${isMode ? 'radio' : 'checkbox'}" ${isMode ? 'name="fdc-shield-source"' : ''} data-fdc-shield-source value="${escapeAttr(row.id)}" ${checked ? 'checked' : ''}><span class="fdc-skill-effect-text"><strong>${escapeHtml(row.label)}${Number.isFinite(row.coefficientP) ? ` / ${escapeHtml(formatPlainNumber(row.coefficientP))}%` : ''}</strong>${row.meta ? `<small>${escapeHtml(row.meta)}${resolved?.supported ? ` → ${escapeHtml(formatNumber(resolved.amount))}${resolved.modifierP ? `（盾効果＋${escapeHtml(formatPlainNumber(resolved.modifierP))}%）` : ''}` : resolved ? ` / ${escapeHtml(resolved.reason)}` : ''}${row.provisional ? ' / 暫定' : ''}</small>` : ''}</span>${row.meta ? `<button type="button" class="fdc-skill-effect-info" data-fdc-shield-source-info="${escapeAttr(row.id)}" aria-label="${escapeAttr(row.label)}の説明">i</button>` : ''}</label>`;
     }).join('');
     const grail = getDefensiveShieldGrailModifier(context);
     if (grail?.supported) el.shieldSourceOptions.insertAdjacentHTML('beforeend',
-      `<label class="fdc-skill-effect-toggle"><input type="checkbox" data-fdc-shield-modifier="${escapeAttr(grail.conditionKey)}" ${grail.enabled ? 'checked' : ''}><span class="fdc-skill-effect-text"><strong>祭司長の香炉 / シールド効果＋${escapeHtml(grail.value)}%</strong><small>★${escapeHtml(grail.star)} / ONで補正発動済みとして計算（暫定）</small></span></label>`);
+      `<label class="fdc-skill-effect-toggle"><input type="checkbox" data-fdc-shield-modifier="${escapeAttr(grail.conditionKey)}" ${grail.enabled ? 'checked' : ''}><span class="fdc-skill-effect-text"><strong>祭司長の香炉 / シールド効果＋${escapeHtml(formatPlainNumber(grail.value))}%</strong><small>★${escapeHtml(grail.star)} / ONで補正発動済みとして計算（暫定）</small></span></label>`);
     const resolved = !['none','__manual__'].includes(selection.sourceId) ? resolveAutomaticDefensiveShield(context, hp) : null;
     if (el.shieldSourceSummary) el.shieldSourceSummary.textContent = `${rows.find(row => row.id === (selection.sourceId || ''))?.label || '手入力'}${resolved?.supported ? ` / ${formatNumber(resolved.amount)}` : resolved ? ' / 自動計算未対応' : ''}`;
   }
@@ -11514,7 +11653,7 @@
         critDmgP: readNumber(el.inputs.enemyCritDmgP),
         skill: readEnemySkillMultiplier(),
         type: readNumber(el.inputs.enemyType),
-        special: readNumber(el.inputs.enemySpecial),
+        special: readEnemySpecialMultiplier(),
         other: readNumber(el.inputs.enemyOther),
         actionMultiplierBonusP: 0,
         addP: readNumber(el.inputs.enemyAddP) + getDebuffDamageP('enemy') + getEnemyPresetBuffDamageP(),
@@ -11757,14 +11896,17 @@
   function syncEnemyPersonalityUi() {
     const personality = getEffectiveEnemyPersonality();
     if (el.enemyPersonality) {
-      const options = view.enemySourceMode === 'apostle'
+      const stageVariants = view.enemySourceMode !== 'apostle' && view.enemyPresetKey?.startsWith('stage:')
+        ? getStageEnemyResolver().personalityVariants(view.enemyPresetKey) : [];
+      const options = stageVariants.length ? [...new Set(stageVariants.map(monster => monster.personality))] : view.enemySourceMode === 'apostle'
         ? formationPersonality.getPersonalityOptions(getApostle(view.enemyApostleId) || {}) : [];
       for (const option of el.enemyPersonality.options) {
-        option.hidden = !!option.value && options.length > 0 && !options.includes(option.value);
+        option.hidden = options.length > 0 && (stageVariants.length ? !options.includes(option.value) : !!option.value && !options.includes(option.value));
         option.disabled = option.hidden;
         if (!option.value) option.textContent = options.length ? '性格を選択' : 'なし';
       }
       el.enemyPersonality.value = personality;
+      if (stageVariants.length) el.enemyPersonality.disabled = options.length <= 1;
     }
     if (el.enemyPersonalityIcon) {
       el.enemyPersonalityIcon.src = personality ? `img/性格_${personality}.webp` : 'img/性格_なし.webp';
@@ -15478,9 +15620,30 @@
     }, null);
   }
 
+  function resolveFdcSkillEffectReplacements(apostle, levels) {
+    const rules = isPublicAsideEnabled(apostle)
+      ? normalizeFdcArray(apostle?.skillEffectReplacements)
+        .filter(rule => Number(levels.asideRank) >= rule.asideRank) : [];
+    if (!rules.length) return normalizeFdcArray(apostle?.skills);
+    return normalizeFdcArray(apostle.skills).map(skill => ({
+      ...skill,
+      effects: normalizeFdcArray(skill.effects).map(effect => {
+        const rule = rules.find(row => row.targetEffectId === effect.effectId);
+        if (!rule) return effect;
+        const transform = (value, level) => {
+          const replacement = rule.levels ? rule.levels[level] : rule.fixedValue;
+          return rule.mode === 'scale' ? Number(value) * replacement : replacement;
+        };
+        if (effect.levels) return { ...effect, levels: Object.fromEntries(
+          Object.entries(effect.levels).map(([level, value]) => [level, transform(value, level)])) };
+        return { ...effect, fixedValue: transform(effect.fixedValue) };
+      })
+    }));
+  }
+
   function collectFdcApostleSkillSources(apostle, levels, target, context) {
     const sources = [];
-    normalizeFdcArray(apostle?.skills).forEach((skill, index) => {
+    resolveFdcSkillEffectReplacements(apostle, levels).forEach((skill, index) => {
       sources.push({ skill, sourceLabel: '通常', sourceKey: `base:${index}` });
     });
     getActiveFdcFavoriteLevels(apostle, target, context).forEach(level => {
@@ -20294,7 +20457,7 @@
         skillCoefficientReplacements: result.detail?.mods?.skillCoefficientReplacements || [],
         actionMultiplierBonusP: Number(result.detail?.mods?.actionMultiplierBonusP) || 0,
         finalActionMultiplierP: actionMultiplier(result.detail?.mods?.finalActionMultiplierP,result.detail?.mods?.skillP),
-        specialP: Number(result.detail?.mods?.specialP) || 100,
+        specialP: actionMultiplier(result.detail?.mods?.specialP),
         otherP: Number(result.detail?.mods?.otherP) || 100,
         baseCrit: Number(result.detail?.stats?.baseCrit) || 0,
         baseCritDmg: Number(result.detail?.stats?.baseCritDmg) || 0,
