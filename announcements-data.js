@@ -11,6 +11,8 @@
   const ARTICLES = Object.freeze([
     Object.freeze({
       id: '20261112-game-data-rohne-stage-enemies',
+      archived: true,
+      autoUntil: '2026-11-18',
       date: '2026-11-12',
       title: 'ローネのアサイドと進軍・世界樹の敵データを追加',
       barTitle: 'ローネのアサイド・進軍と世界樹の敵を追加',
@@ -34,6 +36,7 @@
     }),
     Object.freeze({
       id: '20261106-feature-ef-grade',
+      archived: true,
       date: '2026-11-06',
       title: 'エーリアスフロンティアの学年調整に対応',
       barTitle: 'ダメージ計算の学年調整に対応',
@@ -49,6 +52,7 @@
     }),
     Object.freeze({
       id: '20261105-game-data-polan',
+      archived: true,
       date: '2026-11-05',
       title: 'ポランと専用遺物を追加',
       barTitle: 'ポランと専用遺物を追加',
@@ -64,6 +68,7 @@
     }),
     Object.freeze({
       id: '20261031-feature-apostle-bulk-settings',
+      archived: true,
       date: '2026-10-31',
       title: '使徒設定・全体ボードの一覧操作を改善',
       barTitle: '一覧の一括変更・絞り込みを追加',
@@ -82,6 +87,7 @@
     }),
     Object.freeze({
       id: '20261101-game-data-rank10-equipment-estimate',
+      archived: true,
       date: '2026-11-01',
       title: 'Rank10装備の予想データを追加',
       barTitle: 'Rank10装備を追加（数値は予想値）',
@@ -150,6 +156,10 @@
     if (!article || typeof article !== 'object' || Array.isArray(article)) return `${label} is not an object`;
     if (typeof article.id !== 'string' || !article.id.trim()) return `${label}.id is required`;
     if (!isValidDate(article.date)) return `${label}.date is invalid`;
+    if (article.archived !== undefined && typeof article.archived !== 'boolean') return `${label}.archived is invalid`;
+    if (article.autoUntil !== undefined && (!isValidDate(article.autoUntil)
+      || !Number.isFinite(Date.parse(`${article.autoUntil}T00:00:00+09:00`))
+      || article.autoUntil < article.date)) return `${label}.autoUntil is invalid`;
     if (typeof article.title !== 'string' || !article.title.trim()) return `${label}.title is required`;
     if (article.barTitle !== undefined
       && (typeof article.barTitle !== 'string' || !article.barTitle.trim())) return `${label}.barTitle is invalid`;

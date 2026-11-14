@@ -4790,7 +4790,7 @@
       || toFiniteNumber(input.statusTakenDmgP) !== toFiniteNumber(input.resolvedStatusTakenDmgP)
       || input.statusDamageP) return null;
     const attackP = getRuntimeAttackModifierP(delta, base.damageType);
-    const finalAtk = resolveCombatStat(base.baseAtk, base.attackP + attackP);
+    const finalAtk = resolveCombatStat(base.baseAtk, base.attackP + attackP, 1);
     const finalDef = resolveCombatStat(base.baseDef, base.defenseP - toFiniteNumber(delta.enemyDefDownP), 1);
     const finalCrit = resolveCombatStat(base.baseCrit, base.critP + toFiniteNumber(delta.critP));
     const finalCritRes = resolveCombatStat(base.baseCritRes, base.critResP - toFiniteNumber(delta.enemyCritResDownP), 1);
@@ -5027,7 +5027,7 @@
     if (attackP || enemyDefDownP) {
       const oldFinalAtk = Math.max(0, toFiniteNumber(base.finalAtk));
       const newFinalAtk = attackP
-        ? resolveCombatStat(toFiniteNumber(base.baseAtk), toFiniteNumber(base.attackP) + attackP)
+        ? resolveCombatStat(toFiniteNumber(base.baseAtk), toFiniteNumber(base.attackP) + attackP, 1)
         : oldFinalAtk;
       const oldFinalDef = Math.max(1, toFiniteNumber(base.finalDef, 1));
       const newFinalDef = enemyDefDownP

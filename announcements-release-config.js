@@ -5,7 +5,7 @@
     releaseGate: 'announcements-migration-20260915',
     enabled: true,
     autoEnabled: true,
-    bannerEnabled: true,
+    bannerEnabled: false,
     profiles: Object.freeze(['new', 'legacy']),
     pages: Object.freeze(['manager', 'calc'])
   });

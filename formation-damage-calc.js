@@ -14,6 +14,7 @@
   const CALC_SETTINGS_KEY = 'trickcal_formation_damage_settings_v1';
   const CALC_RESULT_SAVES_KEY = 'trickcal_formation_damage_result_saves_v1';
   const CALC_SAVE_LIMIT = 50;
+  const NO_FORMATION_PRESET_ID = '__none__';
   const INITIAL_STAT_INPUT_DRAFT = Object.freeze({
     hp: '500000', physicalAtk: '60000', magicAtk: '60000',
     physicalDef: '90000', magicDef: '90000', crit: '40000', critDmg: '40000',
@@ -23,7 +24,7 @@
   let damageSaveWriteMessage = '';
   let seasonRuleRefreshTimer = null;
   let statDraftSaveTimer = null;
-  const DAMAGE_CALCULATION_VERSION = 111;
+  const DAMAGE_CALCULATION_VERSION = 112;
   let enemyHitRuntime = null;
                                                                                          
   const SEASON_RULE_LABELS = {
@@ -967,6 +968,7 @@
       const state = loadStatState();
       const formation = normalizeFormation(getSelectedFormationSource(state).formation);
       view.targetId = getFirstFormationApostleId(formation) || view.targetId;
+      if (!countFormationMembers(formation)) view.pickerMode = 'all';
       syncSelectedApostleToStatManager(view.targetId);
       saveCalcSettings();
       render();
@@ -3381,6 +3383,9 @@
   }
 
   function getSelectedFormationSource(state = {}) {
+    if (view.formationPresetId === NO_FORMATION_PRESET_ID) {
+      return { preset: null, formation: {} };
+    }
     const presets = getSavedFormationPresets(state);
     const preset = presets.find(item => item.id === view.formationPresetId);
     if (view.formationPresetId && !preset) view.formationPresetId = '';
@@ -5528,6 +5533,7 @@
       ? '編集中の編成（保存編成を読込中）'
       : '編集中の編成';
     const options = [
+      `<option value="${NO_FORMATION_PRESET_ID}">編成なし</option>`,
       `<option value="">${escapeHtml(currentLabel)}</option>`,
       ...presets
         .slice()
@@ -5546,7 +5552,8 @@
     if (el.formationPreset.innerHTML !== options) {
       el.formationPreset.innerHTML = options;
     }
-    el.formationPreset.value = presets.some(preset => preset.id === view.formationPresetId) ? view.formationPresetId : '';
+    el.formationPreset.value = view.formationPresetId === NO_FORMATION_PRESET_ID
+      || presets.some(preset => preset.id === view.formationPresetId) ? view.formationPresetId : '';
   }
 
   function countFormationMembers(formation = {}) {
@@ -5561,7 +5568,7 @@
       el.targetPreview.className = 'fdc-target-preview';
       el.targetPreview.style.removeProperty('--personality-options-bg');
       el.targetPreview.style.removeProperty('--personality-options-frame');
-      el.targetPreview.innerHTML = '<span class="fdc-target-empty">編成から使徒を選択</span>';
+      el.targetPreview.innerHTML = '<span class="fdc-target-empty">使徒を選択</span>';
       syncTargetResonancePersonalityTrigger(null, context);
       renderFloatingTarget(null, context);
       return;
@@ -5821,6 +5828,15 @@
 
   function selectMemberFromPicker(id, context) {
     if (!id) return '';
+    const candidate = context.allMembers.find(member => member.id === id);
+    if ((view.formationPresetId === NO_FORMATION_PRESET_ID || !context.members.length)
+      && candidate && candidate.basePosition !== formationPlacement.ALL_ROWS) {
+      view.targetId = id;
+      syncSelectedApostleToStatManager(id);
+      applyEnemyPreset();
+      saveCalcSettings();
+      return 'selected';
+    }
     const existingMember = context.members.find(member => member.id === id);
     if (view.pickerMode === 'all' && existingMember?.basePosition === formationPlacement.ALL_ROWS) {
       view.targetId = id;
@@ -5835,7 +5851,6 @@
       saveCalcSettings();
       return 'selected';
     }
-    const candidate = context.allMembers.find(member => member.id === id);
     if (!candidate) {
       view.targetId = id;
       syncSelectedApostleToStatManager(id);
@@ -6758,8 +6773,11 @@
       ${renderSkillEffectSection('編成スキル効果', formationOptions, '影響する編成スキル効果はありません', 'formationSkill')}
     `;
     el.selfSkillEffects.querySelectorAll('[data-fdc-self-skill-effect]').forEach(input => {
+      if (input.dataset.fdcEffectMixed === 'true') input.indeterminate = true;
       input.addEventListener('change', () => {
-        view.selfSkillEffectEnabled[input.dataset.fdcSelfSkillEffect] = !!input.checked;
+        const keys = input.dataset.fdcEffectGroupKeys
+          ? JSON.parse(input.dataset.fdcEffectGroupKeys) : [input.dataset.fdcSelfSkillEffect];
+        keys.forEach(key => { view.selfSkillEffectEnabled[key] = !!input.checked; });
         saveCalcSettings();
         const nextContext = buildContext();
         renderResult(nextContext);
@@ -6793,7 +6811,15 @@
       button.addEventListener('click', event => {
         event.preventDefault();
         event.stopPropagation();
-        const option = collectRenderedSkillEffectOptions(buildContext()).find(item => item.key === button.dataset.fdcSkillEffectInfo);
+        const options = collectRenderedSkillEffectOptions(buildContext());
+        if (button.dataset.fdcA1InfoKeys) {
+          const keys = JSON.parse(button.dataset.fdcA1InfoKeys);
+          const grouped = options.filter(item => keys.includes(item.key));
+          showFdcInfoPopover(button, '戦闘時ステータス効果', grouped.map(item =>
+            getSkillEffectCompactSummary(item).main + (isSelfSkillEffectOptionEnabled(item) ? ' / ON' : ' / OFF')));
+          return;
+        }
+        const option = options.find(item => item.key === button.dataset.fdcSkillEffectInfo);
         if (option) showSkillEffectPopover(button, option);
       });
     });
@@ -6814,12 +6840,39 @@
         ${renderSkillEffectBonusSummary(toggleOptions)}
         ${toggleOptions.length ? `
           <div class="fdc-skill-effect-list">
-            ${toggleOptions.map(option => renderSkillEffectToggle(option)).join('')}
+            ${groupA1StatDisplayOptions(toggleOptions).map(option => renderSkillEffectToggle(option)).join('')}
           </div>
         ` : (!automaticOptions.length ? `<div class="fdc-skill-effect-empty">${escapeHtml(emptyText)}</div>` : '')}
-        ${renderAutomaticSkillEffectList(automaticOptions)}
+        ${renderAutomaticSkillEffectList(groupA1StatDisplayOptions(automaticOptions))}
       </section>
     `;
+  }
+
+  function isA1StatDisplayOption(option) {
+    return option.sourceId === 'aside:1' && option.effectType === 'バフ'
+      && ['自身', '本人'].includes(option.effectTarget)
+      && /^(?:最大HP|HP|物理攻撃力|魔法攻撃力|物理防御力|魔法防御力|会心|会心ダメージ|会心抵抗|会心ダメージ抵抗)増加$/.test(option.valueKind)
+      && (!option.condition || ['常時', '無条件'].includes(option.condition))
+      && !option.conditionType && !option.triggerType && !option.durationText && !option.durationSeconds
+      && !(Number(option.stackMax) > 1) && !option.rangeAssumption && !option.targetSelectionRequired;
+  }
+
+  function groupA1StatDisplayOptions(options = []) {
+    const result = [];
+    const groups = new Map();
+    options.forEach(option => {
+      if (!isA1StatDisplayOption(option)) { result.push(option); return; }
+      const key = JSON.stringify([option.key.split(':aside:1:')[0], option.group,
+        option.controlMode, !!option.normalStatusBlocked, !!option.conditionBlocked]);
+      let group = groups.get(key);
+      if (!group) {
+        group = { ...option, label: '戦闘時ステータス効果', displayA1Options: [] };
+        groups.set(key, group);
+        result.push(group);
+      }
+      group.displayA1Options.push(option);
+    });
+    return result;
   }
 
   function sortFormationSkillEffectOptions(options = []) {
@@ -6869,7 +6922,7 @@
                 <span class="fdc-skill-effect-source ${escapeAttr(getFdcApostleSkillTone(option.category))}">${escapeHtml(getFdcApostleSkillActionLabel(option.category))}</span>
                 ${option.ownerName ? `<span class="fdc-skill-effect-owner">${escapeHtml(option.ownerName)}</span>` : ''}
                 <span class="fdc-automatic-effect-text"><span class="fdc-skill-effect-mainline">${renderFdcEffectTimingTag(option)}<strong>${escapeHtml(summary.main)}</strong></span><small>${escapeHtml(summary.meta)}</small></span>
-                <button type="button" class="fdc-skill-effect-info" data-fdc-skill-effect-info="${escapeAttr(option.key)}" aria-label="${escapeAttr(`${option.label}の条件詳細`)}">i</button>
+                <button type="button" class="fdc-skill-effect-info" data-fdc-skill-effect-info="${escapeAttr(option.key)}"${option.displayA1Options ? ` data-fdc-a1-info-keys="${escapeAttr(JSON.stringify(option.displayA1Options.map(item => item.key)))}"` : ''} aria-label="${escapeAttr(`${option.label}の条件詳細`)}">i</button>
               </div>
             `;
           }).join('')}
@@ -6894,7 +6947,10 @@
     const sourceEnabled = isFdcSkillEffectSourceEnabled(option);
     const autoControlled = isFdcSkillEffectAutoOnly(option);
     const autoSuggested = option.controlMode === 'automatic';
-    const checked = autoControlled || isSelfSkillEffectOptionEnabled(option) ? ' checked' : '';
+    const groupedOptions = option.displayA1Options || [option];
+    const enabledCount = groupedOptions.filter(item => isSelfSkillEffectOptionEnabled(item)).length;
+    const mixed = enabledCount > 0 && enabledCount < groupedOptions.length;
+    const checked = autoControlled || enabledCount === groupedOptions.length ? ' checked' : '';
     const disabled = sourceEnabled && !autoControlled && !option.normalStatusBlocked ? '' : ' disabled';
     const summary = getSkillEffectCompactSummary(option);
     const stackControl = renderSkillEffectStackControl(option);
@@ -6902,10 +6958,10 @@
     const controlLabel = '';
     return `
       <label class="fdc-skill-effect-toggle${autoControlled ? ' is-auto-controlled' : ''}${sourceEnabled ? '' : ' is-source-disabled'}"${option.normalStateControl ? ' data-fdc-normal-state-control' : ''} data-fdc-effect-control="${escapeAttr(autoControlled ? 'automatic' : autoSuggested ? 'automatic-overrideable' : 'manual')}"${controlLabel ? ` title="${escapeAttr(controlLabel)}"` : ''}>
-        <input type="checkbox" data-fdc-self-skill-effect="${escapeAttr(option.key)}"${checked}${disabled}${controlLabel ? ` aria-label="${escapeAttr(controlLabel)}"` : ''}>
+        <input type="checkbox" data-fdc-self-skill-effect="${escapeAttr(option.key)}"${option.displayA1Options ? ` data-fdc-effect-group-keys="${escapeAttr(JSON.stringify(groupedOptions.map(item => item.key)))}"` : ''}${mixed ? ' data-fdc-effect-mixed="true" aria-checked="mixed"' : ''}${checked}${disabled}${controlLabel ? ` aria-label="${escapeAttr(controlLabel)}"` : ''}>
         <span class="fdc-skill-effect-source ${escapeAttr(getFdcApostleSkillTone(option.category))}">${escapeHtml(getFdcApostleSkillActionLabel(option.category))}</span>
         ${option.ownerName ? `<span class="fdc-skill-effect-owner">${escapeHtml(option.ownerName)}</span>` : ''}
-        <button type="button" class="fdc-skill-effect-info" data-fdc-skill-effect-info="${escapeAttr(option.key)}" aria-label="${escapeAttr(`${option.label}の条件詳細`)}">i</button>
+        <button type="button" class="fdc-skill-effect-info" data-fdc-skill-effect-info="${escapeAttr(option.key)}"${option.displayA1Options ? ` data-fdc-a1-info-keys="${escapeAttr(JSON.stringify(option.displayA1Options.map(item => item.key)))}"` : ''} aria-label="${escapeAttr(`${option.label}の条件詳細`)}">i</button>
         <span class="fdc-skill-effect-text">
           <span class="fdc-skill-effect-mainline">${timingTag}<strong>${escapeHtml(summary.main)}</strong></span>
           <small>${escapeHtml(summary.meta)}</small>
@@ -6939,6 +6995,13 @@
   }
 
   function getSkillEffectCompactSummary(option) {
+    if (option.displayA1Options) return {
+      main: '戦闘時ステータス効果',
+      meta: option.displayA1Options.map(item => {
+        const summary = getSkillEffectCompactSummary(item);
+        return summary.main;
+      }).join(' / ')
+    };
     const kind = option.valueKind || option.effectType || option.effectLabel || option.label || '効果';
     const value = option.effectValue || formatBonusMap(getSkillEffectOptionBonuses(option)) || '';
     const stackText = Number(option?.stackMax) > 1 ? ` ×${getConditionalEffectStackCount(option.key, option.stackMax, option.stackDefault)}` : '';
@@ -7229,7 +7292,7 @@
     if (!target || !key) return false;
     const canonical = getFdcSkillEffectCanonicalKey(key);
     return buildSelfSkillEffectOptions(target, {target, actionCategory: ''}).some(option =>
-      option.conditionType === 'フィールド敵数'
+      (option.conditionType === 'フィールド敵数' || isA1StatDisplayOption(option))
         && getFdcSkillEffectCanonicalKey(option.key) === canonical);
   }
 
@@ -9125,7 +9188,9 @@
     el.formationPicker.hidden = !shouldOpen;
     el.formationPicker.classList.toggle('is-floating-picker', shouldOpen);
     if (shouldOpen) {
-      renderFormationPicker(buildContext());
+      const context = buildContext();
+      if (!context.members.length && !view.pendingTempMemberId) view.pickerMode = 'all';
+      renderFormationPicker(context);
     }
     el.targetPreview?.setAttribute('aria-expanded', String(shouldOpen));
     updateFloatingTargetVisibility();
@@ -11281,7 +11346,7 @@
     const critDmgResP = defender.critDmgResP - defender.critDmgResDownP;
     const combatMath = typeof TRICKCAL_DPS_SIMULATOR !== 'undefined' ? TRICKCAL_DPS_SIMULATOR : null;
     const combatStat = combatMath?.resolveCombatStat || ((base, percent, minimum = 0) => Math.max(minimum, base * (1 + percent / 100)));
-    const finalAtk = combatStat(baseAtk, attackP);
+    const finalAtk = combatStat(baseAtk, attackP, 1);
     const finalCrit = combatStat(baseCrit, attacker.critP);
     const finalCritDmg = combatStat(baseCritDmg, attacker.critDmgP);
     const finalHp = baseHp * (1 + hpP / 100);

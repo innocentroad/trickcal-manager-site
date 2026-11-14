@@ -340,9 +340,18 @@
       return releaseFeatureEnabled(feature);
     }
 
+    function isInInitialDisplayPeriod(article) {
+      const now = typeof options.now === 'function' ? options.now() : Date.now();
+      const start = Date.parse(`${article.date}T00:00:00+09:00`);
+      const end = article.autoUntil
+        ? Date.parse(`${article.autoUntil}T00:00:00+09:00`) + 86400000
+        : start + 7 * 86400000;
+      return Number.isFinite(start) && Number.isFinite(end) && now >= start && now < end;
+    }
+
     function articles() {
       try {
-        return data?.getArticles?.(contentProfile) || [];
+        return (data?.getArticles?.(contentProfile) || []).filter(article => !article.archived || isInInitialDisplayPeriod(article));
       } catch (_) {
         return [];
       }
@@ -443,6 +452,16 @@
       siteLink.rel = 'noopener noreferrer';
       appendElement(paragraph, 'span', value.slice(markerIndex + marker.length));
       return paragraph;
+    }
+
+    function appendRelatedLinks(parent, links = []) {
+      links.forEach(item => {
+        const paragraph = appendElement(parent, 'p', undefined, 'trickcal-announcement-paragraph');
+        const link = appendElement(paragraph, 'a', item.label, 'trickcal-announcement-site-link');
+        link.href = item.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+      });
     }
 
     function routeUrl(routeId, fallbackPath) {
@@ -827,6 +846,10 @@
       const item = appendElement(parent, 'li', undefined, 'trickcal-announcement-history-item');
       const details = appendElement(item, 'details', undefined, 'trickcal-announcement-history-entry');
       details.dataset.historyId = entry.id;
+      details.addEventListener('toggle', () => {
+        const id = entry.announcementId || entry.id;
+        if (details.open && articleById(id)) markRead(id);
+      });
       const summary = appendElement(details, 'summary', undefined, 'trickcal-announcement-history-summary');
       const meta = appendElement(summary, 'span', undefined, 'trickcal-announcement-history-meta');
       const time = appendElement(meta, 'time', entry.date, 'trickcal-announcement-history-date');
@@ -835,6 +858,7 @@
       appendElement(meta, 'span', categoryLabels[entry.category], 'trickcal-announcement-history-category');
       appendElement(summary, 'strong', entry.title, 'trickcal-announcement-history-title');
       entry.items.forEach(text => appendElement(details, 'p', text, 'trickcal-announcement-history-paragraph'));
+      appendRelatedLinks(details, entry.relatedLinks);
       if (Array.isArray(entry.historicalNotes) && entry.historicalNotes.length) {
         const notes = appendElement(details, 'aside', undefined, 'trickcal-announcement-history-notes');
         appendElement(notes, 'h4', '更新当時の注記');
@@ -917,7 +941,7 @@
           firstMoreLabel: 'もっと見る'
         });
       }
-      const otherArticles = articles().filter(article => article.id !== MIGRATION_ARTICLE_ID);
+      const otherArticles = articles().filter(article => article.id !== MIGRATION_ARTICLE_ID && !article.archived);
       if (otherArticles.length) {
         const section = appendElement(historyScroll, 'section', undefined, 'trickcal-announcements-list');
         appendElement(section, 'h3', 'その他のお知らせ', 'trickcal-announcement-section-title');
@@ -941,13 +965,7 @@
       });
       appendElement(dialogBody, 'p', `${article.date} · ${article.category}`, 'trickcal-announcement-meta');
       article.body.forEach(paragraph => appendArticleParagraph(dialogBody, paragraph));
-      (article.relatedLinks || []).forEach(item => {
-        const paragraph = appendElement(dialogBody, 'p', undefined, 'trickcal-announcement-paragraph');
-        const link = appendElement(paragraph, 'a', item.label, 'trickcal-announcement-site-link');
-        link.href = item.url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-      });
+      appendRelatedLinks(dialogBody, article.relatedLinks);
       if (article.cta === 'migration-guide') {
         const guideButton = appendElement(dialogBody, 'button', '移行方法を見る', 'trickcal-announcement-guide-button');
         guideButton.type = 'button';
@@ -958,7 +976,7 @@
         });
       }
       appendDismissControl(dialogBody, article);
-      if (!auto && !markRead(article.id)) {
+      if (!markRead(article.id)) {
         appendElement(dialogBody, 'p', 'この記事を既読にしましたが、既読状態を保存できませんでした。', 'trickcal-announcement-storage-unavailable');
       }
       return true;
@@ -1318,7 +1336,8 @@
       const safeToOpen = canAutoOpen();
       autoDecisionMade = true;
       if (!safeToOpen) return false;
-      const candidate = articles().find(article => article.autoRevision && !isAutoAcknowledged(article));
+      const candidate = articles().find(article => article.autoRevision && isInInitialDisplayPeriod(article)
+        && !isRead(article.id) && !isAutoAcknowledged(article));
       if (!candidate) return false;
       return openArticleById(candidate.id, { auto: true });
     }

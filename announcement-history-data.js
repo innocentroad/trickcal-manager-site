@@ -11,6 +11,13 @@
     schemaVersion: 1,
     source: 'user-provided-discord-announcements',
     entries: [
+      { id: '20261114-feature-calc-usability', date: '2026-11-14', category: 'feature', title: 'ダメージ計算の使徒選択と効果表示を改善', items: ['編成が空の場合は使徒一覧から直接選択できます。「編成なし」を選ぶと、計算画面で読み込んだ編成を解除できます。', 'A1の戦闘時ステータス効果をまとめて表示するようにしました。各項目の数値と、個別ON／OFFが混在する設定は保持します。', '通常計算とDPSの通常命中で、攻撃力低下を反映した後の攻撃力の下限を1に揃えました。', 'お知らせをゲームデータ更新とサイト更新履歴へ整理しました。未読の更新案内は一定期間だけ初回表示し、データ移行の帯表示は終了しました。'] },
+      { id: '20261112-game-data-rohne-aside', announcementId: '20261112-game-data-rohne-stage-enemies', date: '2026-11-12', category: 'game-data', title: 'ローネのアサイドを追加', items: ['ローネのアサイド「あの頃のトンカツ」の能力値、A1～A3の効果とアイコンを追加しました。'] },
+      { id: '20261112-feature-stage-enemies', announcementId: '20261112-game-data-rohne-stage-enemies', date: '2026-11-12', category: 'feature', title: '進軍・世界樹の敵データと計算に対応', items: ['ダメージ計算のモンスター選択に「進軍」「世界樹採掘基地」を追加しました。進軍では難易度・ワールド・ステージ・ウェーブ・敵強度、世界樹では性格・階層・敵強度を選べます。', '敵データでは、ステージ・階層ごとのステータス、攻撃倍率、特徴を確認できます。進軍はワールド内のステージを一覧にし、ウェーブを開閉できます。', '選択したステージに登場しないモンスターも候補に含まれます。特徴の一部は説明表示のみの対応です。'], relatedLinks: [{ label: '解説note：進軍と世界樹採掘の敵ステータス予測', url: 'https://note.com/innocentroad/n/n9b8d7e1b2753' }] },
+      { id: '20261106-feature-ef-grade', date: '2026-11-06', category: 'feature', title: 'エーリアスフロンティアの学年調整に対応', items: ['ダメージ計算の「学年」で、エーリアスフロンティアの標準の4年生から5年生・6年生へ変更できます。', 'エピカの愛用スペルなどで学年が上がった場合の比較に利用できます。'] },
+      { id: '20261105-game-data-polan', date: '2026-11-05', category: 'game-data', title: 'ポランと専用遺物を追加', items: ['ポランの育成・装備・ボード・スキル・アサイドのデータを追加しました。', '専用遺物「ポランの制服帽子」と愛用効果、アルバイトの仕事・休息素材を追加しました。'] },
+      { id: '20261101-game-data-rank10-equipment-estimate', date: '2026-11-01', category: 'game-data', title: 'Rank10装備の予想データを追加', items: ['Rank10装備を選択できるようにしました。装備Rankを10に設定すると確認できます。'], historicalNotes: ['追加時点の装備数値は予想値です。実際の数値と異なる可能性があります。'] },
+      { id: '20261031-feature-apostle-bulk-settings', date: '2026-10-31', category: 'feature', title: '使徒設定・全体ボードの一覧操作を改善', items: ['使徒設定の「SLv」「装備」見出しから、SLvのLv4・Lv7・MAX、装備の「なし」・+0～+5を一括適用できます。まとめて取り消し・やり直しができ、個別設定も利用できます。育成値の変更中は一覧位置を維持します。', '全体ボードに、ボード階層・ステータス条件に合う特殊マスの「未塗り優先」「未塗りのみ」を追加しました。', '全体ボード・一括設定・Rank／好感度／アサイド一覧・使徒選択・編成時の使徒選択の並び順を、再読み込み後も保持します。検索文字列や絞り込み条件は保存しません。'] },
       { id: '20261027-fix-data-colors-navigation', date: '2026-10-27', category: 'fix', title: 'データ画面と共通メニューの表示を改善', items: ['データ画面のライトモードと、ボードプレビューのダークモードの色味を揃えました。', '使徒データ・ビンゴの上バーメニューのボタンサイズを修正しました。', 'ダメージ計算の遺物のはんだ表示を、小さな縁取り文字で右下に表示するようにしました。'] },
       { id: '20261027-fix-dps-monster-selection', date: '2026-10-27', category: 'fix', title: 'ダメージ計算・DPSβの表示と操作を改善', items: ['DPSβで高学年OFFなら計算できる構成では、高学年をOFFにして注意を表示するようにしました。', '通常計算からDPSβへ切り替えた際に結果が表示されない問題や、シーズンルール変更後に再計算されない問題を修正しました。', '表示だけの操作による不要な処理を減らし、シールド切替とDPSの注意表示が重ならないようにしました。', '敵の種類の「敵プリセット」を「モンスター」に変更しました。選択画面は上段にコンテンツ・難易度、下段にモンスターを配置しました。'] },
       { id: '20261027-feature-enemy-layout-stat-link', date: '2026-10-27', category: 'feature', title: '敵データ画面とダメージ計算の入力を改善', items: ['敵データはコンテンツと敵を選び、難易度別のステータスを表で見比べられるようになりました。フェーズは表の行から開閉できます。', '使徒のステータスに「ステ管理連携 ON／OFF」を追加しました。OFFでは手入力を使い、入力内容を自動で保持します。', 'シールド「込み／なし」は、下部のボタンを押すたびに切り替えられるようになりました。'] },
@@ -110,6 +117,10 @@
       }
       if (!allowedCategories.has(entry.category)) errors.push(`${label}.categoryが不正です`);
       if (typeof entry.title !== 'string' || !entry.title.trim()) errors.push(`${label}.titleが必要です`);
+      if (entry.announcementId !== undefined
+        && (typeof entry.announcementId !== 'string' || !entry.announcementId.trim())) {
+        errors.push(`${label}.announcementIdが不正です`);
+      }
       if (!Array.isArray(entry.items) || !entry.items.length
         || entry.items.some(item => typeof item !== 'string' || !item.trim())) {
         errors.push(`${label}.itemsは空でない文字列arrayである必要があります`);
@@ -118,6 +129,16 @@
         && (!Array.isArray(entry.historicalNotes)
           || entry.historicalNotes.some(note => typeof note !== 'string' || !note.trim()))) {
         errors.push(`${label}.historicalNotesは空でない文字列arrayである必要があります`);
+      }
+      if (entry.relatedLinks !== undefined) {
+        if (!Array.isArray(entry.relatedLinks)) errors.push(`${label}.relatedLinksが不正です`);
+        else entry.relatedLinks.forEach(link => {
+          try {
+            const url = new URL(link?.url);
+            if (typeof link?.label !== 'string' || !link.label.trim()
+              || url.protocol !== 'https:' || url.username || url.password) throw new Error('invalid link');
+          } catch (_) { errors.push(`${label}.relatedLinksが不正です`); }
+        });
       }
     });
     const sorted = entries.map((entry, sourceIndex) => ({ entry, sourceIndex }))
