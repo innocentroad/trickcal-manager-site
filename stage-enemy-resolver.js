@@ -12,6 +12,24 @@
   function createResolver(data) {
     const monsters = new Map(data.monsters.map(monster => [monster.key, monster]));
     const conditions = new Map(data.conditions.map(condition => [condition.key, condition]));
+    const displayNames = new Map();
+    function displayName(monster, content) {
+      const key = `${content}:${monster.key}`;
+      if (displayNames.has(key)) return displayNames.get(key);
+      const baseName = monster.baseName || monster.name;
+      const siblings = data.monsters.filter(row => row.contents.includes(content)
+        && row.strength === monster.strength && (row.baseName || row.name) === baseName);
+      const whisper = /ウイスパー/.test(baseName);
+      const groups = new Set(siblings.map(row => whisper
+        ? `${row.groupKey || row.key}:${row.personality}` : row.groupKey || row.key));
+      const variants = siblings.filter(row => (row.groupKey || row.key) === (monster.groupKey || monster.key)
+        && (!whisper || row.personality === monster.personality));
+      const personalities = [...new Set(variants.map(row => row.personality).filter(Boolean))];
+      const name = (groups.size > 1 || whisper) && personalities.length
+        ? `${baseName}（${personalities.join('・')}）` : baseName;
+      displayNames.set(key, name);
+      return name;
+    }
     const normalizeKey = (map, kind, value) => map.has(value) || data.keyFormat !== 2
       ? value : publicKey(kind, value);
 
@@ -30,10 +48,14 @@
       const damageType = selection.damageType === 'magic' || selection.damageType === 'physical'
         ? selection.damageType : monster.dmgType;
       return {
-        ...stats, name: monster.name, dmgType: damageType === 'magic' ? 'mag' : 'phys',
+        ...stats, name: displayName(monster, condition.content), dmgType: damageType === 'magic' ? 'mag' : 'phys',
         projected: !!monster.projected,
         personality: monster.personality, strength: monster.strength,
-        content: { type: condition.content, world: condition.world, stage: condition.stage },
+        content: { type: condition.content, world: condition.world, stage: condition.stage,
+          difficulty: condition.difficulty,
+          ...(condition.content === 'crusade' ? {
+            stageLabel: `${({1:'微',2:'中',3:'激'})[condition.difficulty] || ''}${condition.world}-${condition.stage}`
+          } : {}) },
         special: factor(damageType === 'magic' ? condition.magicBonus : condition.physicalBonus) * 100,
         stageSelection: { conditionKey: condition.key, monsterKey: monster.key },
         skills: (monster.skills || []).flatMap(skill => skill.multipliers
@@ -78,7 +100,19 @@
       return monster ? selectionKey({ ...preset.stageSelection, monsterKey: monster.key }) : null;
     }
 
-    return { resolve, selectionKey, resolveKey, personalityVariants, changePersonality, monsters: data.monsters, conditions: data.conditions };
+    function getDefaultPersonality(key) {
+      const preset = resolveKey(key);
+      if (!preset) return '';
+      const world = preset.content.world;
+                                                                                       
+                                                                                       
+      if (preset.content.type === 'crusade' && world >= 6 && world <= 32) {
+        return ['純粋', '冷静', '狂気', '活発', '憂鬱'][(world - 6) % 5];
+      }
+      return preset.personality || '';
+    }
+
+    return { resolve, selectionKey, resolveKey, personalityVariants, changePersonality, getDefaultPersonality, monsters: data.monsters, conditions: data.conditions };
   }
 
   const api = { createResolver };

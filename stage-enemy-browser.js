@@ -5,7 +5,7 @@
     const panel = document.createElement('div');
     panel.className = 'enemy-selection-grid';
     el.monster.closest('.enemy-selection-panel').append(panel);
-    const state = { content: '', world: 1, stage: 1, difficulty: 3, strength: 1, monster: '', personality: '' };
+    const state = { content: '', world: 1, stage: 1, difficulty: 3, strength: 1, monster: '' };
     const openStages = new Set();
     let previousMonster;
     const labels = { crusade: '進軍', yggdrasilDigSite: '世界樹採掘基地' };
@@ -25,7 +25,7 @@
       if (panel.hidden) return false;
       state.content = content;
       let conditions = resolver.conditions.filter(row => row.content === content);
-      let html = select('world', content === 'crusade' ? 'ワールド' : '性格', unique(conditions, 'world'),
+      let html = select('world', content === 'crusade' ? 'ワールド' : '性格（ステージ）', unique(conditions, 'world'),
         content === 'crusade' ? {} : { 1: '純粋', 2: '冷静', 3: '狂気', 4: '活発', 5: '憂鬱' });
       conditions = conditions.filter(row => row.world === state.world);
       if (content === 'crusade') {
@@ -53,11 +53,8 @@
         state.monster = matching?.[0] || groups.keys().next().value || '';
       }
       const variants = groups.get(state.monster) || [];
-      const personalities = [...new Set(variants.map(monster => monster.personality))];
-      if (personalities.length) html += select('personality', '敵の性格', personalities);
+      const personalities = [...new Set(variants.map(monster => monster.personality).filter(Boolean))];
       panel.innerHTML = html;
-      const personalityInput = panel.querySelector('[data-stage-field="personality"]');
-      if (personalityInput) personalityInput.disabled = personalities.length <= 1;
       const nameCounts = new Map();
       groups.forEach(variants => {
         const name = variants[0].baseName || variants[0].name;
@@ -73,7 +70,7 @@
       }).join('');
       el.monster.value = state.monster;
       el.monster.disabled = !monsters.length;
-      const selectedMonster = variants.find(monster => monster.personality === state.personality);
+      const selectedMonster = variants[0];
       previousMonster = selectedMonster;
       const rows = conditions.slice().sort((a, b) => a.stage - b.stage || a.wave - b.wave);
       const numbers = new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 2 });
@@ -100,7 +97,7 @@
       const skills = selectedMonster?.skills || [];
       const features = selectedMonster?.features || [];
       el.detail.innerHTML = `<div class="detail-head"><div class="detail-title-row"><h2>${escape(selectedMonster?.baseName || selectedMonster?.name || '')}</h2>
-        <div class="detail-context"><span class="detail-context-item">${labels[content]}</span><span class="detail-context-item">${escape(selectedMonster?.personality || '')}</span></div></div></div>
+        <div class="detail-context"><span class="detail-context-item">${labels[content]}</span><span class="detail-context-item">${escape(personalities.join('・'))}</span></div></div></div>
         <div class="detail-chips">${selectedMonster?.projected ? '<span class="detail-chip" title="このコンテンツ・強度での能力値は生成式による推定です。攻撃と特徴は元のモンスターを引き継いでいます。">推定値</span>' : ''}<span class="detail-chip ${selectedMonster?.dmgType === 'magic' ? 'is-magic' : 'is-physical'}">${selectedMonster?.dmgType === 'magic' ? '魔法攻撃' : '物理攻撃'}</span>
           ${features.map(feature => `<span class="detail-chip">${escape(feature.label)}</span>`).join('')}</div>
         ${features.length ? '<details class="enemy-variant-info"><summary aria-label="特徴の計算対応について" title="計算対応">i</summary><div class="enemy-variant-info-content"><p>これらの特徴は説明表示のみ対応しています。</p></div></details>' : ''}
@@ -114,7 +111,7 @@
     panel.addEventListener('change', event => {
       const key = event.target.dataset.stageField;
       if (!key) return;
-      state[key] = key === 'personality' ? event.target.value : Number(event.target.value);
+      state[key] = Number(event.target.value);
       render(state.content);
     });
     el.variants.addEventListener('click', event => {

@@ -1206,14 +1206,6 @@
     });
     el.enemyPersonality?.addEventListener('change', () => {
       view.enemyPersonality = el.enemyPersonality.value || '';
-      if (view.enemySourceMode !== 'apostle' && view.enemyPresetKey?.startsWith('stage:')) {
-        const key = getStageEnemyResolver().changePersonality(view.enemyPresetKey, view.enemyPersonality);
-        if (key) {
-          view.enemyPresetKey = key;
-          populateEnemyPresets();
-          applyEnemyPreset();
-        }
-      }
       saveCalcSettings();
       render();
     });
@@ -1296,7 +1288,7 @@
       saveCalcSettings();
       scheduleSeasonRuleRefresh();
     });
-    el.enemyPreset?.addEventListener('change', () => {
+    el.enemyPreset?.addEventListener('change', event => {
       const nextPresetKey = el.enemyPreset.value || '';
       if (nextPresetKey !== view.enemyPresetKey) {
         if (nextPresetKey) writeEnemySpecialMultiplier(100);
@@ -1310,7 +1302,10 @@
         el.inputs.enemyFuryPlus.value = '-1';
       }
       view.enemyPresetKey = nextPresetKey;
-      view.enemyPersonality = normalizePersonalityName(getSelectedEnemyPreset()?.personality);
+      if (!event.detail?.preservePersonality) {
+        view.enemyPersonality = normalizePersonalityName(nextPresetKey.startsWith('stage:')
+          ? getStageEnemyResolver().getDefaultPersonality(nextPresetKey) : getSelectedEnemyPreset()?.personality);
+      }
       syncEnemyPersonalityUi();
       view.enemyPhaseIndex = 0;
       view.enemySkillIndex = -1;
@@ -1846,9 +1841,6 @@
     }
     if (el.enemyPersonality) el.enemyPersonality.disabled = apostleMode
       && !formationPersonality.getPersonalityOptions(getApostle(view.enemyApostleId) || {}).length;
-    if (!apostleMode && view.enemyPresetKey?.startsWith('stage:') && el.enemyPersonality) {
-      el.enemyPersonality.disabled = new Set(getStageEnemyResolver().personalityVariants(view.enemyPresetKey).map(monster => monster.personality)).size <= 1;
-    }
     const finalStatInputs = [el.inputs.enemyHp, el.inputs.enemyAtk, el.inputs.enemyCrit, el.inputs.enemyCritDmg, el.inputs.def, el.inputs.critRes, el.inputs.critDmgRes];
     finalStatInputs.forEach(input => {
       if (input) input.readOnly = false;
@@ -1930,7 +1922,7 @@
       syncWeaknessFields();
       return;
     }
-    if (!view.enemyPersonality && preset.personality) {
+    if (!view.enemyPresetKey?.startsWith('stage:') && !view.enemyPersonality && preset.personality) {
       view.enemyPersonality = normalizePersonalityName(preset.personality);
       syncEnemyPersonalityUi();
     }
@@ -2513,7 +2505,7 @@
       const metadata = getEnemyPresetMetadata(preset, key);
       const name = key ? metadata.name || fullLabel : '手動入力';
       const conditions = key ? [metadata.contentLabel, metadata.difficultyLabel, metadata.stageLabel].filter(Boolean).join(' / ') : '';
-      button.innerHTML = `<span class="fdc-enemy-preset-name">${escapeHtml(name)}</span>${conditions ? `<small class="fdc-enemy-preset-summary"> / ${escapeHtml(conditions)}</small>` : ''}`;
+      button.innerHTML = `<span class="fdc-enemy-preset-name">${escapeHtml(name).replace('（', '<span class="fdc-enemy-preset-personalities">（').replace('）', '）</span>')}</span>${conditions ? `<small class="fdc-enemy-preset-summary">${escapeHtml(conditions)}</small>` : ''}`;
       button.title = fullLabel;
       button.setAttribute('aria-label', `モンスターを選択：${fullLabel}`);
     }
@@ -2521,13 +2513,13 @@
     syncStageEnemyQuickControls();
   }
 
-  function applyStageEnemyKey(key) {
+  function applyStageEnemyKey(key, preservePersonality = false) {
     if (!key || key === view.enemyPresetKey) return;
     if (![...el.enemyPreset.options].some(option => option.value === key)) {
       el.enemyPreset.add(new Option('ステージ選択', key));
     }
     el.enemyPreset.value = key;
-    el.enemyPreset.dispatchEvent(new Event('change', { bubbles: true }));
+    el.enemyPreset.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { preservePersonality } }));
   }
 
   function syncStageEnemyQuickControls() {
@@ -2556,16 +2548,16 @@
       <label><span>強度</span><select data-stage-quick="strength" aria-label="敵強度">${strengths.map(value => `<option value="${value}" ${value === monster.strength ? 'selected' : ''}>${strengthNames[value] || value}</option>`).join('')}</select></label>`;
     container.querySelectorAll('select').forEach(input => input.addEventListener('change', () => {
       if (input.dataset.stageQuick === 'wave') {
-        applyStageEnemyKey(resolver.selectionKey({ ...preset.stageSelection, conditionKey: input.value }));
+        applyStageEnemyKey(resolver.selectionKey({ ...preset.stageSelection, conditionKey: input.value }), true);
       } else {
         const candidates = alternatives.filter(row => row.strength === Number(input.value));
         const target = candidates.find(row => row.key === monster.key) || candidates[0];
-        if (target) applyStageEnemyKey(resolver.selectionKey({ ...preset.stageSelection, monsterKey: target.key }));
+        if (target) applyStageEnemyKey(resolver.selectionKey({ ...preset.stageSelection, monsterKey: target.key }), true);
       }
     }));
   }
 
-  function openEnemyPresetDialog(skipStage = false) {
+  function openEnemyPresetDialog(requestedContent = null) {
     let dialog = document.getElementById('fdc-enemy-preset-dialog');
     if (!dialog) {
       dialog = document.createElement('dialog');
@@ -2591,14 +2583,27 @@
       el.enemyPreset.dispatchEvent(new Event('change', { bubbles: true }));
     };
     const selectedStage = getStageEnemyResolver().resolveKey(savedKey);
-    if (selectedStage && skipStage !== true) {
-      openStageEnemyPicker(dialog, getStageEnemyResolver(), savedKey, selectedStage.content.type, applyStageKey, () => openEnemyPresetDialog(true));
+    const stageTypes = ['crusade', 'yggdrasilDigSite'];
+    const contentOptions = new Map([['', 'すべて']]);
+    Object.entries(presets).filter(([key, preset]) => !key.startsWith('stage:') && !preset.selectionAliasOf && !preset.hideInSelection)
+      .forEach(([key, preset]) => {
+        const label = preset.isCustom ? '保存済み' : getEnemyPresetMetadata(preset, key).contentLabel || 'その他';
+        if (!['進軍', '世界樹採掘基地'].includes(label)) contentOptions.set(label, label);
+      });
+    contentOptions.set('crusade', '進軍');
+    contentOptions.set('yggdrasilDigSite', '世界樹採掘基地');
+    const contentMarkup = [...contentOptions].map(([value, label]) => `<option value="${escapeAttr(value)}">${escapeHtml(label)}</option>`).join('');
+    const activeContent = typeof requestedContent === 'string' ? requestedContent : selectedStage?.content.type;
+    if (stageTypes.includes(activeContent)) {
+      openStageEnemyPicker(dialog, getStageEnemyResolver(), savedKey, activeContent, applyStageKey,
+        value => openEnemyPresetDialog(value), contentMarkup);
+      dialog.querySelector('[data-enemy-content]')?.focus();
       return;
     }
     const currentKey = presets[savedKey]?.selectionAliasOf
       || (typeof resolveEnemyPresetKey === 'function' ? resolveEnemyPresetKey(savedKey) : savedKey);
     const entries = Object.entries(presets).filter(([key, preset]) =>
-      !preset.selectionAliasOf && (!preset.hideInSelection || key === currentKey))
+      !key.startsWith('stage:') && !preset.selectionAliasOf && (!preset.hideInSelection || key === currentKey))
       .sort(typeof compareEnemyPresetEntries === 'function' ? compareEnemyPresetEntries : undefined);
     const metadata = entries.map(([key, preset]) => {
       const meta = getEnemyPresetMetadata(preset, key);
@@ -2622,16 +2627,14 @@
     dialog.innerHTML = `<header><h2 id="fdc-enemy-preset-title">モンスターを選択</h2><button type="button" data-enemy-cancel aria-label="閉じる">×</button></header>
       <label class="fdc-field"><span>検索</span><input data-enemy-search type="search" placeholder="敵名・段階・難易度"></label>
       <div class="fdc-enemy-preset-filters">
-        <label class="fdc-field"><span>コンテンツ</span><select data-enemy-content><option value="">すべて</option>${[...new Set(metadata.map(contentLabel))].map(name => `<option>${escapeHtml(name)}</option>`).join('')}</select></label>
+        <label class="fdc-field"><span>コンテンツ</span><select data-enemy-content>${contentMarkup}</select></label>
         <label class="fdc-field"><span>難易度・段階</span><select data-enemy-variant disabled><option value="">先にモンスターを選択</option></select></label>
       </div>
       <label class="fdc-field fdc-enemy-name-field"><span>モンスター</span><select data-enemy-name><option value="">モンスターを選択</option><option value="__manual__">手動入力</option></select></label>
       <footer><button type="button" data-enemy-cancel>取消</button><button type="button" data-enemy-confirm>選択を反映</button></footer>`;
     const search = dialog.querySelector('[data-enemy-search]');
     const content = dialog.querySelector('[data-enemy-content]');
-    for (const [value, label] of [['crusade', '進軍'], ['yggdrasilDigSite', '世界樹採掘基地']]) {
-      content.add(new Option(label, value));
-    }
+    content.value = contentOptions.has(activeContent) ? activeContent : '';
     const enemy = dialog.querySelector('[data-enemy-name]');
     const variant = dialog.querySelector('[data-enemy-variant]');
     const confirm = dialog.querySelector('[data-enemy-confirm]');
@@ -2695,7 +2698,7 @@
     };
     content.addEventListener('change', () => {
       if (content.value === 'crusade' || content.value === 'yggdrasilDigSite') {
-        openStageEnemyPicker(dialog, getStageEnemyResolver(), savedKey, content.value, applyStageKey, () => openEnemyPresetDialog(true));
+        openEnemyPresetDialog(content.value);
         return;
       }
       renderEnemies();
@@ -2721,8 +2724,9 @@
       dialog.close();
     });
     renderEnemies({ preserve: false });
-    dialog.showModal();
-    search.focus();
+    if (!dialog.open) dialog.showModal();
+    if (typeof requestedContent === 'string') content.focus();
+    else search.focus();
   }
 
   function getEnemyApostleSkillOptions(context = buildContext()) {
@@ -11961,17 +11965,14 @@
   function syncEnemyPersonalityUi() {
     const personality = getEffectiveEnemyPersonality();
     if (el.enemyPersonality) {
-      const stageVariants = view.enemySourceMode !== 'apostle' && view.enemyPresetKey?.startsWith('stage:')
-        ? getStageEnemyResolver().personalityVariants(view.enemyPresetKey) : [];
-      const options = stageVariants.length ? [...new Set(stageVariants.map(monster => monster.personality))] : view.enemySourceMode === 'apostle'
+      const options = view.enemySourceMode === 'apostle'
         ? formationPersonality.getPersonalityOptions(getApostle(view.enemyApostleId) || {}) : [];
       for (const option of el.enemyPersonality.options) {
-        option.hidden = options.length > 0 && (stageVariants.length ? !options.includes(option.value) : !!option.value && !options.includes(option.value));
+        option.hidden = options.length > 0 && !!option.value && !options.includes(option.value);
         option.disabled = option.hidden;
         if (!option.value) option.textContent = options.length ? '性格を選択' : 'なし';
       }
       el.enemyPersonality.value = personality;
-      if (stageVariants.length) el.enemyPersonality.disabled = options.length <= 1;
     }
     if (el.enemyPersonalityIcon) {
       el.enemyPersonalityIcon.src = personality ? `img/性格_${personality}.webp` : 'img/性格_なし.webp';

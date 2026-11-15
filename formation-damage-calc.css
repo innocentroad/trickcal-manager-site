@@ -3096,7 +3096,7 @@ body.theme-dark .fdc-floating-target.is-resonance .fdc-floating-target-portrait 
 }
 .fdc-enemy-preset-dialog {
   position: fixed; inset: 0; margin: auto;
-  width: min(40rem, calc(100vw - 1.5rem)); max-height: 85dvh;
+  width: min(40rem, calc(100vw - 1.5rem)); height: min(36rem, 85dvh); max-height: 85dvh;
   box-sizing: border-box; padding: .8rem; overflow: hidden;
   border: 1px solid var(--fdc-border); border-radius: .9rem;
   color: var(--fdc-text); background: var(--fdc-panel); font: inherit;
@@ -7558,3 +7558,18 @@ body[data-fdcp-mode="dps"] #fdc-season-shock-field { display: none; }
 .fdc-enemy-hit-range input,.fdc-enemy-hit-range select { width:100%; min-width:0; box-sizing:border-box; }
 .fdc-enemy-hits p { margin:.35rem 0; font-size:.8rem; overflow-wrap:anywhere; }
 @media(max-width:600px) { .fdc-enemy-hit-range { grid-template-columns:repeat(2,minmax(0,1fr)); } .fdc-enemy-hit-range label:first-child { grid-column:1/-1; } }
+
+/* Keep long monster names readable alongside their stage conditions. */
+.fdc-enemy-preset-open { flex-direction: column; align-items: stretch; }
+.fdc-enemy-preset-name, .fdc-enemy-preset-summary {
+  flex: none; white-space: normal; overflow-wrap: anywhere; overflow: visible;
+}
+.fdc-stage-monster-field, .fdc-stage-monster-fullname { grid-column: 1 / -1; }
+.fdc-stage-monster-fullname { display: block; word-break: break-all; line-break: anywhere; min-width: 0; white-space: normal; overflow-wrap: anywhere; font-size: .85rem; color: var(--fdc-muted, var(--fdc-text)); }
+.fdc-enemy-preset-dialog > .fdc-enemy-preset-filters { flex-shrink: 1; min-height: 0; overflow-y: auto; }
+
+.fdc-stage-monster-fullname > span { display: block; }
+
+.fdc-enemy-preset-personalities { display: block; font-size: .85em; }
+
+.fdc-enemy-preset-dialog > footer { margin-top: auto; padding-top: .6rem; }

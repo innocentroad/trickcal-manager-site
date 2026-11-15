@@ -1,10 +1,11 @@
 (function (root) {
   'use strict';
-  root.openStageEnemyPicker = function (dialog, resolver, initialKey, content, apply, back) {
-    const initial = resolver.resolveKey(initialKey);
+  root.openStageEnemyPicker = function (dialog, resolver, initialKey, content, apply, changeContent, contentMarkup = '') {
+    const resolvedInitial = resolver.resolveKey(initialKey);
+    const initial = resolvedInitial?.content.type === content ? resolvedInitial : null;
     const saved = initial && resolver.conditions.find(row => row.key === initial.stageSelection.conditionKey);
     const state = { world: saved?.world || 1, stage: saved?.stage || 1, difficulty: saved?.difficulty || 3,
-      wave: saved?.wave || 1, strength: initial?.strength ?? 1, monster: initial?.stageSelection.monsterKey || '' };
+      search: '', wave: saved?.wave || 1, strength: initial?.strength ?? 1, monster: initial?.stageSelection.monsterKey || '' };
     const groupKey = monster => /ウイスパー/.test(monster.baseName || monster.name)
       ? `${monster.groupKey || monster.key}:${monster.personality}` : monster.groupKey || monster.key;
     const initialMonster = resolver.monsters.find(monster => monster.key === state.monster);
@@ -13,12 +14,12 @@
     let selection;
     function field(key, label, values, names = {}) {
       if (!values.includes(state[key])) state[key] = values[0];
-      return `<label class="fdc-field"><span>${label}</span><select data-stage-pick="${key}">${values.map(value => `<option value="${escape(value)}" ${state[key] === value ? 'selected' : ''}>${escape(names[value] || value)}</option>`).join('')}</select></label>`;
+      return `<label class="fdc-field${key === 'monster' ? ' fdc-stage-monster-field' : ''}"><span>${label}</span><select data-stage-pick="${key}">${values.map(value => `<option value="${escape(value)}" ${state[key] === value ? 'selected' : ''}>${escape(names[value] || value)}</option>`).join('')}</select></label>`;
     }
     function render() {
       const unique = (rows, key) => [...new Set(rows.map(row => row[key]))].sort((a, b) => a - b);
       let rows = resolver.conditions.filter(row => row.content === content);
-      let controls = '';
+      let controls = contentMarkup ? `<label class="fdc-field"><span>コンテンツ</span><select data-enemy-content>${contentMarkup}</select></label>` : '';
       if (content === 'crusade') {
         controls += field('difficulty', '難易度', unique(rows, 'difficulty').reverse(), { 1: '微辛', 2: '中辛', 3: '激辛' });
         rows = rows.filter(row => row.difficulty === state.difficulty);
@@ -51,13 +52,24 @@
           ? `${name}（${personalities.join('・')}）` : name;
         return [key, label];
       }));
-      controls += field('monster', 'モンスター', [...groups.keys()], names);
+      const matchingKeys = [...groups.keys()].filter(key => names[key].toLocaleLowerCase().includes(state.search.trim().toLocaleLowerCase()));
+      controls += field('monster', 'モンスター', matchingKeys, names);
+      controls += `<div class="fdc-stage-monster-fullname">${escape(names[state.monster] || '').replace('（', '<span>（').replace('）', '）</span>')}</div>`;
       const condition = rows.find(row => row.wave === state.wave);
       const variants = groups.get(state.monster) || [];
       const selectedMonster = variants.find(monster => monster.key === initialMonster?.key)
         || variants.find(monster => monster.personality === initialMonster?.personality) || variants[0];
       selection = condition && selectedMonster ? { conditionKey: condition.key, monsterKey: selectedMonster.key } : null;
-      dialog.innerHTML = `<header><h2 id="fdc-enemy-preset-title">${content === 'crusade' ? '進軍' : '世界樹採掘基地'}</h2><button type="button" data-stage-cancel aria-label="閉じる">×</button></header><div class="fdc-enemy-preset-filters">${controls}</div><footer><button type="button" data-stage-back>コンテンツを変更</button><button type="button" data-stage-cancel>取消</button><button type="button" data-stage-apply ${selection ? '' : 'disabled'}>反映</button></footer>`;
+      dialog.innerHTML = `<header><h2 id="fdc-enemy-preset-title">モンスターを選択</h2><button type="button" data-stage-cancel aria-label="閉じる">×</button></header><label class="fdc-field"><span>検索</span><input data-stage-search type="search" placeholder="敵名・性格" value="${escape(state.search)}"></label><div class="fdc-enemy-preset-filters">${controls}</div><footer><button type="button" data-stage-cancel>取消</button><button type="button" data-stage-apply ${selection ? '' : 'disabled'}>反映</button></footer>`;
+      dialog.querySelector('[data-stage-search]').addEventListener('input', event => {
+        if (event.isComposing) return;
+        const caret = event.target.selectionStart;
+        state.search = event.target.value;
+        render();
+        const search = dialog.querySelector('[data-stage-search]');
+        search.focus();
+        search.setSelectionRange(caret, caret);
+      });
       dialog.querySelectorAll('[data-stage-pick]').forEach(input => input.addEventListener('change', () => {
         state[input.dataset.stagePick] = input.dataset.stagePick === 'monster' ? input.value : Number(input.value);
         if (input.dataset.stagePick === 'strength' && selectedMonster) {
@@ -70,7 +82,11 @@
         render();
         dialog.querySelector(`[data-stage-pick="${input.dataset.stagePick}"]`)?.focus();
       }));
-      dialog.querySelector('[data-stage-back]').addEventListener('click', back);
+      if (contentMarkup) {
+        const contentSelect = dialog.querySelector('[data-enemy-content]');
+        contentSelect.value = content;
+        contentSelect.addEventListener('change', () => changeContent(contentSelect.value));
+      }
       dialog.querySelectorAll('[data-stage-cancel]').forEach(button => button.addEventListener('click', () => dialog.close()));
       dialog.querySelector('[data-stage-apply]').addEventListener('click', () => {
         if (selection) { apply(resolver.selectionKey(selection)); dialog.close(); }
