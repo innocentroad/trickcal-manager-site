@@ -3633,6 +3633,76 @@ const CARD_LIBRARY = {
                     "critRateP": 8.7
                 }
             ]
+        },
+        {
+            "id": "artifact_speaki_maid_cleaner",
+            "kind": "artifact",
+            "rarity": "伝説",
+            "name": "クレープの壊れた掃除機",
+            "signature": true,
+            "favoriteCharacter": "スピッキー(メイド)",
+            "cost": 27,
+            "bonusesByStar": [
+                {
+                    "atkP": 21.9,
+                    "critRateP": 21.9
+                },
+                {
+                    "atkP": 27.4,
+                    "critRateP": 27.4
+                },
+                {
+                    "atkP": 32.9,
+                    "critRateP": 32.9
+                },
+                {
+                    "atkP": 38.4,
+                    "critRateP": 38.4
+                },
+                {
+                    "atkP": 43.8,
+                    "critRateP": 43.8
+                }
+            ],
+            "conditionalEffects": [
+                {
+                    "id": "artifact_speaki_maid_cleaner_e01",
+                    "type": "toggle",
+                    "label": "低学年スキル使用時 SP回復",
+                    "triggerType": "低学年スキル使用時",
+                    "effectType": "回復",
+                    "effectStack": false,
+                    "condition": "低学年スキル使用時",
+                    "shortLabel": "SP回復",
+                    "valueClass": "固定値",
+                    "nonStackingSameEffect": true,
+                    "description": "自分 / 固定値",
+                    "descriptionByStar": [
+                        "SP回復48 (低学年スキル使用時 / 自分)",
+                        "SP回復60 (低学年スキル使用時 / 自分)",
+                        "SP回復72 (低学年スキル使用時 / 自分)",
+                        "SP回復84 (低学年スキル使用時 / 自分)",
+                        "SP回復96 (低学年スキル使用時 / 自分)"
+                    ],
+                    "bonusesByStar": [
+                        {
+                            "spRecovery": 48
+                        },
+                        {
+                            "spRecovery": 60
+                        },
+                        {
+                            "spRecovery": 72
+                        },
+                        {
+                            "spRecovery": 84
+                        },
+                        {
+                            "spRecovery": 96
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "spells": [
@@ -5806,12 +5876,12 @@ const CARD_SOLDER_DATA = {
     },
     "artifact_sherum_parchment_scroll": {
         "1": {
-            "critDmgP": 2.6999999999999993,
+            "critDmgP": 2.699999999999999,
             "critRateP": 5.100000000000001
         },
         "2": {
             "critDmgP": 5.399999999999999,
-            "critRateP": 10.200000000000003
+            "critRateP": 10.2
         }
     },
     "artifact_guin_tiny_penguin": {
@@ -6424,6 +6494,16 @@ const CARD_SOLDER_DATA = {
         },
         "2": {
             "hpP": 0.8
+        }
+    },
+    "artifact_speaki_maid_cleaner": {
+        "1": {
+            "atkP": 5.5,
+            "critRateP": 5.5
+        },
+        "2": {
+            "atkP": 11,
+            "critRateP": 11
         }
     }
 };

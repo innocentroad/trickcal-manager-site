@@ -10,6 +10,24 @@
   const ALLOWED_CTA = new Set(['migration-guide', null]);
   const ARTICLES = Object.freeze([
     Object.freeze({
+      id: '20261119-game-data-speaki-maid',
+      archived: true,
+      date: '2026-11-19',
+      title: 'スピッキー(メイド)とRank10装備を更新',
+      barTitle: 'スピッキー(メイド)・Rank10装備を更新',
+      summary: 'スピッキー(メイド)と専用遺物を追加し、Rank10装備を実装後のデータに更新しました。',
+      body: Object.freeze([
+        'スピッキー(メイド)の育成・ボード・スキル・アサイド・アルバイトのデータを追加しました。',
+        '専用遺物「クレープの壊れた掃除機」を追加しました。DPSβに対応済みの使徒では、低学年スキル使用時のSP回復も計算に反映されます。',
+        'Rank10装備の名称・能力値・使徒ごとの装備設定を実装後のデータに更新しました。',
+        '進軍の敵データとダメージ計算で、微辛34-10まで選択できるようにしました。'
+      ]),
+      category: 'game-data',
+      profiles: Object.freeze(['new']),
+      autoRevision: '1',
+      cta: null
+    }),
+    Object.freeze({
       id: '20261112-game-data-rohne-stage-enemies',
       archived: true,
       autoUntil: '2026-11-18',

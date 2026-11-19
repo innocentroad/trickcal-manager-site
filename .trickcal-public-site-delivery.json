@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
   "purpose": "P5b local public-site delivery ownership ledger",
-  "candidateId": "6e56e5e115da79be",
-  "sourceCommit": "adcb2b264547c199ae43a3af1261b30254b61fe9",
+  "candidateId": "81fdfb4d3b487365",
+  "sourceCommit": "4582aaab83ccc47dfb41eaadbcf1ccbcb5496650",
   "profile": "new",
-  "contentDigest": "549669a0cb6f7fb48fdce7914267ba7ff0b07d20378aff27d53e942ca40d8ec7",
-  "outputDigest": "03118da2b8797906",
+  "contentDigest": "0df4aad2c2ba885eb79e2667aaca93b0568501bd46ccd186458478969f5fef78",
+  "outputDigest": "8a2c4e2786e7f913",
   "identityPath": "public-site-deployment.json",
   "ownedFiles": [
     {
       "path": "announcement-history-data.js",
-      "sha256": "1fa6cb6849682376cd09c1c8b98c1f03fef95b27349491d0a99899d4f02a6ee3"
+      "sha256": "cfe99e11d242ee36cce59172276f4c0e2d9224aa5f537347a73c5a52acb894c1"
     },
     {
       "path": "announcements-data.js",
-      "sha256": "3e264b4100f16b8510d95b064fa59f4057b78dd8343558641e07a1f12c4969b7"
+      "sha256": "e51cc4daaaa6377cc780621e1de96f6972d74f029a384f5c92c8c26d9efff0c9"
     },
     {
       "path": "announcements-release-config.js",
@@ -34,11 +34,11 @@
     },
     {
       "path": "apostle-skill-image-data.js",
-      "sha256": "d7c625dd0de07c4ebb9c9c5dee268e8278d3318371d927556167449a2e2dc4f3"
+      "sha256": "d4c7004b518bd5cc478f317a1254ff3ab6bb92de72b1eda599b255d45a1824a0"
     },
     {
       "path": "apostles.js",
-      "sha256": "a6cbb49304f711a2ad31dcb0027f02f682db83c1f60983212c4ebdcc08c5e4a2"
+      "sha256": "cacf45b3ebf5847c2dcbc37341d34c37e392e7e4afddae44380a8a299bfdfcf8"
     },
     {
       "path": "app-cache.js",
@@ -46,15 +46,15 @@
     },
     {
       "path": "calc/dps/index.html",
-      "sha256": "f919d10ed67b94694e527bd9458280090ebfd311b8d61ea37f077a1c9422409c"
+      "sha256": "3d9ea4ea83736ce3fd46235a78abc2982276fa43217e7b488ef1a35734d2eaca"
     },
     {
       "path": "calc/index.html",
-      "sha256": "a7754d3e157da45152492f37371caffe462ae90c6426ff82589557b776321741"
+      "sha256": "0e0469030cdf4d327e22490f2566ef5fca2c502b7dca3413e2ab42915ad5a392"
     },
     {
       "path": "cards.js",
-      "sha256": "4c50adae5d816dd0c8d433ee25bdec10622a3130e7cbec1c92a9b809d71cb92f"
+      "sha256": "ebe83852306f6a61cb88accf035dcb08d3ffacc6a1fc2652fd43100f268d8ed2"
     },
     {
       "path": "combat-scenario.js",
@@ -62,23 +62,23 @@
     },
     {
       "path": "data/apostles/index.html",
-      "sha256": "67508722ff2bcc96f9a89c2cb939a04745c9a4fa8067911aa831f9d8fa08a267"
+      "sha256": "8424aa3b695be8898fd36063ed8a22326707f80acd173a4a79f8facc5dff44bf"
     },
     {
       "path": "data/boards/index.html",
-      "sha256": "2f75478d690dac523408e2c4fd9884d1f7be77276ae166109c940f0645dfab2d"
+      "sha256": "e8ddbeb504404b34ad2cc4ee5fb0f2f6180f1dc9bdaf6b6519b2dabf5e702dd6"
     },
     {
       "path": "data/enemies/index.html",
-      "sha256": "de56a6befd693988087196094462ced3170bbb3993123809f563decaedb5f446"
+      "sha256": "b5cf9a9752e42135f4025adab063ffa3caf20a27d81ba194f26ed6dbb139ca93"
     },
     {
       "path": "data/index.html",
-      "sha256": "c16d3c25ba194d855c3ec1fd6eff6e9da1be7bd30b375a346e60b0b8300788a0"
+      "sha256": "0a2aaef116a1bf0c3cc66942231bc8531d4ae25a08a0647230205a01060cd52f"
     },
     {
       "path": "data/life-jobs/index.html",
-      "sha256": "c38f6bc1b7ed2c3d9f9c016034f8fa0a7495d2d6b2b243db01bac30da2d998f6"
+      "sha256": "d29dc335675b0b04ae26c369fc88afea398c80a61aa5243deae5931b45a9d16f"
     },
     {
       "path": "dps-simulator-worker.js",
@@ -126,7 +126,7 @@
     },
     {
       "path": "formation-damage-calc.js",
-      "sha256": "db534938b031f5c644d8a72d6b191acf7d50c56e68fdb995580a4ff3969f55c2"
+      "sha256": "8c6d454be8ef97999dda851bfaebfaeb41717c886ef66b9a90034d78fed82c5b"
     },
     {
       "path": "formation-damage-dps-prototype.css",
@@ -150,7 +150,7 @@
     },
     {
       "path": "formation-share-catalog.js",
-      "sha256": "bf37608ccc2d3f0b4be99dcdfcaa319a485bdbf33f7c74fca4067e9dcd83d3c5"
+      "sha256": "d6f6f09d374e44f2730a35ebac1b5c061579d6ca73ac84e0221c0724b4ecf177"
     },
     {
       "path": "formation-share-codec.js",
@@ -158,11 +158,11 @@
     },
     {
       "path": "formation-share-create.js",
-      "sha256": "78b8d724ed973d486f960106e04c8cbba66aa43901c5b328481aa6884aed6789"
+      "sha256": "b1e253362e0f72aa909f8712131a7fe1c713b8ba18eddccef5249a30bac88538"
     },
     {
       "path": "formation-share-display-data.js",
-      "sha256": "0febb168c911683ac924c0c3b95f8309b7c2fc1faaadbfb82b8e4be4d7fed646"
+      "sha256": "fff6cab0f18edf71ae6cf2085ce14feb427bf8ddb439ca462d3778c8cfa57afb"
     },
     {
       "path": "formation-share-image.js",
@@ -411,6 +411,10 @@
     {
       "path": "img/Card/Artifact/グウィンの小さなペンギンの友達.webp",
       "sha256": "beb5cd4b01ce58465dae871e607a7ec8e8e2e3507a8d39f68b2de607acf1f83c"
+    },
+    {
+      "path": "img/Card/Artifact/クレープの壊れた掃除機.webp",
+      "sha256": "3ec39a67c25c3712c8f97d1384572500d916d655f409ba70acaf850041429ef3"
     },
     {
       "path": "img/Card/Artifact/クロエの万能裁縫箱.webp",
@@ -1317,6 +1321,18 @@
       "sha256": "4f39c09f8a968d959a898bf8183415e4edea17526315813531bd21f99af67279"
     },
     {
+      "path": "img/Chara/Aside/Aside_Skill_SpeakiMaid_1.webp",
+      "sha256": "80d91b3e96a87a11511f8ff6b1315af4d0e7c7eed49ce8860461a06acef35aa8"
+    },
+    {
+      "path": "img/Chara/Aside/Aside_Skill_SpeakiMaid_2.webp",
+      "sha256": "13f2c0e5976266a610cb7d99e6989625792f1802d3b966881da6ccc40604537b"
+    },
+    {
+      "path": "img/Chara/Aside/Aside_Skill_SpeakiMaid_3.webp",
+      "sha256": "76eb5c6145a52bb4e03eedf7d6c8233cb26557711a6db262b70a06f0cc275d79"
+    },
+    {
       "path": "img/Chara/Aside/Aside_Skill_Sylla_1.webp",
       "sha256": "4fce99beac8b0baabd0f7ad1794315ca10ca1ba291ced548f7126a545bfe34b4"
     },
@@ -1555,6 +1571,10 @@
     {
       "path": "img/Chara/Aside/AsideIcon_Snorky.webp",
       "sha256": "6b2d5deb904e93400b626b078c98159129759910694ef0a89d24c92c3429e271"
+    },
+    {
+      "path": "img/Chara/Aside/AsideIcon_SpeakiMaid.webp",
+      "sha256": "cb619a426ea651e81baf7a3780d98f536ba4d5b5ee11cf8d2345b1cb88410a64"
     },
     {
       "path": "img/Chara/Aside/AsideIcon_Sylla.webp",
@@ -2161,6 +2181,10 @@
       "sha256": "e2f5175a1e4116a622119d7c924b5df553c1d7bb303750dcb191cfa052c9caad"
     },
     {
+      "path": "img/Chara/Skill/Skill_F_SpeakiMaid.webp",
+      "sha256": "da240aedad7bf9ed4c9a81808985efcfb805a6da0996a99bb8134a77aa60eee8"
+    },
+    {
       "path": "img/Chara/Skill/Skill_F_Sylla.webp",
       "sha256": "05605837c5fa974c63f8ac000098a51cfca7bb4a988853b49e02cee0e77b963b"
     },
@@ -2495,6 +2519,10 @@
     {
       "path": "img/Chara/Skill/Skill_P_Speaki.webp",
       "sha256": "5da6f10d5ef187dc7ed3db648ca0d647382711844024ad27eeaafd4c9763cb95"
+    },
+    {
+      "path": "img/Chara/Skill/Skill_P_SpeakiMaid.webp",
+      "sha256": "84b6410561f21431c725b22547469062c2af2029683954f75bf23f739f4a129e"
     },
     {
       "path": "img/Chara/Skill/Skill_P_Sylla.webp",
@@ -2833,6 +2861,10 @@
       "sha256": "5b7485d4c6be09b32782eb9717d9fe1f9cc59885c68e269946e57f41be37cb16"
     },
     {
+      "path": "img/Chara/Skill/Skill_S_SpeakiMaid.webp",
+      "sha256": "7f5bc152b8308e70b0c305ea29a58e1cf3d83d5d067b473bc7e4543d398afcdc"
+    },
+    {
       "path": "img/Chara/Skill/Skill_S_Sylla.webp",
       "sha256": "3d7d5b0d504f6d79165f2f8dc27eb64606a092b27966f9f9605ebd0ab1f6db49"
     },
@@ -2879,6 +2911,10 @@
     {
       "path": "img/Chara/Speaki.webp",
       "sha256": "5d506f39ef0187dfcf5861cf1fa9bed21deda69da000a8d595e0a02e24ebfd24"
+    },
+    {
+      "path": "img/Chara/SpeakiMaid.webp",
+      "sha256": "188b41962e3ac72ea0f497cc5c338019aa5b2306d70da0db44a595504062328c"
     },
     {
       "path": "img/Chara/Sylla.webp",
@@ -5270,7 +5306,7 @@
     },
     {
       "path": "manager/index.html",
-      "sha256": "69c11493fd89d3a9cb0aa64d6e858545ad9e6dbf4c66b9d1e8d77ab5f547e507"
+      "sha256": "dbe6fa4e1d8319e3329405fb67ce7e369d462d0216a059414d5a12b1b077e699"
     },
     {
       "path": "public-release-config.js",
@@ -5278,7 +5314,7 @@
     },
     {
       "path": "public-site-deployment.json",
-      "sha256": "ecddaf7a721e819500c06abb210007978b55311524e5b02b13b2508d34db4815"
+      "sha256": "a61969ed838f2d2d67787ccac1c3de843a6eda5e72312c727b58e2c45ffdf9f7"
     },
     {
       "path": "public-site-runtime.js",
@@ -5370,7 +5406,7 @@
     },
     {
       "path": "recovery/index.html",
-      "sha256": "9d023b10e4644de3f8382d02e3e69ad6a977227b0a5b9c56a5d6d7f8f93c5bfc"
+      "sha256": "38aecff678d685631a78c6ad34dabdc90e011aa568b00f5d8f46fc39334931f1"
     },
     {
       "path": "research-progress.js",
@@ -5382,11 +5418,11 @@
     },
     {
       "path": "service-worker.js",
-      "sha256": "b3471d393b927af75139fa9ea90cf9dcdd85e247ce9f1ca0b7b4ba785a368fe4"
+      "sha256": "f62db11ef3c844ae4afb8bbf0720a13ebf8c3d2d75f8a0258e8dcae1b4699524"
     },
     {
       "path": "share/index.html",
-      "sha256": "86b2a8bdd3bbf029f86d4a8552535eae3024094cd538a7614f7f7a9f0faf8739"
+      "sha256": "db265ee89192c44482fe2da104a34d6c5c706066308cf9e8da59527096845624"
     },
     {
       "path": "shared-topbar.css",
@@ -5410,7 +5446,7 @@
     },
     {
       "path": "stage-enemy-data.js",
-      "sha256": "b02fc09c74cd4043f4118e42e85a840b2202cec8aa3bc2a52b12753e77bd9ae5"
+      "sha256": "13eb68818d7ee6d9af3e52496a47351faad57bde07715a1406c936ec8d8065a7"
     },
     {
       "path": "stage-enemy-picker.js",
@@ -5418,7 +5454,7 @@
     },
     {
       "path": "stage-enemy-resolver.js",
-      "sha256": "2d36366ff37de84b81bc5b7f1e6d39e3c94250e360169d2656340f1795eb2994"
+      "sha256": "e4fa15608d73b9846f9ca04aa1b6aa5750f1354dffe1586f6a5c5f42185160bb"
     },
     {
       "path": "stat-dashboard.css",
@@ -5450,7 +5486,7 @@
     },
     {
       "path": "statData.js",
-      "sha256": "663618fc7244d7da1da8587afc1961ee952531b2fdb83ef5d5710353566e2654"
+      "sha256": "7a53f23421def118ffe740fde2af8732c652f0daf0df617bbbd769c9a906f65e"
     },
     {
       "path": "storage-backup.js",
@@ -5498,23 +5534,23 @@
     },
     {
       "path": "tool/bingo/index.html",
-      "sha256": "daf85846c639fdf3a283449644cfc4a6f586d500b58663ff5ce95d0de44cc27c"
+      "sha256": "93c4e97ff3fc5a8233202cc85e2a13755c2f180ac5e9226e2881ce136a122259"
     },
     {
       "path": "tool/critical/index.html",
-      "sha256": "b6e9d5a953f9d2925c8a8cc0e74cd56fd89373bc062673cb2c3bc929f417cb81"
+      "sha256": "599c98ea50bba973ababc3decb455dbb25cbb2be10420950081dfb0b03bbcb6d"
     },
     {
       "path": "tool/growth-cost/index.html",
-      "sha256": "0f3775f25303d8681de3cea011c0b179d95b49155f367d2fabb286c3a1f834e2"
+      "sha256": "f3febf1091cc6ef62df5eb7bf8935368e0d4079a66eb5bbb87e26f2ef6e5216a"
     },
     {
       "path": "tool/pvp/index.html",
-      "sha256": "81ddfa716eb222038f2d7c91c5096d0d7cbcf720e736c8dbcc7322a544107fc0"
+      "sha256": "29a06d96193f64381d9ea733e4bbb8aa43da3c5f230934d5b17607a4639a8120"
     },
     {
       "path": "transfer/index.html",
-      "sha256": "8243b45d56dc667f5cc5aff30209154fe0cefac6973f6ae17cd1d42b22d76cfa"
+      "sha256": "da5463039a22a43377611ba9c898143e08b62b342b7b06ade7b3e129bc7be716"
     }
   ]
 }

@@ -18,7 +18,8 @@
       'Lethe',
       'KommySwim',
       'Guin',
-      'Polan'
+      'Polan',
+      'SpeakiMaid'
     ],
     artifacts: [
       'artifact_yomi_moonflower', 'artifact_erpin_ice_cream_cake', 'artifact_butter_yellow_card',
@@ -38,7 +39,8 @@
       'artifact_cardboard_armor', 'artifact_head_wrap',
       'artifact_rusty_awl', 'artifact_sherum_parchment_scroll',
       'artifact_guin_tiny_penguin',
-      'artifact_polan_hat'
+      'artifact_polan_hat',
+      'artifact_speaki_maid_cleaner'
     ],
     spells: [
       'spell_alice_fake_magic', 'spell_epica_hero_exaltation', 'spell_luc_ed_dream',

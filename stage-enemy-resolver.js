@@ -104,9 +104,9 @@
       const preset = resolveKey(key);
       if (!preset) return '';
       const world = preset.content.world;
+                                                                            
                                                                                        
-                                                                                       
-      if (preset.content.type === 'crusade' && world >= 6 && world <= 32) {
+      if (preset.content.type === 'crusade' && world >= 6 && world <= 34) {
         return ['純粋', '冷静', '狂気', '活発', '憂鬱'][(world - 6) % 5];
       }
       return preset.personality || '';

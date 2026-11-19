@@ -2364,7 +2364,6 @@ const APOSTLE_LIBRARY = [
                 "valueClass": "周期",
                 "effectType": "回復",
                 "conditionType": "編成中",
-                "conditionValue": "ED",
                 "condition": "イード編成時",
                 "effectTarget": "自身と周囲の味方",
                 "fixedValue": 5.0
@@ -2376,7 +2375,6 @@ const APOSTLE_LIBRARY = [
                 "valueClass": "固定値",
                 "effectType": "回復",
                 "conditionType": "編成中",
-                "conditionValue": "ED",
                 "condition": "イード編成時",
                 "effectTarget": "自身と周囲の味方",
                 "fixedValue": 30.0
@@ -33175,6 +33173,578 @@ const APOSTLE_LIBRARY = [
             }
           ],
           "description": "後列の味方の敵への与ダメージ量を増加させ、後列の味方の敵からの被ダメージ量を減少させる。"
+        }
+      }
+    },
+    "board": null
+  },
+  {
+    "id": "speakimaid",
+    "name": "スピッキー(メイド)",
+    "basic": {
+      "rarity": 3.0,
+      "personality": "活発",
+      "race": "幽霊",
+      "role": "攻撃",
+      "position": "後列",
+      "attackType": "魔法",
+      "initialSp": 220.0,
+      "spRecoveryPerSecond": 40.0,
+      "baseAttackSpeed": 135.0,
+      "combatPowerCorrection": 0.4,
+      "combatPowerLowSkillCoefficient": 0.02,
+      "combatPowerHighSkillCoefficient": 0.02,
+      "combatPowerPassiveCoefficient": 0.02,
+      "combatPowerAsideCoefficient": 0.7
+    },
+    "statTypes": {
+      "hp": 3.0,
+      "atkP": 0.0,
+      "atkM": 4.0,
+      "defP": 3.0,
+      "defM": 3.0,
+      "crit": 4.0,
+      "critDmg": 4.0,
+      "critRes": 2.0,
+      "critDmgRes": 2.0
+    },
+    "skills": [
+      {
+        "effects": [
+          {
+            "effectId": "SpeakiMaid_basic_e01",
+            "valueKind": "魔法ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "敵",
+            "fixedValue": 125.0
+          }
+        ],
+        "skillId": "SpeakiMaid_basic",
+        "skillType": "普通攻撃_基本",
+        "skillName": "基本攻撃",
+        "description": "壊れた掃除機でガラクタを飛ばして敵に魔法ダメージを与える。"
+      },
+      {
+        "effects": [
+          {
+            "effectId": "SpeakiMaid_enhanced_e01",
+            "valueKind": "総魔法ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "前方の敵",
+            "fixedValue": 250.0
+          }
+        ],
+        "skillId": "SpeakiMaid_enhanced",
+        "skillType": "普通攻撃_強化",
+        "skillName": "基本攻撃",
+        "description": "一定の確率で掃除機を作動させ、前方の敵に範囲魔法ダメージを3回与える。"
+      },
+      {
+        "effects": [
+          {
+            "effectId": "SpeakiMaid_low_e01",
+            "valueKind": "魔法ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "condition": "チラシ",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 180.0,
+              "2": 200.0,
+              "3": 220.0,
+              "4": 240.0,
+              "5": 260.0,
+              "6": 280.0,
+              "7": 300.0,
+              "8": 320.0,
+              "9": 340.0,
+              "10": 360.0,
+              "11": 380.0,
+              "12": 400.0,
+              "13": 420.0,
+              "14": 440.0,
+              "15": 460.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_low_e02",
+            "valueKind": "SP減少",
+            "valueClass": "固定値",
+            "effectType": "デバフ",
+            "condition": "チラシ",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 50.0,
+              "2": 50.0,
+              "3": 50.0,
+              "4": 50.0,
+              "5": 50.0,
+              "6": 50.0,
+              "7": 50.0,
+              "8": 50.0,
+              "9": 50.0,
+              "10": 50.0,
+              "11": 50.0,
+              "12": 50.0,
+              "13": 50.0,
+              "14": 50.0,
+              "15": 50.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_low_e03",
+            "valueKind": "魔法ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "condition": "キャンディ",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 180.0,
+              "2": 200.0,
+              "3": 220.0,
+              "4": 240.0,
+              "5": 260.0,
+              "6": 280.0,
+              "7": 300.0,
+              "8": 320.0,
+              "9": 340.0,
+              "10": 360.0,
+              "11": 380.0,
+              "12": 400.0,
+              "13": 420.0,
+              "14": 440.0,
+              "15": 460.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_low_e04",
+            "valueKind": "被ダメージ量増加",
+            "valueClass": "倍率",
+            "effectType": "デバフ",
+            "condition": "キャンディ",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 15.0,
+              "2": 15.0,
+              "3": 15.0,
+              "4": 15.0,
+              "5": 15.0,
+              "6": 15.0,
+              "7": 15.0,
+              "8": 15.0,
+              "9": 15.0,
+              "10": 15.0,
+              "11": 15.0,
+              "12": 15.0,
+              "13": 15.0,
+              "14": 15.0,
+              "15": 15.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_low_e05",
+            "valueKind": "被ダメージ量増加",
+            "valueClass": "持続時間",
+            "effectType": "デバフ",
+            "condition": "キャンディ",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 6.0,
+              "2": 6.0,
+              "3": 6.0,
+              "4": 6.0,
+              "5": 6.0,
+              "6": 6.0,
+              "7": 6.0,
+              "8": 6.0,
+              "9": 6.0,
+              "10": 6.0,
+              "11": 6.0,
+              "12": 6.0,
+              "13": 6.0,
+              "14": 6.0,
+              "15": 6.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_low_e06",
+            "valueKind": "魔法ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "condition": "かぼちゃ落下",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 180.0,
+              "2": 200.0,
+              "3": 220.0,
+              "4": 240.0,
+              "5": 260.0,
+              "6": 280.0,
+              "7": 300.0,
+              "8": 320.0,
+              "9": 340.0,
+              "10": 360.0,
+              "11": 380.0,
+              "12": 400.0,
+              "13": 420.0,
+              "14": 440.0,
+              "15": 460.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_low_e07",
+            "valueKind": "魔法ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "condition": "かぼちゃ爆発",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 360.0,
+              "2": 380.0,
+              "3": 400.0,
+              "4": 420.0,
+              "5": 440.0,
+              "6": 460.0,
+              "7": 480.0,
+              "8": 500.0,
+              "9": 520.0,
+              "10": 540.0,
+              "11": 560.0,
+              "12": 580.0,
+              "13": 600.0,
+              "14": 620.0,
+              "15": 640.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_low_e08",
+            "valueKind": "気絶",
+            "valueClass": "持続時間",
+            "effectType": "デバフ",
+            "condition": "かぼちゃ爆発",
+            "effectTarget": "範囲内の敵",
+            "levels": {
+              "1": 3.0,
+              "2": 3.0,
+              "3": 3.0,
+              "4": 3.0,
+              "5": 3.0,
+              "6": 3.0,
+              "7": 3.0,
+              "8": 3.0,
+              "9": 3.0,
+              "10": 3.0,
+              "11": 3.0,
+              "12": 3.0,
+              "13": 3.0,
+              "14": 3.0,
+              "15": 3.0
+            }
+          }
+        ],
+        "skillId": "SpeakiMaid_low",
+        "skillType": "低学年",
+        "skillName": "綺麗になったら、やることがないよ！",
+        "description": "壊れた掃除機で3種類のガラクタのうち1つを前方の敵に飛ばす。ガラクタは発動するたびに決められた順番で変わり、それぞれ異なる効果を発動する。\n1つ目：チラシを飛ばして範囲魔法ダメージを与え、SPを減少させる。\n2つ目：キャンディを飛ばして範囲魔法ダメージを与え、被ダメージ量を増加させる。\n3つ目：かぼちゃを空中に打ち上げて前方に落とし、範囲魔法ダメージを与える。落下したかぼちゃは爆発してより大きなダメージを与え、気絶を付与する。\n気絶：行動不能状態になる。"
+      },
+      {
+        "effects": [
+          {
+            "effectId": "SpeakiMaid_high_e01",
+            "valueKind": "総魔法ダメージ",
+            "valueClass": "倍率",
+            "effectType": "攻撃",
+            "effectTarget": "ランダムな敵",
+            "levels": {
+              "1": 1200.0,
+              "2": 1400.0,
+              "3": 1600.0,
+              "4": 1800.0,
+              "5": 2000.0,
+              "6": 2200.0,
+              "7": 2400.0,
+              "8": 2600.0,
+              "9": 2800.0,
+              "10": 3000.0,
+              "11": 3200.0,
+              "12": 3400.0,
+              "13": 3600.0,
+              "14": 3800.0,
+              "15": 4000.0
+            }
+          }
+        ],
+        "skillId": "SpeakiMaid_high",
+        "skillType": "高学年",
+        "skillName": "ターボクリーンモードォォ！",
+        "description": "暴走する掃除機に引きずり回され、ランダムな敵に合計5回の魔法ダメージを与える。スキル発動で敵に進入した後は敵の目標対象にならず、無敵状態になる。\n無敵：全てのダメージ及びデバフの免疫を得る。",
+        "cooldownSeconds": 24.0
+      },
+      {
+        "effects": [
+          {
+            "effectId": "SpeakiMaid_passive_e01",
+            "valueKind": "魔法攻撃力増加",
+            "valueClass": "倍率",
+            "effectType": "バフ",
+            "maxStack": 5.0,
+            "condition": "低学年・高学年の命中時",
+            "effectTarget": "自身",
+            "levels": {
+              "1": 10.0,
+              "2": 11.0,
+              "3": 12.0,
+              "4": 13.0,
+              "5": 14.0,
+              "6": 15.0,
+              "7": 16.0,
+              "8": 17.0,
+              "9": 18.0,
+              "10": 19.0,
+              "11": 20.0,
+              "12": 21.0,
+              "13": 22.0,
+              "14": 23.0,
+              "15": 24.0
+            }
+          },
+          {
+            "effectId": "SpeakiMaid_passive_e02",
+            "valueKind": "魔法攻撃力増加",
+            "valueClass": "持続時間",
+            "effectType": "バフ",
+            "condition": "低学年・高学年の命中時",
+            "effectTarget": "自身",
+            "levels": {
+              "1": 8.0,
+              "2": 8.0,
+              "3": 8.0,
+              "4": 8.0,
+              "5": 8.0,
+              "6": 8.0,
+              "7": 8.0,
+              "8": 8.0,
+              "9": 8.0,
+              "10": 8.0,
+              "11": 8.0,
+              "12": 8.0,
+              "13": 8.0,
+              "14": 8.0,
+              "15": 8.0
+            }
+          }
+        ],
+        "skillId": "SpeakiMaid_passive",
+        "skillType": "パッシブ",
+        "skillName": "パッシブスキル",
+        "description": "低学年スキルおよび高学年スキルが敵に命中するたびに、一定時間自身の攻撃力が増加する。攻撃力増加効果は最大5回までスタック可能。"
+      }
+    ],
+    "favoriteCard": {
+      "name": "クレープの壊れた掃除機",
+      "kind": "遺物",
+      "levels": {
+        "1": [
+          {
+            "effects": [
+              {
+                "effectId": "SpeakiMaid_favorite_1_ally_atk_e01",
+                "processGroupId": "SpeakiMaid_favorite_1_ally_atk",
+                "processOrder": 1.0,
+                "targetSkill": "SpeakiMaid_passive",
+                "valueKind": "攻撃力増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "condition": "低学年・高学年の命中時",
+                "effectTarget": "自身以外の味方使徒全員",
+                "levels": {
+                  "1": 5.0,
+                  "2": 5.5,
+                  "3": 6.0,
+                  "4": 6.5,
+                  "5": 7.0,
+                  "6": 7.5,
+                  "7": 8.0,
+                  "8": 8.5,
+                  "9": 9.0,
+                  "10": 9.5,
+                  "11": 10.0,
+                  "12": 10.5,
+                  "13": 11.0,
+                  "14": 11.5,
+                  "15": 12.0
+                }
+              },
+              {
+                "effectId": "SpeakiMaid_favorite_1_ally_atk_e02",
+                "processGroupId": "SpeakiMaid_favorite_1_ally_atk",
+                "processOrder": 2.0,
+                "targetSkill": "SpeakiMaid_passive",
+                "valueKind": "攻撃力増加",
+                "valueClass": "持続時間",
+                "effectType": "バフ",
+                "condition": "低学年・高学年の命中時",
+                "effectTarget": "自身以外の味方使徒全員",
+                "fixedValue": 8.0
+              }
+            ],
+            "skillId": "SpeakiMaid_favorite_1",
+            "skillName": "愛用Lv1",
+            "description": "愛用遺物スキル：パッシブスキル\n低学年スキルおよび高学年スキルが敵に命中するたびに、一定時間自身の攻撃力が増加し、自身を除く味方使徒全員の攻撃力を一定割合増加させる。\n攻撃力増加効果は最大5回までスタック可能。"
+          }
+        ],
+        "3": [
+          {
+            "effects": [
+              {
+                "effectId": "SpeakiMaid_favorite_3_e01",
+                "valueKind": "魔法攻撃力増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9.0
+              },
+              {
+                "effectId": "SpeakiMaid_favorite_3_e02",
+                "valueKind": "会心増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9.0
+              },
+              {
+                "effectId": "SpeakiMaid_favorite_3_e03",
+                "valueKind": "会心ダメージ増加",
+                "valueClass": "倍率",
+                "effectType": "バフ",
+                "effectTarget": "自身",
+                "fixedValue": 9.0
+              }
+            ],
+            "skillId": "SpeakiMaid_favorite_3",
+            "skillName": "愛用Lv3",
+            "description": "スピッキー(メイド)の魔法攻撃力、会心、会心ダメージが9%増加する。"
+          }
+        ]
+      }
+    },
+    "aside": {
+      "name": "世界一きれいなかぼちゃ",
+      "levels": {
+        "1": {
+          "name": "世界一清潔なかぼちゃ",
+          "stats": [],
+          "effects": [
+            {
+              "skillId": "SpeakiMaid_aside_1",
+              "effectId": "SpeakiMaid_aside_1_e01",
+              "valueKind": "最大HP増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "SpeakiMaid_aside_1",
+              "effectId": "SpeakiMaid_aside_1_e02",
+              "valueKind": "魔法攻撃力増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "SpeakiMaid_aside_1",
+              "effectId": "SpeakiMaid_aside_1_e03",
+              "valueKind": "会心増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            },
+            {
+              "skillId": "SpeakiMaid_aside_1",
+              "effectId": "SpeakiMaid_aside_1_e04",
+              "valueKind": "会心ダメージ増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "effectTarget": "自身",
+              "fixedValue": 6.0
+            }
+          ],
+          "description": "戦闘時ステータス増加"
+        },
+        "2": {
+          "name": "自動掃除モードですよぉ！",
+          "stats": [],
+          "effects": [
+            {
+              "skillId": "SpeakiMaid_aside_2",
+              "effectId": "SpeakiMaid_aside_2_e01",
+              "valueKind": "被ダメージ量減少",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "condition": "低学年スキル命中時",
+              "effectTarget": "自身・低学年スキルが命中した味方",
+              "fixedValue": 24.0
+            },
+            {
+              "skillId": "SpeakiMaid_aside_2",
+              "effectId": "SpeakiMaid_aside_2_e02",
+              "valueKind": "与ダメージ量増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "damageModifierCategory": "与ダメージ量",
+              "attackCategory": "高学年スキル",
+              "effectTarget": "自身",
+              "fixedValue": 25.0
+            },
+            {
+              "skillId": "SpeakiMaid_aside_2",
+              "effectId": "SpeakiMaid_aside_2_e03",
+              "valueKind": "高学年クールタイム短縮",
+              "valueClass": "固定値",
+              "effectType": "バフ",
+              "condition": "高学年スキルで敵を倒した時",
+              "effectTarget": "自身",
+              "fixedValue": 4.0
+            }
+          ],
+          "description": "低学年スキル使用時、命中した味方使徒と自身の被ダメージ量が一定時間減少する。\n高学年スキルダメージ量が増加し、高学年スキルで敵を倒すたびに、現在の高学年スキルのクールタイムが即時減少する。"
+        },
+        "3": {
+          "name": "大掃除の日",
+          "stats": [
+            {
+              "skillId": "SpeakiMaid_aside_3_global",
+              "effectId": "SpeakiMaid_aside_3_global_e01",
+              "statApplyTo": "全体",
+              "statName": "会心",
+              "increaseP": 3.0
+            },
+            {
+              "skillId": "SpeakiMaid_aside_3_global",
+              "effectId": "SpeakiMaid_aside_3_global_e02",
+              "statApplyTo": "全体",
+              "statName": "会心ダメージ",
+              "increaseP": 3.0
+            }
+          ],
+          "effects": [
+            {
+              "skillId": "SpeakiMaid_aside_3_battle",
+              "effectId": "SpeakiMaid_aside_3_battle_e01",
+              "valueKind": "与ダメージ量増加",
+              "valueClass": "倍率",
+              "effectType": "バフ",
+              "damageModifierCategory": "与ダメージ量",
+              "effectTarget": "味方全員",
+              "fixedValue": 15.0
+            }
+          ],
+          "description": "味方全員の敵への与ダメージ量を増加させる。"
         }
       }
     },

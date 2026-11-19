@@ -24,7 +24,7 @@
   let damageSaveWriteMessage = '';
   let seasonRuleRefreshTimer = null;
   let statDraftSaveTimer = null;
-  const DAMAGE_CALCULATION_VERSION = 112;
+  const DAMAGE_CALCULATION_VERSION = 113;
   let enemyHitRuntime = null;
                                                                                          
   const SEASON_RULE_LABELS = {
@@ -13081,7 +13081,8 @@
         reason: '',
         conditionKey,
         overlapStackKey: createArtifactEffectOverlapKey(source, row, effect, target),
-        overlapCount: isNonStackingSameApostleEffect(effect, text) ? 1 : Math.max(1, Number(row.qty) || 1),
+        overlapCount: isNonStackingSameEffect(effect, text) || isNonStackingSameApostleEffect(effect, text)
+          ? 1 : Math.max(1, Number(row.qty) || 1),
         nonStackingSameEffect: isNonStackingSameEffect(effect, text),
         nonStackingSameApostle: isNonStackingSameApostleEffect(effect, text),
         damageModifierCategory: normalizeFdcDamageModifierCategory(effect.damageModifierCategory),
@@ -13178,7 +13179,8 @@
           ownerLabel: ownerRow.ownerLabel,
           conditionKey,
           overlapStackKey: createArtifactEffectOverlapKey('編成遺物', ownerRow, effect, target),
-          overlapCount: isNonStackingSameApostleEffect(effect, text) ? 1 : Math.max(1, Number(ownerRow.qty) || 1),
+          overlapCount: isNonStackingSameEffect(effect, text) || isNonStackingSameApostleEffect(effect, text)
+          ? 1 : Math.max(1, Number(ownerRow.qty) || 1),
           nonStackingSameEffect: isNonStackingSameEffect(effect, text),
           nonStackingSameApostle: isNonStackingSameApostleEffect(effect, text),
           damageModifierCategory: normalizeFdcDamageModifierCategory(effect.damageModifierCategory),
@@ -13902,8 +13904,9 @@
 
   function scaleEffectBonusMap(bonuses, qty = 1, effect = null, text = '', stackCount = 1) {
                                      
-                                 
-    const cardMultiplier = isNonStackingSameApostleEffect(effect, text) ? 1 : qty;
+                                         
+    const nonStacking = isNonStackingSameApostleEffect(effect, text) || isNonStackingSameEffect(effect, text);
+    const cardMultiplier = nonStacking ? 1 : qty;
     const stackMultiplier = Math.max(1, Number(stackCount) || 1);
     return scaleBonusMap(bonuses, cardMultiplier * stackMultiplier);
   }

@@ -588,6 +588,13 @@ const FORMATION_SHARE_DISPLAY_DATA = {
       "position": "後列",
       "role": "攻撃",
       "imagePath": "img/Chara/Rollett.webp?v=a86184071864b083"
+    },
+    "SpeakiMaid": {
+      "name": "スピッキー(メイド)",
+      "personality": "活発",
+      "position": "後列",
+      "role": "攻撃",
+      "imagePath": "img/Chara/SpeakiMaid.webp?v=188b41962e3ac72e"
     }
   },
   "artifacts": {
@@ -1016,6 +1023,15 @@ const FORMATION_SHARE_DISPLAY_DATA = {
       "cost": 6,
       "kind": "artifact",
       "imagePath": "img/Card/Artifact/錆びついた錐.webp?v=33ec30588c322119"
+    },
+    "artifact_speaki_maid_cleaner": {
+      "name": "クレープの壊れた掃除機",
+      "rarity": "伝説",
+      "cost": 27,
+      "signature": true,
+      "favoriteCharacter": "スピッキー(メイド)",
+      "kind": "artifact",
+      "imagePath": "img/Card/Artifact/クレープの壊れた掃除機.webp?v=3ec39a67c25c3712"
     }
   },
   "spells": {
@@ -1356,8 +1372,8 @@ const FORMATION_SHARE_DISPLAY_DATA = {
     "img/SP回復.webp": "img/SP回復.webp?v=04761ffeb11bd275"
   },
   "sourceCounts": {
-    "apostles": 83,
-    "artifacts": 54,
+    "apostles": 84,
+    "artifacts": 55,
     "spells": 36,
     "masterPowers": 6
   }

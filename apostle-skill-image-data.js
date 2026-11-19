@@ -371,6 +371,11 @@
     "low": "img/Chara/Skill/Skill_F_Speaki.webp",
     "passive": "img/Chara/Skill/Skill_P_Speaki.webp"
   },
+  "SpeakiMaid": {
+    "high": "img/Chara/Skill/Skill_S_SpeakiMaid.webp",
+    "low": "img/Chara/Skill/Skill_F_SpeakiMaid.webp",
+    "passive": "img/Chara/Skill/Skill_P_SpeakiMaid.webp"
+  },
   "Sylla": {
     "high": "img/Chara/Skill/Skill_S_Sylla.webp",
     "low": "img/Chara/Skill/Skill_F_Sylla.webp",
