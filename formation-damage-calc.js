@@ -734,15 +734,13 @@
     el.result.detailToggle?.addEventListener('click', () => {
       const open = el.result.detailPanel?.hidden !== false;
       setResultDetailOpen(open);
-      const context = buildContext();
-      renderResultDetail(context, calculateDamage(context));
+      if (open) renderResult(buildContext(), { source: 'displayPreference' });
     });
     el.result.detailTabButtons.forEach(button => button.addEventListener('click', () => {
       const tab = button.dataset.fdcResultDetailTab;
       if (tab !== 'calculation' && tab !== 'comparison') return;
       view.resultDetailTab = tab;
-      const context = buildContext();
-      renderResultDetail(context, calculateDamage(context));
+      renderResult(buildContext(), { source: 'displayPreference' });
     }));
     el.result.metricToggle?.addEventListener('click', event => {
       event.stopPropagation();
@@ -1355,15 +1353,17 @@
     ];
     statInputs.forEach(([side, input, field]) => {
       input?.addEventListener('input', () => {
+        let context;
         if (isStatInputLinked(side)) {
           if (side === 'self') view.statDirty = true;
           else view.enemyStatDirty = true;
         } else {
-          const context = buildContext();
+          context = buildContext();
           updateManualStatDraftFromInput(side, input, field, context);
           scheduleStatDraftSave();
         }
-        renderResult(buildContext());
+        if (side === 'enemy' && isStatInputLinked(side)) saveCalcSettings();
+        renderResult(context || buildContext());
       });
       input?.addEventListener('change', () => {
         if (!isStatInputLinked(side)) {
@@ -1412,20 +1412,21 @@
       } else view.defensiveShield = {...selection,sourceId:radio.value};
       saveCalcSettings(); render();
     });
-    el.shieldSwitch?.querySelectorAll('[data-fdc-shield-enabled]').forEach(button => {
-      button.addEventListener('click', () => {
-        view.defensiveShield = { ...normalizeDefensiveShield(view.defensiveShield, view.targetId), enabled: button.dataset.fdcShieldEnabled === 'true' };
-        saveCalcSettings();
-        render();
-      });
-    });
-    el.shieldRemaining?.addEventListener('input', () => {
-      view.defensiveShield = { ...normalizeDefensiveShield(view.defensiveShield, view.targetId), sourceId:'__manual__',remaining: el.shieldRemaining.value };
+    const shieldToggle = el.shieldSwitch?.querySelector('[data-fdc-shield-enabled]');
+    shieldToggle?.addEventListener('change', () => {
+      view.defensiveShield = { ...normalizeDefensiveShield(view.defensiveShield, view.targetId), enabled: shieldToggle.checked };
       saveCalcSettings();
       render();
     });
+    el.shieldRemaining?.addEventListener('input', () => {
+      const selection = normalizeDefensiveShield(view.defensiveShield, view.targetId);
+      view.defensiveShield = { ...selection, sourceId: '__manual__', remaining: el.shieldRemaining.value };
+      saveCalcSettings();
+      renderResult(buildContext(), { skipShieldSources: selection.sourceId === '__manual__' });
+    });
+    const statInputElements = new Set(statInputs.map(([, input]) => input));
     Object.values(el.inputs).forEach(input => {
-      if (!input || isEnemyCorrectionInput(input) || [el.inputs.selfHp, el.inputs.atk, el.inputs.selfDef, el.inputs.crit, el.inputs.critDmg, el.inputs.selfCritResBase, el.inputs.selfCritDmgResBase].includes(input)) return;
+      if (!input || isEnemyCorrectionInput(input) || statInputElements.has(input)) return;
       input.addEventListener('input', () => {
         if (input === el.inputs.enemySpecial) {
           delete input.dataset.specialRaw;
@@ -1485,17 +1486,6 @@
     syncSeasonRuleFields();
     const context = buildContext();
     if (el.shieldRemaining) el.shieldRemaining.value = normalizeDefensiveShield(view.defensiveShield, view.targetId).remaining;
-    if (el.shieldSwitch) {
-      el.shieldSwitch.hidden = view.perspective !== 'enemy';
-      const enabled = normalizeDefensiveShield(view.defensiveShield, view.targetId).enabled;
-      el.shieldSwitch.querySelectorAll('[data-fdc-shield-enabled]').forEach(button => {
-        if (button.hasAttribute('data-fdc-shield-toggle')) {
-          button.textContent = enabled ? 'シールド込み' : 'シールドなし';
-          button.dataset.fdcShieldEnabled = String(!enabled);
-          button.setAttribute('aria-pressed', String(enabled));
-        } else button.setAttribute('aria-pressed', String((button.dataset.fdcShieldEnabled === 'true') === enabled));
-      });
-    }
     syncApplyFloatUi();
     renderBoardPlanBonus(context);
     syncPinnedComparisonUi(context);
@@ -10412,8 +10402,8 @@
     renderHpRateResults(result, currentResult);
     renderDefensiveShieldResults(result, currentResult);
     renderResultMetricSwitch(result, currentResult, beforeLabel);
-    renderResultDetail(context, result);
-    renderDefensiveShieldSources(context);
+    if (el.result.detailPanel?.hidden === false) renderResultDetail(context, result);
+    if (!options.skipShieldSources) renderDefensiveShieldSources(context);
     window.dispatchEvent(new CustomEvent('trickcal:damage-calculator-rendered', {
       detail: { targetId: context.target?.id || '', source: options.source || '' }
     }));
@@ -12798,10 +12788,24 @@
     Object.values(el.result.hpRates || {}).forEach(element => {
       if (element) element.hidden = view.resultDisplays.hp === false;
     });
+    const shieldAvailable = view.perspective === 'enemy';
+    const shieldEnabled = normalizeDefensiveShield(view.defensiveShield, view.targetId).enabled;
+    if (el.shieldSwitch) {
+      el.shieldSwitch.hidden = false;
+      el.shieldSwitch.title = shieldAvailable ? 'シールドを計算に含める' : '敵から受けるダメージの計算で切り替えられます';
+      const input = el.shieldSwitch.querySelector('[data-fdc-shield-enabled]');
+      if (input) {
+        input.disabled = !shieldAvailable;
+        input.checked = shieldAvailable && shieldEnabled;
+        input.dataset.fdcShieldEnabled = String(!shieldEnabled);
+      }
+    }
     el.applyFloatDots.forEach(dot => {
       const key = dot.dataset.fdcApplyDot;
-      dot.classList.toggle('is-on', isEffectSourceActive(key));
-      dot.classList.toggle('is-off', !isEffectSourceActive(key));
+      const active = key === 'hp' ? view.resultDisplays.hp !== false
+        : key === 'shield' ? shieldAvailable && shieldEnabled : isEffectSourceActive(key);
+      dot.classList.toggle('is-on', active);
+      dot.classList.toggle('is-off', !active);
     });
     const enabledCount = Object.keys(view.effectSources).filter(isEffectSourceActive).length;
     el.applyFloat?.classList.toggle('is-all-enabled', enabledCount === Object.keys(view.effectSources).length);

@@ -10,6 +10,7 @@
   const normalizeType=v=>String(v||'').replace(/^全体/,'').trim();
   function effects(row,group){
     return [1,2].map(i=>({name:String(row[`効果${i}_type`]||''),value:Number(row[`効果${i}_value`])}))
+      .map(effect=>row.マス_type==='上級' ? {...effect,value:Math.trunc(effect.value)} : effect)
       .filter(e=>GROUPS[group]?.includes(normalizeType(e.name))&&Number.isFinite(e.value)&&e.value>0);
   }
   function rowCost(row,basic){
@@ -87,6 +88,8 @@
     return {id:basic.id,basic,row:target,layer,effects:selected,effectValue:selected.reduce((n,e)=>n+e.value,0),star,requiredStar,starSteps,required,targetCosts,routeCosts,starCosts,costs,warnings};
   }
   function list(data,apostles={},options={}){
+    const tileType=options.tileType==='上級'?'上級':'特殊';
+    const crayon=tileType==='上級'?'upper':'special';
     const byId=new Map();for(const row of data.sheets.board||[]){if(!byId.has(row.id))byId.set(row.id,[]);byId.get(row.id).push(row);}
     const result=[];
     for(const basic of data.sheets.basicInfo||[]){
@@ -94,14 +97,17 @@
       if(options.rarity&&options.rarity!=='all'&&(options.rarity==='eldain'?!eldain:eldain||Number(basic.レア度)!==Number(options.rarity)))continue;
       const rows=byId.get(basic.id)||[],a=apostles[basic.id]||{},filled=filledKeys(rows,a,options.mode);
       for(const row of rows){
-        if(row.マス_type!=='特殊'||!effects(row,options.group||'HP').length||filled.has(key(row)))continue;
+        if(row.マス_type!==tileType||!effects(row,options.group||'HP').length||filled.has(key(row)))continue;
         if(options.layer&&options.layer!=='all'&&Number(options.layer)!==Number(row.ボード階層))continue;
         result.push(candidate(basic,rows,a,row,options));
       }
     }
     const mode=options.sort||'special';
-    const value=c=>mode==='gold'?c.costs.gold:mode==='certificate'?c.costs.shared+c.costs.apostle:mode==='efficiency'?c.costs.special/c.effectValue:c.costs.special;
-    return result.sort((a,b)=>Number(!!a.warnings.length)-Number(!!b.warnings.length)||value(a)-value(b)||a.costs.gold-b.costs.gold||a.required.length-b.required.length||String(a.basic.使徒名).localeCompare(String(b.basic.使徒名),'ja')||key(a.row).localeCompare(key(b.row)));
+    const value=c=>mode==='gold'?c.costs.gold:mode==='certificate'?c.costs.shared+c.costs.apostle:mode==='efficiency'?c.costs[crayon]/c.effectValue:c.costs[crayon];
+    const prioritizeSpecial=tileType==='上級'&&mode==='special';
+    return result.sort((a,b)=>Number(!!a.warnings.length)-Number(!!b.warnings.length)
+      ||(prioritizeSpecial?a.costs.special-b.costs.special:0)
+      ||value(a)-value(b)||a.costs.gold-b.costs.gold||a.required.length-b.required.length||String(a.basic.使徒名).localeCompare(String(b.basic.使徒名),'ja')||key(a.row).localeCompare(key(b.row)));
   }
   const api=Object.freeze({list,candidate,filledKeys,effects,key,FIELDS});
   if(typeof module==='object'&&module.exports)module.exports=api;

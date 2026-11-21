@@ -453,6 +453,7 @@
   let researchPlan = null;
   let researchDialogOpener = null;
   let apostleBulkPopoverTrigger = null;
+  let formationSaveDraft = null;
   let boardDraft = null;
   let globalBoardDrafts = {};
   let boardWorkspaceDrafts = cloneJson(initialWorkspaceState?.boardWorkspaceDrafts || {});
@@ -1293,6 +1294,11 @@
       toggleProfileAsideRank();
     });
 
+    elements.profileCard?.addEventListener('click', event => {
+      const trigger = event.target.closest('[data-profile-equipment-bulk]');
+      if (trigger) toggleApostleBulkPopover(trigger);
+    });
+
     elements.profileCard?.addEventListener('change', event => {
       const equipmentSelect = event.target.closest('select[data-profile-equipment-key]');
       if (equipmentSelect) {
@@ -1764,12 +1770,31 @@
     elements.formationSaveConfirm?.addEventListener('click', saveCurrentFormationPreset);
     elements.formationSaveCancel?.addEventListener('click', closeFormationSaveEditor);
     elements.formationOverwriteCurrent?.addEventListener('click', overwriteCurrentFormationPreset);
+    elements.formationSaveTags?.addEventListener('keydown', event => {
+      if (event.key !== 'Enter' || event.isComposing) return;
+      event.preventDefault();
+      addFormationTagPreset();
+    });
+    document.getElementById('formation-save-tag-chips')?.addEventListener('click', event => {
+      const button = event.target.closest('[data-formation-remove-tag]');
+      if (!button || !formationSaveDraft) return;
+      formationSaveDraft.tags.splice(Number(button.dataset.formationRemoveTag), 1);
+      renderFormationSaveTags();
+      const next = document.getElementById('formation-save-tag-chips').children[Number(button.dataset.formationRemoveTag)];
+      (next || elements.formationSaveTags)?.focus({ preventScroll: true });
+    });
 
     elements.formationTagPresets.forEach(button => {
       button.addEventListener('click', () => addFormationTagPreset(button.dataset.formationTagPreset || button.textContent || ''));
     });
 
     elements.formationSaveList?.addEventListener('click', event => {
+      const editButton = event.target.closest('[data-formation-preset-edit]');
+      if (editButton) {
+        const preset = ensureFormationPresetStore().find(item => item.id === editButton.dataset.formationPresetEdit);
+        if (preset) openFormationSaveEditor(preset);
+        return;
+      }
       const loadButton = event.target.closest('[data-formation-preset-load]');
       if (loadButton) {
         loadFormationPreset(loadButton.dataset.formationPresetLoad || '');
@@ -2062,6 +2087,28 @@
       renderResearchOverview();
     });
     elements.researchGrid.addEventListener('click', event => {
+      const mark = event.target.closest('button[data-research-order]');
+      if (mark) {
+        const order = Number(mark.dataset.researchOrder);
+        let level = view.researchBrowseStage;
+        let progress = order;
+        if (mark.getAttribute('aria-pressed') === 'true') {
+          if (!window.confirm(`研究${level}段階の${order}番目と、それ以降の研究を未取得に戻しますか？`)) return;
+          progress = order - 1;
+          if (!progress) {
+            level = RESEARCH_LIMITS.stages.findLast(stage => stage < level) || 0;
+            progress = RESEARCH.getProgressLimit(RESEARCH_LIMITS, level);
+          }
+        }
+        const history = beginHistoryAction('研究進行度変更');
+        Object.assign(appState.research, { level, progress });
+        view.researchBrowseStageTouched = true;
+        saveState();
+        render();
+        commitHistoryAction(history);
+        elements.researchGrid.querySelector(`[data-research-order="${order}"]`)?.focus({ preventScroll: true });
+        return;
+      }
       const button = event.target.closest('button[data-research-material]');
       if (!button) return;
       openResearchMaterialDialog(button.dataset.researchMaterial, Number(button.dataset.researchCount) || 1, button);
@@ -2205,13 +2252,13 @@
       }
       const option = event.target.closest('[data-apostle-bulk-action-value]');
       if (!option || !apostleBulkPopoverTrigger) return;
-      const context = { apostleId: apostleBulkPopoverTrigger.apostleId, group: apostleBulkPopoverTrigger.group };
+      const context = apostleBulkPopoverTrigger;
       const value = option.dataset.apostleBulkActionValue;
       closeApostleBulkPopover({ restoreFocus: false });
       if (context.group === 'skills') applyApostleBulkSkillPreset(context.apostleId, value);
       if (context.group === 'equipment') applyApostleBulkEquipmentPreset(context.apostleId, value);
       if (context.group === 'level') applyApostleBulkLevelPreset(context.apostleId, value);
-      findApostleBulkPopoverTrigger(context.apostleId, context.group)?.focus({ preventScroll: true });
+      findApostleBulkPopoverTrigger(context.apostleId, context.group, context.profile)?.focus({ preventScroll: true });
     });
 
     document.addEventListener('click', event => {
@@ -3615,6 +3662,7 @@
     appState.formation = normalized.formation;
     appState.totalCombatPower = normalizeFormationCoins(normalized.totalCombatPower);
     appState.activeFormationPresetId = normalized.activeFormationPresetId || '';
+    closeFormationSaveEditor();
     if (Array.isArray(normalized.savedFormations)) {
       appState.savedFormations = normalized.savedFormations;
     }
@@ -4642,7 +4690,7 @@
 
   function historyScope(label) {
     if (['使徒選択', '画面遷移', 'ボード階層変更', 'ボードモード変更', '全体ボードモード変更'].includes(label)) return 'navigation';
-    if (['編成保存', '編成上書き', '編成お気に入り変更', '編成削除'].includes(label)) return 'boundary';
+    if (['編成保存', '編成上書き', '編成名・タグ変更', '編成お気に入り変更', '編成削除'].includes(label)) return 'boundary';
     if (label.includes('ボード')) return 'board';
     if (label.includes('研究')) return 'research';
     if (label.startsWith('カード')) return 'cards';
@@ -5280,7 +5328,9 @@
     }).join('');
     return `
       <span class="profile-meta-chip profile-meta-chip-equipment" aria-label="装備設定">
-        <small>装備</small>
+        <button type="button" class="profile-equipment-bulk-trigger" data-profile-equipment-bulk
+          data-apostle-bulk-id="${escapeAttr(basic.id)}" data-apostle-bulk-menu-trigger="equipment"
+          aria-expanded="false" aria-controls="apostle-bulk-action-popover" title="装備Rank・装備一括変更">装備</button>
         <strong class="profile-equipment-chips">${chips}</strong>
       </span>
     `;
@@ -6858,7 +6908,10 @@
           const contents = `${image}<span>${escapeHtml(item.name)}×${Number(item.count).toLocaleString('ja-JP')}</span>`;
           return `<button type="button" class="research-material-button" data-research-material="${escapeHtml(item.name)}" data-research-count="${Number(item.count)}" aria-label="${escapeHtml(item.name)}の製作ツリーを表示">${contents}</button>`;
         }).join('') || '—';
-        return `<tr><th scope="row" class="research-order-cell"><span class="research-order-group">${row.取得順}<span class="research-acquired-mark${acquired(row) ? ' is-acquired' : ''}" role="img" aria-label="${acquired(row) ? '取得済み' : '未取得'}">${acquired(row) ? '✓' : ''}</span></span></th><td class="research-effect-cell"><strong>${escapeHtml(effect)}</strong>${effect !== row.内容 ? `<small>${escapeHtml(row.内容)}</small>` : ''}</td>` +
+        const checked = acquired(row);
+        const order = Number(row.取得順);
+        const action = checked ? 'ここから未取得に戻す' : 'ここまで取得済みにする';
+        return `<tr><th scope="row" class="research-order-cell"><span class="research-order-group">${order}<button type="button" class="research-acquired-mark${checked ? ' is-acquired' : ''}" data-research-order="${order}" aria-pressed="${checked}" aria-label="研究${stage}段階 ${order}番目の取得状況" title="${action}">${checked ? '✓' : ''}</button></span></th><td class="research-effect-cell"><strong>${escapeHtml(effect)}</strong>${effect !== row.内容 ? `<small>${escapeHtml(row.内容)}</small>` : ''}</td>` +
           `<td class="research-material-cell">${materialHtml}</td><td class="research-gold-cell">${Number(row.必要ゴールド).toLocaleString('ja-JP')}</td>` +
           `<td class="research-time-cell">${escapeHtml(formatResearchDuration(row.研究時間))}</td></tr>`;
       }).join('')}</tbody></table>`;
@@ -7640,8 +7693,9 @@
     return Number.isFinite(tier);
   }
 
-  function findApostleBulkPopoverTrigger(apostleId, group) {
-    return Array.from(elements.apostleBulkList?.querySelectorAll('[data-apostle-bulk-menu-trigger]') || [])
+  function findApostleBulkPopoverTrigger(apostleId, group, profile = false) {
+    const container = profile ? elements.profileCard : elements.apostleBulkList;
+    return Array.from(container?.querySelectorAll('[data-apostle-bulk-menu-trigger]') || [])
       .find(trigger => trigger.dataset.apostleBulkId === String(apostleId)
         && trigger.dataset.apostleBulkMenuTrigger === group) || null;
   }
@@ -7652,12 +7706,12 @@
     if (!apostleId || !['skills', 'equipment', 'level'].includes(group) || !elements.apostleBulkPopover) return;
     if (!elements.apostleBulkPopover.hidden
       && apostleBulkPopoverTrigger?.apostleId === apostleId
-      && apostleBulkPopoverTrigger?.group === group) {
+      && apostleBulkPopoverTrigger?.element === trigger) {
       closeApostleBulkPopover({ restoreFocus: false });
       return;
     }
     closeApostleBulkPopover({ restoreFocus: false });
-    apostleBulkPopoverTrigger = { apostleId, group, element: trigger };
+    apostleBulkPopoverTrigger = { apostleId, group, element: trigger, profile: trigger.hasAttribute('data-profile-equipment-bulk') };
     trigger.setAttribute('aria-expanded', 'true');
     elements.apostleBulkPopover.innerHTML = renderApostleBulkPopover(apostleId, group);
     elements.apostleBulkPopover.hidden = false;
@@ -7703,11 +7757,6 @@
         if (!values.includes(cap)) values.push(cap);
         return values.map(value => [String(value), value === cap ? `${value}/MAX` : String(value), `Lv${value}にする`]);
       })();
-    const note = group === 'skills'
-      ? '<p class="apostle-bulk-popover-note">低・高・パッシブをまとめて変更します。</p>'
-      : group === 'level'
-        ? '<p class="apostle-bulk-popover-note">10刻みまたは現在の★上限を選びます。</p>'
-        : '<p class="apostle-bulk-popover-note">「なし」は装備解除、「+0」は強化なしで装備します。</p>';
     const rankActions = Array.from({ length: EQUIPMENT_RANK_MAX }, (_, index) => index + 1);
     const rankSection = group === 'equipment' ? `
       <div class="apostle-bulk-popover-section-label">装備Rank</div>
@@ -7723,7 +7772,6 @@
     const selectedLevel = Number(state.level);
     return `
       <h3 id="apostle-bulk-popover-title" class="apostle-bulk-popover-title">${escapeHtml(basic.使徒名 || apostleId)} · ${title}</h3>
-      ${note}
       ${rankSection}
       <div class="apostle-bulk-popover-actions ${actionClass}">
         ${actions.map(([value, label, description]) => `
@@ -7843,7 +7891,8 @@
     const basic = DATA.getById('basicInfo', id);
     if (!row || !basic) return;
     const active = document.activeElement;
-    const popoverOpenForRow = !elements.apostleBulkPopover?.hidden && apostleBulkPopoverTrigger?.apostleId === id;
+    const popoverOpenForRow = !elements.apostleBulkPopover?.hidden
+      && apostleBulkPopoverTrigger?.apostleId === id && !apostleBulkPopoverTrigger.profile;
     const popoverFocus = popoverOpenForRow
       ? active?.closest?.('[data-apostle-bulk-rank-value], [data-apostle-bulk-action-value]')
       : null;
@@ -7949,6 +7998,17 @@
       renderSkillLevelChange();
     }
     updateApostleBulkRow(id);
+    const popover = apostleBulkPopoverTrigger;
+    if (popover?.profile && popover.apostleId === id) {
+      const trigger = findApostleBulkPopoverTrigger(id, popover.group, true);
+      if (trigger) {
+        popover.element = trigger;
+        trigger.setAttribute('aria-expanded', 'true');
+        elements.apostleBulkPopover.innerHTML = renderApostleBulkPopover(id, popover.group);
+        positionApostleBulkPopover(trigger);
+        elements.apostleBulkPopover.querySelector('[data-apostle-bulk-rank-value][aria-pressed="true"]')?.focus({ preventScroll: true });
+      }
+    }
     commitHistoryAction(history);
   }
 
@@ -8642,12 +8702,30 @@
   }
 
   function saveCurrentFormationPreset() {
+    if (!formationSaveDraft) return;
+    const tags = collectFormationSaveTags();
+    if (!tags) return;
+    if (formationSaveDraft.presetId) {
+      const preset = ensureFormationPresetStore().find(item => item.id === formationSaveDraft.presetId);
+      if (!preset) {
+        closeFormationSaveEditor();
+        return;
+      }
+      if (preset.tags.length && !tags.length && !window.confirm(`「${preset.name}」のタグをすべて削除しますか？`)) return;
+      const action = beginHistoryAction('編成名・タグ変更');
+      preset.name = elements.formationSaveName.value.trim() || preset.name;
+      preset.tags = tags;
+      closeFormationSaveEditor();
+      renderFormationActivePreset();
+      renderFormationPresetList();
+      commitHistoryAction(action);
+      return;
+    }
     const history = beginHistoryAction('編成保存');
     ensureFormationPresetStore();
     const now = new Date();
     const name = (elements.formationSaveName?.value || '').trim()
       || `編成 ${now.toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`;
-    const tags = parseFormationTags(elements.formationSaveTags?.value || '');
     const id = `formation_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
     appState.savedFormations.unshift({
       id,
@@ -8665,13 +8743,20 @@
     commitHistoryAction(history);
   }
 
-  function openFormationSaveEditor() {
+  function openFormationSaveEditor(preset) {
     if (!elements.formationSaveEditor) return;
+    const editing = preset?.id ? preset : null;
+    const source = editing || ensureFormationPresetStore().find(item => item.id === appState.activeFormationPresetId);
+    formationSaveDraft = { presetId: editing?.id || '', tags: [...(source?.tags || [])] };
     elements.formationSaveEditor.hidden = false;
-    if (elements.formationSaveName && !elements.formationSaveName.value.trim()) {
+    document.getElementById('formation-save-editor-title').textContent = editing ? `名前・タグを編集 · ${editing.name}` : '新規保存';
+    if (elements.formationSaveName) {
       const now = new Date();
-      elements.formationSaveName.value = `編成 ${now.toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`;
+      elements.formationSaveName.value = editing?.name || `編成 ${now.toLocaleString('ja-JP', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}`;
     }
+    if (elements.formationSaveTags) elements.formationSaveTags.value = '';
+    renderFormationSaveTags();
+    elements.formationSaveEditor.scrollIntoView({ block: 'nearest' });
     if (shouldAutofocusTextInput()) {
       elements.formationSaveName?.focus({ preventScroll: true });
       elements.formationSaveName?.select();
@@ -8679,6 +8764,7 @@
   }
 
   function closeFormationSaveEditor() {
+    formationSaveDraft = null;
     if (elements.formationSaveEditor) elements.formationSaveEditor.hidden = true;
   }
 
@@ -8688,8 +8774,7 @@
     const history = beginHistoryAction('編成ロード');
     appState.formation = normalizeFormationState(preset.formation);
     appState.activeFormationPresetId = preset.id;
-    if (elements.formationSaveName) elements.formationSaveName.value = preset.name || '';
-    if (elements.formationSaveTags) elements.formationSaveTags.value = (preset.tags || []).join(', ');
+    closeFormationSaveEditor();
     saveState();
     renderFormation();
     commitHistoryAction(history);
@@ -8700,11 +8785,8 @@
     const id = appState.activeFormationPresetId || '';
     const preset = presets.find(item => item.id === id);
     if (!preset) return;
-    if (!window.confirm(`編成「${preset.name}」を現在の内容で上書きしますか？\n保存済みの内容はundoでは戻せません。`)) return;
+    if (!window.confirm(`「${preset.name}」の編成内容を上書きしますか？\n名前・タグ・お気に入りは保持します。上書きは取り消せません。`)) return;
     const history = beginHistoryAction('編成上書き');
-    const name = (elements.formationSaveName?.value || '').trim() || preset.name || '無題の編成';
-    preset.name = name;
-    preset.tags = parseFormationTags(elements.formationSaveTags?.value || '');
     preset.savedAt = new Date().toISOString();
     preset.formation = normalizeFormationState(ensureFormationState());
     saveState();
@@ -8839,13 +8921,14 @@
         <div>
           <strong>${escapeHtml(preset.name)}</strong>
           <span>${escapeHtml(memberCount)}人 / コスト ${escapeHtml(cost)}</span>
-          ${preset.tags?.length ? `<small>${preset.tags.map(tag => `<b>${escapeHtml(tag)}</b>`).join('')}</small>` : ''}
         </div>
         <div class="formation-preset-actions">
           <button type="button" class="favorite ${preset.favoriteSlot ? 'is-on' : ''}" data-formation-preset-favorite="${escapeAttr(preset.id)}" aria-label="お気に入り番号選択">${preset.favoriteSlot ? preset.favoriteSlot : '☆'}</button>
           <button type="button" data-formation-preset-load="${escapeAttr(preset.id)}">読込</button>
+          <button type="button" data-formation-preset-edit="${escapeAttr(preset.id)}">名前・タグ</button>
           <button type="button" class="danger" data-formation-preset-delete="${escapeAttr(preset.id)}">削除</button>
         </div>
+        ${preset.tags?.length ? `<small class="formation-preset-tags">${preset.tags.map(tag => `<b title="${escapeAttr(tag)}">${escapeHtml(tag)}</b>`).join('')}</small>` : ''}
         ${appState.openFormationFavoritePickerId === preset.id ? renderFormationPresetSlotPicker(preset) : ''}
       </article>
     `;
@@ -8857,6 +8940,9 @@
         ${createNumberOptions(1, 6).map(option => `
           <button type="button" class="${preset.favoriteSlot === option.value ? 'is-selected' : ''}" data-formation-preset-id="${escapeAttr(preset.id)}" data-formation-preset-slot="${option.value}">${option.value}</button>
         `).join('')}
+        ${preset.favoriteSlot ? `<button type="button" class="formation-preset-slot-clear"
+          data-formation-preset-id="${escapeAttr(preset.id)}" data-formation-preset-slot="0"
+          aria-label="お気に入り登録を解除"><span aria-hidden="true">×</span> 解除</button>` : ''}
       </div>
     `;
   }
@@ -8866,21 +8952,37 @@
     return appState.savedFormations;
   }
 
-  function parseFormationTags(value) {
+  function parseFormationTags(value, limit = 8) {
     return String(value || '')
       .split(/[,、，\n]+/)
       .map(tag => tag.trim())
       .filter(Boolean)
-      .slice(0, 8);
+      .slice(0, limit);
   }
 
-  function addFormationTagPreset(tag) {
-    if (!elements.formationSaveTags) return;
-    const value = String(tag || '').trim();
-    if (!value) return;
-    const tags = parseFormationTags(elements.formationSaveTags.value);
-    if (!tags.includes(value)) tags.push(value);
-    elements.formationSaveTags.value = tags.slice(0, 8).join(', ');
+  function collectFormationSaveTags(tag = '') {
+    const tags = [...new Set([...formationSaveDraft.tags,
+      ...parseFormationTags(elements.formationSaveTags?.value, Infinity), ...(tag ? [tag] : [])])];
+    if (tags.length <= 8) return tags;
+    document.getElementById('formation-save-tag-status').textContent = 'タグは8件までです。';
+    return null;
+  }
+
+  function renderFormationSaveTags() {
+    const { tags } = formationSaveDraft;
+    document.getElementById('formation-save-tag-chips').innerHTML = tags.map((tag, index) =>
+      `<button type="button" data-formation-remove-tag="${index}" aria-label="${escapeAttr(tag)}を削除">${escapeHtml(tag)} <span aria-hidden="true">×</span></button>`
+    ).join('');
+    document.getElementById('formation-save-tag-status').textContent = tags.length >= 8 ? 'タグは8件までです。' : '';
+  }
+
+  function addFormationTagPreset(tag = '') {
+    if (!formationSaveDraft || !elements.formationSaveTags) return;
+    const tags = collectFormationSaveTags(tag);
+    if (!tags) return;
+    formationSaveDraft.tags = tags;
+    elements.formationSaveTags.value = '';
+    renderFormationSaveTags();
     if (shouldAutofocusTextInput()) {
       elements.formationSaveTags.focus({ preventScroll: true });
     }

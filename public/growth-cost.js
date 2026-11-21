@@ -7,7 +7,7 @@
   const portraitAliases={ED:'Ed',Cuee:'Kyuri',Kyui:'Kyuri',Kyuui:'Kyuri',Kiwi:'Kyuri',Lazy:'Layze',Razy:'Layze',Reizy:'Layze',Rudd:'Rude',Selline:'Selene',Shady:'Shaydi',RenewaAwaken:'Renewa',Sion:'Xion',sion:'Xion',xion:'Xion',xXionx:'Xion'};
   const icons={gold:'ゴールド.webp',lower:'下級くれよん.webp',middle:'中級くれよん.webp',upper:'上級くれよん.webp',special:'特級くれよん.webp',shared:'★1共同教団証.webp',apostle:'使徒証.webp'};
   let apostles={},readError=false,currentCandidates=[],routeOrientation='horizontal';
-  const options=()=>({group:$('stat-filter').value,mode:$('board-mode').value,layer:$('layer-filter').value,rarity:$('rarity-filter').value,sort:$('sort-filter').value,includeStar:$('include-star').checked});
+  const options=()=>({tileType:$('tile-type').value,group:$('stat-filter').value,mode:$('board-mode').value,layer:$('layer-filter').value,rarity:$('rarity-filter').value,sort:$('sort-filter').value,includeStar:$('include-star').checked});
   function costs(c){return Object.keys(engine.FIELDS).filter(k=>c[k]>0).map(k=>`<span class="cost" title="${escape(engine.FIELDS[k])}"><img src="${escape(asset('img/'+icons[k]))}" alt="${escape(engine.FIELDS[k])}"><strong>${fmt(c[k])}</strong></span>`).join('')||'<span class="meta">なし</span>';}
   function routeDiagram(c){
     const rows=data.getById('board',c.id)||[],required=new Set(c.required.map(engine.key));
@@ -45,11 +45,16 @@
   }
   function render(){
     if(readError){$('results').innerHTML='<p class="empty">保存状態を確認できません。再読込してください。</p>';$('result-count').textContent='';return;}
-    const items=engine.list(data,apostles,options());
+    const settings=options();
+    const upper=settings.tileType==='上級';
+    const sort=$('sort-filter');
+    sort.querySelector('[value="special"]').textContent=upper?'上級が少ない順':'特級が少ない順';
+    sort.querySelector('[value="efficiency"]').textContent=upper?'選択効果+1あたりの上級':'選択効果1%あたりの特級';
+    const items=engine.list(data,apostles,settings);
     currentCandidates=items;
     $('result-count').textContent=`${items.length}件`;
     $('results').innerHTML=items.map((c,index)=>{
-      const effect=c.effects.map(e=>`${escape(e.name)} +${fmt(e.value)}%`).join(' / ');
+      const effect=c.effects.map(e=>`${escape(e.name)} +${fmt(e.value)}${upper?'':'%'}`).join(' / ');
       const section=(title,value)=>`<div><label>${title}</label><div class="costs">${costs(value)}</div></div>`;
       const query=new URLSearchParams({view:'board',apostle:c.id,board:String(c.layer),boardMode:options().mode==='planned'?'plan':'current'}).toString();
       const boardUrl=window.TRICKCAL_PUBLIC_SITE?.pageUrl('manager',query)||`../stat-dashboard.html?${query}`;
@@ -57,7 +62,7 @@
       return `<article class="candidate"><div class="candidate-title"><a href="${escape(boardUrl)}" aria-label="${escape(title)}" title="${escape(title)}"><img class="portrait" loading="lazy" src="${escape(asset('img/Chara/'+(portraitAliases[c.id]||c.id)+'.webp'))}" alt=""></a><div><a class="name candidate-board-link" href="${escape(boardUrl)}" title="${escape(title)}">${escape(c.basic.使徒名)}</a> <span class="meta">B${c.layer}</span><p class="effect">${effect}</p><p class="meta">現在★${c.star} / 必要★${c.requiredStar}${!options().includeStar&&c.star<c.requiredStar?'（スターアップ費用を除外）':''}</p></div></div>
         <div class="costs">${c.warnings.length?'<span class="warning">費用未確定</span>':costs(c.costs)}</div>
         <details data-route-index="${index}"><summary>内訳 · 追加${c.required.length}マス</summary><div class="breakdown">${section('対象マス',c.targetCosts)}${section('経路・ゲート',c.routeCosts)}${section('スターアップ',c.starCosts)}</div><div class="route-map"></div>${c.warnings.map(w=>`<p class="warning">${escape(w)}</p>`).join('')}</details></article>`;
-    }).join('')||'<p class="empty">対象の未取得特殊マスはありません。</p>';
+    }).join('')||`<p class="empty">対象の未取得${escape(settings.tileType)}マスはありません。</p>`;
   }
   function read(){
     try{
@@ -71,7 +76,7 @@
   if(!data||!engine){$('results').textContent='データを読み込めませんでした。';return;}
   const boot=await window.TRICKCAL_STORAGE_BOOT;
   if(!boot?.ok){readError=true;render();return;}
-  for(const id of ['stat-filter','board-mode','layer-filter','rarity-filter','sort-filter','include-star'])$(id).addEventListener('change',render);
+  for(const id of ['tile-type','stat-filter','board-mode','layer-filter','rarity-filter','sort-filter','include-star'])$(id).addEventListener('change',render);
   $('reload-state').addEventListener('click',read);
   $('results').addEventListener('click',event=>{
     const button=event.target.closest('[data-route-orientation]');

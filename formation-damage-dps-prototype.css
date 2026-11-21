@@ -18,7 +18,7 @@
 .fdcp-dps-reason-dialog > p { margin:.65rem 0 0; font-size:.8rem; line-height:1.5; white-space:pre-line; overflow-wrap:anywhere; }
 .fdcp-bottom-bar .fdcp-left-tabs { position:absolute; z-index:3; top:calc(-1.7rem - 1px); left:max(.7rem,calc((100% - 1200px) / 2 + 7px)); right:calc(max(.7rem,calc((100% - 1200px) / 2 + 7px)) + var(--fdcp-detail-column) + .45rem); display:flex; align-items:stretch; gap:2px; height:1.7rem; pointer-events:none; }
 .fdcp-bottom-bar .fdcp-left-tabs > * { pointer-events:auto; }
-.fdcp-bottom-bar .fdcp-left-tabs .fdcp-mode-tabs, .fdcp-bottom-bar .fdcp-left-tabs .fdc-shield-switch, .fdcp-bottom-bar .fdcp-left-tabs .fdcp-dps-unavailable-details { position:static; flex:0 0 auto; }
+.fdcp-bottom-bar .fdcp-left-tabs .fdcp-mode-tabs, .fdcp-bottom-bar .fdcp-left-tabs .fdcp-dps-unavailable-details { position:static; flex:0 0 auto; }
 .fdcp-bottom-bar .fdcp-left-tabs .fdcp-dps-unavailable-details { flex:0 1 auto; min-width:0; }
 .fdcp-left-tabs .fdcp-dps-unavailable-details summary { overflow:hidden; text-overflow:ellipsis; }
 @media (max-width:680px) { .fdcp-bottom-bar .fdcp-left-tabs { left:max(.34rem,env(safe-area-inset-left)); right:calc(max(.34rem,env(safe-area-inset-right)) + 3.15rem + .35rem); } }

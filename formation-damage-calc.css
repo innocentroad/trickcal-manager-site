@@ -1,12 +1,6 @@
 .fdc-shield-result { display:block; font-size:.65rem; line-height:1.25; overflow-wrap:anywhere; }
 .fdc-shield-result[hidden] { display:none; }
 #fdc-shield-input-note { font-size:.7rem; line-height:1.3; opacity:.8; }
-.fdc-shield-switch { position:absolute; top:calc(-1.7rem - 1px); left:calc(max(.7rem,calc((100% - 1200px) / 2 + 7px)) + var(--fdcp-mode-tabs-width,3.15rem) * 2 + .35rem); display:flex; align-items:center; height:1.7rem; padding:0; color:var(--fdc-text); }
-.fdc-shield-switch[hidden], .fdcp-bottom-bar[data-mode="dps"] .fdc-shield-switch { display:none; }
-.fdc-shield-switch button { box-sizing:border-box; height:1.7rem; border:1px solid var(--fdc-border); border-bottom:0; border-radius:7px 7px 0 0; padding:3px 7px; color:inherit; background:#1a2744; font:inherit; font-size:.68rem; font-weight:900; line-height:1; white-space:nowrap; cursor:pointer; box-shadow:0 -2px 7px rgba(15,23,42,.2); }
-body.theme-light .fdc-shield-switch button:not([aria-pressed="true"]) { background:#fff; }
-.fdc-shield-switch button[aria-pressed="true"] { color:#fff; background:#566fd1; border-color:#93aaff; }
-@media (max-width:680px) { .fdc-shield-switch { left:calc(max(.34rem,env(safe-area-inset-left)) + var(--fdcp-mode-tabs-width,3.15rem) * 2 + .35rem); } .fdc-shield-switch button { font-size:.64rem; } }
 .fdc-hp-shield { white-space:normal; }
 #fdcp-bottom-bar[data-mode="single"].has-shield-result { --fdcp-result-card-rows:1rem minmax(0,1fr) 1.9rem; }
 #fdcp-bottom-bar[data-mode="single"].has-shield-result .result-card .fdc-result-hp-rate { display:block; height:auto; overflow:visible; text-align:center; line-height:1.1; }
@@ -531,6 +525,8 @@ body.theme-light .fdc-theme-toggle {
   z-index: 1120;
 }
 .fdc-jump-slot #fdc-jump-toggle {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -539,13 +535,30 @@ body.theme-light .fdc-theme-toggle {
   max-width: none;
   min-width: 44px;
   min-height: 44px;
-  padding: 0.3rem 0.55rem;
-  border: 1px solid var(--fdc-border);
-  border-radius: 0.65rem;
+  padding: 0;
+  border: 0;
   font: inherit;
+  font-size: 20px;
+  line-height: 1;
   color: var(--fdc-text);
-  background: var(--fdc-panel-strong);
+  background: transparent;
   cursor: pointer;
+}
+.fdc-jump-slot #fdc-jump-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  z-index: -1;
+  border: 1px solid color-mix(in srgb, #668af2 65%, var(--fdc-border));
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, #668af2 24%, var(--fdc-panel-strong));
+}
+.fdc-jump-slot #fdc-jump-toggle:is(:hover, :focus-visible, [aria-expanded="true"])::before {
+  background: color-mix(in srgb, #668af2 38%, var(--fdc-panel-strong));
 }
 .fdc-jump-panel {
   position: fixed;
@@ -567,10 +580,6 @@ body.theme-light .fdc-theme-toggle {
     min-width: 32px;
     height: 32px;
     min-height: 32px;
-    padding: 0;
-    border-radius: 0.5rem;
-    font-size: 20px;
-    line-height: 1;
   }
 }
 .fdc-jump-panel[hidden], .fdc-jump-sides[hidden] { display: none; }
@@ -1009,6 +1018,8 @@ body.fdc-result-detail-open .fdc-apply-float-toggle:not([aria-expanded="true"]) 
 
 .fdc-apply-float-dots {
   display: inline-flex;
+  flex-direction: column;
+  align-items: center;
   gap: 0.18rem;
   border-radius: 999px;
   padding: 0.08rem 0.22rem 0.04rem;
@@ -1026,6 +1037,27 @@ body.fdc-result-detail-open .fdc-apply-float-toggle:not([aria-expanded="true"]) 
 .fdc-apply-float-dots i.is-off {
   opacity: 0.42;
 }
+
+.fdc-apply-effect-dots,
+.fdc-apply-result-dots {
+  display: inline-flex;
+  gap: inherit;
+}
+
+.fdc-apply-result-dots > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+  font-size: 0.62rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.fdc-apply-result-dots i.is-on { background: #22c55e; }
+.fdc-apply-result-dots i[data-fdc-apply-dot="shield"].is-on { background: #818cf8; }
+#fdc-shield-switch[hidden] { display: none; }
+#fdc-shield-switch:has(input:disabled) { opacity: 0.6; }
+
 
 .fdc-apply-float-dots i[data-fdc-apply-dot="synergy"].is-on {
   background: #2dd4bf;
@@ -2828,28 +2860,14 @@ body.theme-light .fdc-formation-loader select {
   gap: 0.62rem;
 }
 
-.fdc-picker-row > .fdc-picker-slot:nth-child(1):not(.is-resonance),
-.fdc-picker-row .fdc-picker-member-choice:nth-child(1) .fdc-picker-slot:not(.is-resonance) {
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb, dodgerblue 28%, var(--fdc-input)),
-      color-mix(in srgb, var(--fdc-personality-color) 14%, var(--fdc-input)));
-}
+.fdc-picker-row > :nth-child(1) { --fdc-picker-lane-tint: color-mix(in srgb, dodgerblue 28%, var(--fdc-input)); }
+.fdc-picker-row > :nth-child(2) { --fdc-picker-lane-tint: color-mix(in srgb, mediumseagreen 28%, var(--fdc-input)); }
+.fdc-picker-row > :nth-child(3) { --fdc-picker-lane-tint: color-mix(in srgb, indianred 30%, var(--fdc-input)); }
 
-.fdc-picker-row > .fdc-picker-slot:nth-child(2):not(.is-resonance),
-.fdc-picker-row .fdc-picker-member-choice:nth-child(2) .fdc-picker-slot:not(.is-resonance) {
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb, mediumseagreen 28%, var(--fdc-input)),
-      color-mix(in srgb, var(--fdc-personality-color) 14%, var(--fdc-input)));
-}
-
-.fdc-picker-row > .fdc-picker-slot:nth-child(3):not(.is-resonance),
-.fdc-picker-row .fdc-picker-member-choice:nth-child(3) .fdc-picker-slot:not(.is-resonance) {
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb, indianred 30%, var(--fdc-input)),
-      color-mix(in srgb, var(--fdc-personality-color) 14%, var(--fdc-input)));
+.fdc-picker-row .fdc-picker-slot {
+  --fdc-picker-lane-bg: linear-gradient(135deg, var(--fdc-picker-lane-tint),
+    color-mix(in srgb, var(--fdc-personality-color) 14%, var(--fdc-input)));
+  background-image: var(--fdc-picker-lane-bg);
 }
 
 .fdc-picker-row + .fdc-picker-row {
@@ -7495,6 +7513,14 @@ body.theme-dark { --personality-gradient-base: #253044; }
   background-image: var(--personality-options-bg) !important;
   background-origin: padding-box;
   background-clip: padding-box;
+}
+
+.fdc-picker-row .fdc-picker-slot.is-resonance {
+  background-image: var(--fdc-picker-lane-bg) !important;
+}
+
+.fdc-picker-row .fdc-picker-slot.is-two-tone.is-resonance-unselected {
+  background-image: var(--fdc-picker-lane-bg), var(--personality-options-frame) !important;
 }
 /* The power preview is independent of the apostle hit and the DPS timeline. */
 .fdc-master-power-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }

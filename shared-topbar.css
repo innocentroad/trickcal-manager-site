@@ -909,6 +909,34 @@ body.theme-dark .fdc-top-control-bar .fdc-theme-toggle {
   outline-offset: 2px;
 }
 
+@media (hover: hover) {
+  :where(:is(button, summary, input[type="button"], input[type="submit"], input[type="reset"], [role="button"], [role="tab"]):hover:not(:disabled):not([aria-disabled="true"])) {
+    filter: brightness(var(--trickcal-button-hover-brightness, 0.94)) saturate(1.1);
+  }
+
+  :where(:root[data-theme="dark"], body.theme-dark) {
+    --trickcal-button-hover-brightness: 1.16;
+  }
+
+  [data-shared-topbar-page] :is(
+    .topbar-operation-link,
+    .topbar-operation-menu > summary,
+    .topbar-icon-action,
+    [data-topbar-menu-item]
+  ):hover:not(:disabled):not([aria-disabled="true"]) {
+    filter: brightness(0.94) saturate(1.1);
+  }
+
+  :is(:root[data-theme="dark"], body.theme-dark) [data-shared-topbar-page] :is(
+    .topbar-operation-link,
+    .topbar-operation-menu > summary,
+    .topbar-icon-action,
+    [data-topbar-menu-item]
+  ):hover:not(:disabled):not([aria-disabled="true"]) {
+    filter: brightness(1.16) saturate(1.1);
+  }
+}
+
 @media (max-width: 720px) {
   :is(.dashboard-top-control-bar, .fdc-top-control-bar) {
     padding: 0.16rem 0.34rem 0.2rem;

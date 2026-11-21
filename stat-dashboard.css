@@ -694,7 +694,8 @@ body.dashboard-page.is-booting::after {
 .setting-panel[data-setting-panel="research"] :is(select, input, .research-material-dialog button) { min-height: 34px; border-radius: 8px; }
 .setting-panel[data-setting-panel="research"] .research-material-dialog button { padding: 5px 10px; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); background: color-mix(in srgb, currentColor 7%, transparent); color: inherit; font: inherit; cursor: pointer; }
 .setting-panel[data-setting-panel="research"] .research-tree-node { padding: 3px; }
-.research-acquired-mark { display: inline-grid; place-items: center; width: 19px; height: 19px; border: 2px solid currentColor; border-radius: 4px; font-weight: 900; line-height: 1; vertical-align: middle; }
+.research-acquired-mark { display: inline-grid; place-items: center; width: 19px; height: 19px; min-height: 0; padding: 0; color: inherit; background: transparent; border: 2px solid currentColor; border-radius: 4px; font-weight: 900; line-height: 1; vertical-align: middle; cursor: pointer; }
+.research-acquired-mark:hover, .research-acquired-mark:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .research-acquired-mark.is-acquired { background: color-mix(in srgb, #40a271 22%, transparent); }
 .research-tree-selected { margin-top: 5px; min-height: 1.4em; }
 .research-material-dialog { width: fit-content; min-width: min(320px, calc(100vw - 24px)); max-width: min(900px, calc(100vw - 24px)); max-height: min(80dvh, 760px); padding: 12px; overflow: auto; border: 1px solid color-mix(in srgb, currentColor 30%, transparent); border-radius: 10px; background: #fffdf7; color: #283747; }
@@ -1143,6 +1144,24 @@ body.dashboard-page.is-booting::after {
   max-width: 100%;
   white-space: normal;
   background: rgba(77, 137, 184, 0.12);
+}
+
+.profile-meta-chip-equipment .profile-equipment-bulk-trigger {
+  flex: none;
+  min-width: 0;
+  min-height: 22px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 9%, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.profile-meta-chip-equipment .profile-equipment-bulk-trigger:is(:hover, [aria-expanded="true"]) {
+  background: color-mix(in srgb, currentColor 19%, transparent);
 }
 
 .profile-equipment-chip {
@@ -5294,6 +5313,27 @@ body.dashboard-page.is-booting::after {
   display: block;
 }
 
+.formation-save-tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.formation-save-tag-chips:not(:empty) { margin: 4px 0; }
+
+.formation-save-tag-chips button {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
 .formation-save-fields input {
   width: 100%;
   min-height: 34px;
@@ -5575,6 +5615,8 @@ body.dashboard-page.is-booting::after {
 
 .formation-preset-card {
   display: grid;
+  container-name: formation-preset;
+  container-type: inline-size;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
@@ -5597,7 +5639,6 @@ body.dashboard-page.is-booting::after {
   gap: 2px;
 }
 
-.formation-preset-card strong,
 .formation-preset-card span {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5605,6 +5646,7 @@ body.dashboard-page.is-booting::after {
 }
 
 .formation-preset-card strong {
+  overflow-wrap: anywhere;
   color: #294a32;
   font-size: 0.78rem;
   font-weight: 950;
@@ -5616,13 +5658,19 @@ body.dashboard-page.is-booting::after {
   font-weight: 850;
 }
 
-.formation-preset-card small {
+.formation-preset-tags {
+  grid-column: 1 / -1;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
 }
 
 .formation-preset-card b {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   border-radius: 999px;
   padding: 1px 6px;
   color: #36553e;
@@ -5633,7 +5681,22 @@ body.dashboard-page.is-booting::after {
 
 .formation-preset-actions {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 5px;
+}
+
+@container formation-preset (max-width: 380px) {
+  .formation-preset-card > div:first-child,
+  .formation-preset-card > .formation-preset-actions {
+    grid-column: 1 / -1;
+  }
+
+  .formation-preset-card > .formation-preset-actions {
+    order: 1;
+  }
+
+  .formation-preset-card > .formation-preset-slot-picker { order: 2; }
 }
 
 .formation-preset-actions button {
@@ -5662,9 +5725,18 @@ body.dashboard-page.is-booting::after {
   grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 4px;
   padding-top: 2px;
 }
+
+.formation-preset-slot-picker button.formation-preset-slot-clear {
+  width: auto;
+  padding-inline: 7px;
+  white-space: nowrap;
+}
+
+.formation-preset-slot-clear > span { color: inherit; }
 
 .formation-preset-slot-picker button {
   width: 24px;
@@ -10990,10 +11062,41 @@ body.dashboard-page.is-booting::after {
   }
 }
 
-.board-global-intro .panel-note {
-  min-width: min(100%, 420px);
-  flex: 1 1 520px;
-  margin: 0;
+.board-global-help {
+  position: relative;
+}
+
+.board-global-help > summary {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  list-style: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.board-global-help > summary::-webkit-details-marker { display: none; }
+
+.board-global-help > p {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 5;
+  box-sizing: border-box;
+  width: min(18rem, calc(100vw - 3rem));
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  background: #fffdf7;
+  font-size: 0.8rem;
+}
+
+:root[data-theme="dark"] .board-global-help > p {
+  background: #172334;
 }
 
 .board-global-tool-links {
@@ -11801,9 +11904,13 @@ button.apostle-picker-card[class*="personality-"] > strong.has-sort-value .apost
   color: rgba(205, 226, 227, 0.76) !important;
 }
 
-:root[data-theme="dark"] .dashboard-persistent-profile .profile-equipment-chip {
+:root[data-theme="dark"] .dashboard-persistent-profile :is(.profile-equipment-chip, .profile-equipment-bulk-trigger) {
   color: rgba(235, 246, 246, 0.96);
   background: rgba(142, 189, 197, 0.1);
+}
+
+:root[data-theme="dark"] .dashboard-persistent-profile .profile-equipment-bulk-trigger:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  background: rgba(142, 189, 197, 0.2);
 }
 
 :root[data-theme="dark"] .dashboard-persistent-profile .profile-equipment-chip select {
@@ -12588,13 +12695,6 @@ button.apostle-picker-card[class*="personality-"] > strong.has-sort-value .apost
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.apostle-bulk-popover-note {
-  margin: 5px 0 9px;
-  color: var(--muted);
-  font-size: 0.68rem;
-  line-height: 1.35;
 }
 
 .apostle-bulk-popover-actions {
