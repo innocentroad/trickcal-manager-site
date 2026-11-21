@@ -2076,7 +2076,9 @@
       && normalizeArray(actionTiming?.timingEvents).some(row => ['Yomi_high_e01','Yomi_high_e02'].includes(row.effectId));
                                                                           
                                                                           
-    if (sherumArea || yomiArea) suppressDamageFallback = true;
+    const guinArea = normalizeScenarioId(apostle?.id) === 'guin' && actionKey === 'lowSkill';
+    const guinReserve = normalizeScenarioId(apostle?.id) === 'guin' && actionKey === 'highSkill';
+    if (sherumArea || yomiArea || guinArea || guinReserve) suppressDamageFallback = true;
     const usesRawTiming = actionTiming?.timingBasis === 'rawMotion'
       && actionTiming?.timingAdoption !== '暫定採用';
     const includeCommonRows = !exactBranch || branchComposition === 'additive';
@@ -2340,6 +2342,47 @@
         event.ownerArea={durationSeconds:duration,intervalSeconds:1,pulseEvent};
       });
     }
+    if (guinArea) {
+      const durationSeconds = resolveEffectValue(resolveEffect(skill, 'Guin_low_e02'), skillLevel);
+      const intervalSeconds = resolveEffectValue(resolveEffect(skill, 'Guin_low_e03'), skillLevel);
+      const hits = sortedEvents.filter(event => event.type === 'damage');
+      const hit = hits[0];
+      if (hits.length !== 1 || hit.effectId !== 'Guin_low_e01'
+        || hit.timingQuality === 'fallbackEnd' || !(durationSeconds > 0) || !(intervalSeconds > 0)) {
+        throw new RangeError('グウィン低学年の領域通知・持続時間・周期が不足しています');
+      }
+      const pulseEvent = { ...hit, hitCount: 1, isFinalHit: false, afterAction: '継続' };
+      Object.assign(hit, {
+        type: 'effect', hitCount: 0, isFinalHit: false,
+        ownerArea: { durationSeconds, intervalSeconds, pulseEvent }
+      });
+      warnings.push('グウィン低学年は敵が霧の範囲内にいる前提です。周期の終了境界は暫定です。');
+    }
+    if (guinReserve) {
+      const hits = sortedEvents.filter(event => event.type === 'damage');
+      const hit = hits[0];
+      const count = resolveEffectValue(resolveEffect(skill, 'Guin_high_e02'), skillLevel);
+      if (hits.length !== 1 || hit.effectId !== 'Guin_high_e01'
+        || hit.timingQuality === 'fallbackEnd' || count !== 10 || hit.coefficientShare !== 1 / count) {
+        throw new RangeError('グウィン高学年の予約通知・1回分の倍率が不足しています');
+      }
+      const aside = timingContext.asideRank >= 2 ? apostle.aside?.levels?.[2] : null;
+      const reserveCount = aside
+        ? resolveEffectValue(resolveEffect(aside, 'Guin_aside_2_e06'), skillLevel) : count;
+      if (aside && reserveCount !== 20) {
+        throw new RangeError('グウィンA2のペンギン数が不足しています');
+      }
+      const pulseEvent = { ...hit, hitCount: 1, isFinalHit: false, afterAction: '継続',
+        onlySelectedDamageEffect: true };
+      Object.assign(hit, {
+        type: 'effect', hitCount: 0, isFinalHit: false,
+        ownerReserveAttack: { count: reserveCount, intervalSeconds: 0.6, pulseEvent }
+      });
+      warnings.push('グウィン高学年は敵が氷の道にいる前提です。ペンギンの移動時間は未反映です。');
+    }
+    if (skill?.skillId === 'Guin_favorite_1' && actionKey === 'enhancedAttack') {
+      warnings.push('グウィンの愛用遺物は巨大ペンギンの落下待ちを省いた暫定時刻で計算します。');
+    }
     return sortedEvents;
   }
 
@@ -2482,6 +2525,7 @@
       motionFramesByVariant[item.branch || 'default'] = Math.max(0, toFiniteNumber(item.gameFrames));
     });
     const timingContext = {
+      asideRank: buildOptions.asideRank,
       artifactCount: buildOptions.artifactCount,
       skillCountModifiers: buildOptions.skillCountModifiers,
       runtimeEventEffects: buildOptions.runtimeEffects?.eventEffects
@@ -8005,6 +8049,15 @@
     };
 
     const emitEvent = (owner, event) => {
+      if (event.ownerReserveAttack) {
+        const { count, intervalSeconds, pulseEvent } = event.ownerReserveAttack;
+        const reserve = { owner, count, pulseEvent, index: 0, wait: 0,
+          intervalSeconds, startTick: state.tick, update: 1,
+          nextTick: state.tick + toTicks(framesPerSecond / 60, ticksPerFrame) };
+        releaseOwnerReserveChild(reserve);
+        state.ownerReserves.push(reserve);
+        return;
+      }
       if (event.motionLinkedGeneratedEvents) {
         const sequence = event.motionLinkedGeneratedEvents;
         const generatedOwner = {...owner, events:sequence};
@@ -8411,6 +8464,12 @@
       state.pendingUnitSpRecoveries=state.pendingUnitSpRecoveries.filter(pending=>!pending.finished);
     };
     const releaseOwnerReserveChild = reserve => {
+      if (reserve.pulseEvent) {
+        reserve.index++;
+        reserve.wait = 0;
+        emitEvent(reserve.owner, reserve.pulseEvent);
+        return;
+      }
       const spawn = reserve.spawns[reserve.index++];
       reserve.owner.events.filter(event => event.generatedInstanceKey === spawn.generatedInstanceKey)
         .forEach(event => scheduleGeneratedEvent({
@@ -8435,7 +8494,8 @@
         reserve.update++;
         reserve.nextTick = reserve.startTick + toTicks(reserve.update / 60 * framesPerSecond, ticksPerFrame);
       });
-      state.ownerReserves = state.ownerReserves.filter(reserve => reserve.index < reserve.spawns.length);
+      state.ownerReserves = state.ownerReserves.filter(reserve =>
+        reserve.index < (reserve.count ?? reserve.spawns.length));
     };
 
     const emitDueActionEvents = () => {

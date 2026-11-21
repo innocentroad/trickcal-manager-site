@@ -7402,6 +7402,8 @@
         options.push({
           key: `${target.id}:${sourceKey}:${effectIndex}:${getFdcSkillEffectActionKey(effect, actionKey)}${joanneSupport ? `:row:${encodeURIComponent(joanneSupport.row)}` : ''}`,
           effectId: effect.effectId || '',
+                                                               
+          ...(effect.effectId === 'Guin_aside_2_e09' ? { normalCalculationOnly: true } : {}),
           sourceId: sourceKey,
           category,
           label,
@@ -17546,9 +17548,10 @@
     const selectedLevels = unique(selectedRewriteOptions
       .map(option => Number(String(option.sourceKey || '').split(':')[1]))
       .filter(level => Number.isFinite(level)));
+    const equippedLevels = getActiveFdcFavoriteLevels(apostle, target, context);
     const activeLevels = selectedLevels.length
       ? selectedLevels.sort((a, b) => a - b)
-      : getActiveFdcFavoriteLevels(apostle, target, context);
+      : equippedLevels;
     activeLevels.forEach(level => {
       normalizeFdcArray(apostle?.favoriteCard?.levels?.[level]).forEach(skill => {
         const effects = normalizeFdcArray(skill?.effects);
@@ -17596,6 +17599,15 @@
             override.dpsActionName = targetName;
           }
           override.dpsSourceKey = `favorite:${level}`;
+          if (skill.skillId === 'Guin_favorite_1' && actionKey === 'enhancedAttack') {
+            const base = normalizeFdcArray(apostle.skills).find(s => s.skillType === '普通攻撃_強化');
+            const rate = equippedLevels.includes(3)
+              ? normalizeFdcArray(apostle.favoriteCard.levels[3]?.[0]?.effects)
+                .find(effect => effect.effectId === 'Guin_favorite_3_e01')?.fixedValue
+              : 0;
+            override.triggerType = base?.triggerType;
+            override.triggerValue = (Number(base?.triggerValue) || 0) + (Number(rate) || 0);
+          }
           if (skill.skillId === 'Erpin_favorite_1' && actionKey === 'enhancedAttack') {
             const base = normalizeFdcArray(apostle.skills).find(s => s.skillType === '普通攻撃_強化');
             override.triggerType = base?.triggerType;
@@ -18565,6 +18577,9 @@
   }
 
   function isDpsUnsupportedRuntimeTrigger(effect = {}, fallbackText = '') {
+                                                                          
+                                                                            
+    if (effect.effectId === 'Guin_aside_2_e03') return true;
                                      
                                     
                        
@@ -20654,6 +20669,8 @@
           manualDisabled: manualState === false,
           reason: isDpsUnresolvedSelfSpRecovery(option, [option.condition, option.detailText].filter(Boolean).join(' '))
             ? 'SP回復の発動条件が未設定です。被弾・周期などの入力を確認してください'
+            : option.effectId === 'Guin_aside_2_e03'
+            ? '冷たい霧の範囲内にいる時間をDPSで再現できていません'
             : option.targetSelectionRequired && !(option.rangeAssumption ? manualState ?? option.rangeAssumption.defaultEnabled : manualState === true)
             ? '効果の対象候補です。計算対象へ適用する場合は本人効果を手動ONにしてください'
             : unsupportedRuntimeTrigger
