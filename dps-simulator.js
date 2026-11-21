@@ -979,6 +979,11 @@
     return Math.max(minimum, roundDamageRateToEven(base * (1 + percent / 100)));
   }
 
+  function resolveCombatAttack(base, percent = 0, minimum = 0) {
+    const multiplier = Math.max(0.2, 1 + percent / 100);
+    return Math.max(minimum, roundDamageRateToEven(base * multiplier));
+  }
+
   function resolveAttackSpeed(base, percent = 0, fixed = 0) {
     return Math.max(base * Math.fround(0.2), Math.min(base * 10,
       roundDamageRateToEven((base + fixed) * (1 + percent / 100))));
@@ -3059,6 +3064,16 @@
       });
       if (action) actions[actionKey] = action;
     });
+    if (normalizeScenarioId(apostle?.id) === 'speakimaid' && actions.lowSkill) {
+      const order = ['チラシ', 'キャンディ', 'かぼちゃ'];
+      if (order.some(branch => !actions.lowSkill.variantNames.includes(branch))) {
+        throw new RangeError('スピッキー(メイド)の低学年スキルに必要な分岐がありません');
+      }
+      actions.lowSkill.variantSelection = { type: 'cycle', order };
+      if (actions.enhancedAttack && !actions.enhancedAttack.triggerType) {
+        actions.enhancedAttack.triggerProbability = 33;
+      }
+    }
     if (normalizeScenarioId(apostle?.id) === 'shoupan' && !actions.enhancedAttack) {
                                                                               
                                                                                
@@ -3858,6 +3873,41 @@
       attackerPersonality: String(reaction?.attackerPersonality || '')
     })).filter(reaction => reaction.status && reaction.takenDmgP);
     let suppliedDamageBuffEffects = normalizeArray(buildOptions.runtimeEffects?.damageBuffEffects);
+    if (normalizeScenarioId(apostle?.id) === 'speakimaid' && actions.lowSkill) {
+      const passive = normalizeArray(apostle.skills).find(skill => skill.skillType === 'パッシブ');
+      const level = getSkillLevel(passive, buildOptions.skillLevels);
+      const bonus = resolveEffect(passive, 'SpeakiMaid_passive_e01');
+      const percent = resolveEffectValue(bonus, level);
+      const duration = resolveEffectValue(resolveEffect(passive, 'SpeakiMaid_passive_e02'), level);
+      if (!(percent > 0 && duration > 0 && Number(bonus?.maxStack) > 0)) {
+        throw new RangeError('スピッキー(メイド)のパッシブに必要な値がありません');
+      }
+      const id = bonus.effectId;
+      const lowSkill = findSkill(apostle, 'lowSkill');
+      const lowLevel = getSkillLevel(lowSkill, buildOptions.skillLevels);
+      const candyId = 'SpeakiMaid_low_e04';
+      const candyBonus = resolveEffectValue(resolveEffect(lowSkill, candyId), lowLevel);
+      const candyDuration = resolveEffectValue(resolveEffect(lowSkill, 'SpeakiMaid_low_e05'), lowLevel);
+      if (!(candyBonus > 0 && candyDuration > 0)) {
+        throw new RangeError('キャンディの被ダメージ量増加に必要な値がありません');
+      }
+      suppliedDamageBuffEffects = suppliedDamageBuffEffects.filter(effect => (
+        [id, candyId].every(sourceId => effect.runtimeBaseEffectId !== sourceId
+          && effect.id !== sourceId && !String(effect.id || '').startsWith(`${sourceId}:`))
+      ));
+      suppliedDamageBuffEffects.push({
+        id, runtimeBaseEffectId: id, sourceId: apostle.id, label: '魔法攻撃力増加',
+        mode: 'actionHitTimed', triggerActionKeys: ['lowSkill', 'highSkill'],
+        durationFrames: duration * 60, stackable: true, maxStacks: Number(bonus.maxStack),
+        modifiers: { magicAtkP: percent }
+      });
+      suppliedDamageBuffEffects.push({
+        id: candyId, runtimeBaseEffectId: candyId, sourceId: apostle.id, label: '被ダメージ量増加',
+        mode: 'sourceEventTimed', triggerSourceId: 'SpeakiMaid_low_e03', triggerActionKeys: ['lowSkill'],
+        sourceEventFallbackMode: 'disabled', durationFrames: candyDuration * 60,
+        modifiers: { addP: candyBonus }
+      });
+    }
     if (normalizeScenarioId(apostle?.id) === 'chloe' && actions.basicAttack) {
       const buffs = suppliedDamageBuffEffects.filter(effect => effect.id === 'Chloe_low_e04:owner:Chloe');
       if (buffs.length !== 1 || buffs[0].modifiers?.normalAttackAddP !== 7
@@ -4268,6 +4318,10 @@
     }
     if (action.key === 'lowSkill') {
       const selection = action.variantSelection || { type: 'random' };
+      if (selection.type === 'cycle') {
+        const order = selection.order;
+        return order[(order.indexOf(state.lastSkillVariant) + 1) % order.length];
+      }
       let selected;
       if (selection.type === 'resourceAfterGain') {
         const resource = state.runtimeResources?.[selection.resourceId];
@@ -4627,7 +4681,7 @@
       actionKind: 'normalAttack', attackType: 'physical', criticalModel: 'mean-v1',
       skillLevel: base.skillLevel, frame,
       stats: {
-        physicalAtk: resolveCombatStat(base.baseAtk, base.attackP + delta('atkP') + delta('physicalAtkP')),
+        physicalAtk: resolveCombatAttack(base.baseAtk, base.attackP + delta('atkP') + delta('physicalAtkP')),
         crit: resolveCombatStat(base.baseCrit, base.critP + delta('critP')),
         critDmg: resolveCombatStat(base.baseCritDmg, base.critDmgP + delta('critDmgP'))
       },
@@ -4790,7 +4844,7 @@
       || toFiniteNumber(input.statusTakenDmgP) !== toFiniteNumber(input.resolvedStatusTakenDmgP)
       || input.statusDamageP) return null;
     const attackP = getRuntimeAttackModifierP(delta, base.damageType);
-    const finalAtk = resolveCombatStat(base.baseAtk, base.attackP + attackP, 1);
+    const finalAtk = resolveCombatAttack(base.baseAtk, base.attackP + attackP, 1);
     const finalDef = resolveCombatStat(base.baseDef, base.defenseP - toFiniteNumber(delta.enemyDefDownP), 1);
     const finalCrit = resolveCombatStat(base.baseCrit, base.critP + toFiniteNumber(delta.critP));
     const finalCritRes = resolveCombatStat(base.baseCritRes, base.critResP - toFiniteNumber(delta.enemyCritResDownP), 1);
@@ -4871,7 +4925,7 @@
   function createDotAttackSnapshot(base, delta = {}) {
     if (!base?.dotInput) return null;
     return Object.freeze({
-      attack: resolveCombatStat(base.baseAtk, base.attackP + getRuntimeAttackModifierP(delta, base.damageType)),
+      attack: resolveCombatAttack(base.baseAtk, base.attackP + getRuntimeAttackModifierP(delta, base.damageType)),
       critical: resolveCombatStat(base.baseCrit, base.critP + toFiniteNumber(delta.critP)),
       criticalDamage: resolveCombatStat(base.baseCritDmg, base.critDmgP + toFiniteNumber(delta.critDmgP)),
       criticalDamagePoints: base.critDmgAddP + toFiniteNumber(delta.critDmgAddP)
@@ -5027,7 +5081,7 @@
     if (attackP || enemyDefDownP) {
       const oldFinalAtk = Math.max(0, toFiniteNumber(base.finalAtk));
       const newFinalAtk = attackP
-        ? resolveCombatStat(toFiniteNumber(base.baseAtk), toFiniteNumber(base.attackP) + attackP, 1)
+        ? resolveCombatAttack(toFiniteNumber(base.baseAtk), toFiniteNumber(base.attackP) + attackP, 1)
         : oldFinalAtk;
       const oldFinalDef = Math.max(1, toFiniteNumber(base.finalDef, 1));
       const newFinalDef = enemyDefDownP
@@ -8746,6 +8800,7 @@
       triggerAttackSpeedEffectsForAction(actionKey);
       triggerAccelerationEffectsForAction(actionKey);
       const variant = selectedVariant || pickVariant(action, state, random);
+      if (action.variantSelection?.type === 'cycle') state.lastSkillVariant = variant;
       const variantLabel = String(action.variantLabels?.[variant] || '').trim();
       const sourceEvents = action.variants[variant] || action.variants.default || [];
       const baseMotionFrames = action.motionFramesByVariant?.[variant] ?? action.motionFrames;
@@ -10142,6 +10197,7 @@
     resolveNormalDamageRate,
     resolveDirectCritRate,
     resolveCombatStat,
+    resolveCombatAttack,
     resolveAttackSpeed,
     calcRuntimeBaseDamageRate,
     calcRuntimeCritRate,

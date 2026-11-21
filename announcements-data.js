@@ -10,6 +10,27 @@
   const ALLOWED_CTA = new Set(['migration-guide', null]);
   const ARTICLES = Object.freeze([
     Object.freeze({
+      id: '20261121-feature-pvp-guidance',
+      archived: true,
+      autoUntil: '2026-11-27',
+      date: '2026-11-21',
+      title: 'PvP順位ナビ・ボードプレビューなどを更新',
+      barTitle: 'PvP順位ナビ・ボードプレビューを更新',
+      summary: 'PvP順位ナビにおすすめ順位を追加し、ボードプレビューの使徒を画像から選べるようにしました。',
+      body: Object.freeze([
+        '勝った後の挑戦も考慮し、最短戦数を維持しながら相手を探しやすい範囲を案内します。',
+        '確率表示から引き直し回数を1〜15回に変更できます。初期設定は5回です。',
+        '現在順位は保存され、＋／−の長押しで連続調整できます。スマホの分割表示でも使いやすいように画面を整理しました。',
+        'ボードプレビューでは、画像の一覧から使徒を選び、種族とボード種別で絞り込めます。ステータス管理の使徒選択では、カードの星と名前の位置を揃えました。',
+        'スピッキー(メイド)の単体DPSβに暫定対応しました。強化攻撃の倍率配分や一部の命中時刻に暫定値を使っています。',
+        'ダメージ計算で、物理・魔法攻撃力の倍率に、強化と弱体を合算した後で20%の下限を適用します。'
+      ]),
+      category: 'feature',
+      profiles: Object.freeze(['new']),
+      autoRevision: '1',
+      cta: null
+    }),
+    Object.freeze({
       id: '20261119-game-data-speaki-maid',
       archived: true,
       date: '2026-11-19',

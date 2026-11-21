@@ -4289,7 +4289,7 @@ h3 {
   }
 
   .apostle-picker-grid {
-    grid-template-columns: repeat(3, minmax(86px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .stat-total-grid {

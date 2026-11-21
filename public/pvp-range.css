@@ -3,3 +3,89 @@ select{font:inherit;color:var(--fdc-text);background:var(--fdc-bg);border:1px so
 :root[data-theme="dark"]{color-scheme:dark;--fdc-bg:#0b1020;--fdc-panel:#131d34;--fdc-border:#384762;--fdc-text:#f6f8ff;--fdc-muted:#aeb9d1;--fdc-primary:#b6a1fa;--fdc-primary-soft:#2d2548;--fdc-shadow:#0005}
 *{box-sizing:border-box}body{margin:0;padding-top:var(--trickcal-top-occupied-height,var(--trickcal-topbar-height,3.25rem));background:var(--fdc-bg);color:var(--fdc-text);font:14px/1.5 "Yu Gothic UI","Meiryo",system-ui,sans-serif}.data-detail-topbar{position:fixed;inset:0 0 auto;z-index:1100;background:var(--fdc-bg);border-bottom:1px solid var(--fdc-border)}button,input{font:inherit}main{width:min(100% - 24px,760px);margin:12px auto}h1{font-size:17px;margin:0 0 10px}h1>span{font-size:13px;color:var(--fdc-muted)}.pvp-panel{padding:12px;border:1px solid var(--fdc-border);border-radius:12px;background:var(--fdc-panel)}.pvp-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.pvp-card{display:flex;flex-direction:column;justify-content:center;gap:6px;min-width:0;padding:10px;border:1px solid var(--fdc-border);border-radius:9px}.pvp-card>span:first-child{font-size:12px;color:var(--fdc-muted)}.pvp-card strong{font-size:22px}.pvp-card input{width:calc(100% - 24px);max-width:110px;border:1px solid var(--fdc-border);border-radius:6px;padding:4px;background:var(--fdc-bg);color:var(--fdc-text);font-size:20px}.pvp-eliph{display:flex;align-items:center;gap:5px}.pvp-eliph img{width:28px;height:28px;object-fit:contain}.pvp-slider{display:block;margin:12px 0}.pvp-slider>span{display:flex;justify-content:space-between;color:var(--fdc-muted)}.pvp-slider input{width:100%;direction:rtl;accent-color:var(--fdc-primary)}.pvp-panel details{border-top:1px solid var(--fdc-border);padding-top:8px;font-size:12px;color:var(--fdc-muted)}.pvp-panel summary{cursor:pointer}.pvp-panel details p{margin:8px 0}main input:focus-visible,.pvp-panel summary:focus-visible{outline:2px solid var(--fdc-primary);outline-offset:2px}@media(max-width:400px){.pvp-results{gap:5px}.pvp-card{padding:7px}.pvp-card strong,.pvp-card input{font-size:18px}.pvp-eliph img{width:22px;height:22px}.pvp-panel{padding:8px}}
 :root .pvp-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.pvp-heading h1{margin:0}.pvp-history{display:flex;gap:5px}.pvp-history button{width:36px;height:36px;font-size:24px}.pvp-history button,#pvp-target{border:1px solid var(--fdc-border);border-radius:7px;background:var(--fdc-primary-soft);color:var(--fdc-text);cursor:pointer}.pvp-history button:disabled,#pvp-target:disabled{opacity:.45;cursor:default}#pvp-target{white-space:nowrap;min-height:38px;font-size:22px;font-weight:700;padding:2px 5px}#pvp-target:focus-visible,.pvp-history button:focus-visible{outline:2px solid var(--fdc-primary);outline-offset:2px}@media(max-width:400px){#pvp-target{font-size:16px;padding-inline:3px}}
+
+/* Compact layout for split-screen use. */
+body.pvp-nav-collapsed{padding-top:0}
+.data-detail-topbar[hidden],body.pvp-nav-collapsed .trickcal-announcements-follow-bar{display:none!important}
+main{width:min(100% - 12px,760px);margin:6px auto}
+:root .pvp-heading{margin-bottom:5px;gap:4px}.pvp-heading h1{font-size:14px;white-space:nowrap}
+#pvp-nav-toggle{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;padding:0;border:1px solid var(--fdc-border);border-radius:6px;background:var(--fdc-panel);color:var(--fdc-text);cursor:pointer}
+#pvp-nav-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#pvp-nav-toggle[aria-expanded="false"] svg{transform:rotate(180deg)}
+.pvp-heading .pvp-history{margin-left:auto}
+.pvp-history button{width:28px;height:28px;font-size:19px}.pvp-panel{padding:7px;border-radius:8px}
+.pvp-input-row{display:flex;align-items:center;gap:6px;justify-content:space-between}.pvp-input-row label{display:flex;align-items:center;gap:3px;min-width:0}.pvp-input-row input{width:76px;min-width:0;padding:4px;border:1px solid var(--fdc-border);border-radius:5px;background:var(--fdc-bg);color:var(--fdc-text);font-size:16px}
+#pvp-minimum{margin:5px 0;font-size:12px;font-weight:700}.pvp-results{gap:4px}.pvp-card{padding:5px 3px;gap:3px;justify-content:flex-start}.pvp-card>span:first-child{font-size:11px;line-height:1.3}.pvp-card strong,#pvp-target{font-size:16px;line-height:1.4;font-weight:700}#pvp-target{min-height:30px;padding:0;border:0;background:transparent;white-space:normal;text-align:left}
+.pvp-card strong{display:block}.pvp-gain{display:inline-flex;align-items:center;gap:1px;margin-left:3px;white-space:nowrap;font-size:10px;font-weight:400;color:var(--fdc-muted)}.pvp-gain img{width:13px;height:13px;object-fit:contain}
+#pvp-probability{margin:3px 0;font-size:10px;color:var(--fdc-muted)}.pvp-guide-heading{font-size:13px;margin:7px 0 2px}.pvp-guide-table{margin-top:0;font-size:12px}.pvp-guide-table th{font-size:10px;line-height:1.2;padding:3px 2px}.pvp-guide-table td{padding:2px}.pvp-guide-table button{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:0;min-height:30px;width:100%;padding:2px;border:0;background:transparent;font-size:12px}.pvp-panel details{margin-top:6px;padding-top:5px}.pvp-route-panel{margin-top:6px}
+@media(max-width:360px){.pvp-card strong,#pvp-target{font-size:14px}.pvp-card>span:first-child{font-size:10px}.pvp-gain{margin-left:1px}.pvp-input-row input{width:69px}.pvp-guide-table .pvp-gain{font-size:9px}}
+
+.pvp-input-row{gap:3px}.pvp-input-row label{gap:2px;font-size:11px}.pvp-input-row input{width:55px;padding:4px 2px;text-align:center}.pvp-input-row button{padding:0;min-width:28px;min-height:32px;border:1px solid var(--fdc-border);border-radius:5px;background:var(--fdc-primary-soft);color:var(--fdc-text);font-size:16px}.pvp-slider{margin:2px 0}.pvp-slider>span{display:none}.pvp-slider input{display:block;margin:0;height:24px}
+
+:root{--pvp-target:#245bb1;--pvp-compromise:#217149;--pvp-boundary:#975b18}
+:root[data-theme="dark"]{--pvp-target:#94bdff;--pvp-compromise:#80d5a3;--pvp-boundary:#f1be7c}
+.pvp-card:nth-child(1)>span:first-child,#pvp-target,.pvp-guide-table :is(th,td):nth-child(2) button,.pvp-guide-table th:nth-child(2){color:var(--pvp-target)}
+.pvp-card:nth-child(2)>span:first-child,#pvp-compromise,.pvp-guide-table td:nth-child(3) button,.pvp-guide-table th:nth-child(3){color:var(--pvp-compromise)}
+.pvp-card:nth-child(3)>span:first-child,#pvp-boundary,.pvp-guide-table td:nth-child(4) button,.pvp-guide-table th:nth-child(4){color:var(--pvp-boundary)}
+.pvp-probability-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:2px 8px;margin-top:5px;padding:4px 6px;border-radius:5px;background:var(--fdc-bg);font-size:11px}
+.pvp-probability-row>span{color:var(--fdc-muted)}
+#pvp-probability{margin:0;font-size:12px;font-weight:700;color:var(--pvp-compromise);font-variant-numeric:tabular-nums}
+#pvp-display-warning { flex-basis: 100%; color: var(--pvp-boundary); font-size: inherit; }
+.pvp-current-rank { display: flex; align-items: center; gap: 2px; min-width: 0; font-size: 11px; }
+.pvp-input-row [data-adjust="rank"] { touch-action: none; user-select: none; }
+#pvp-goal { min-height: 32px; padding: 3px 5px; color: var(--fdc-text); font-size: 14px; }
+.pvp-results .pvp-card, .pvp-results #pvp-target { text-align: center; }
+.pvp-probability-control { position: relative; }
+.pvp-probability-control:has(select:not([hidden])) { text-decoration: underline dotted; text-underline-offset: 2px; }
+.pvp-probability-control select { position: absolute; inset: -5px 0; width: 100%; opacity: 0; cursor: pointer; }
+.pvp-probability-control:has(select:focus-visible) { outline: 2px solid var(--fdc-primary); outline-offset: 2px; }
+
+@media (max-width: 819px), (max-height: 649px) {
+  .pvp-results .pvp-gain { display: flex; width: max-content; margin-inline: auto; }
+  .pvp-minimum-row { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; }
+  #pvp-compact-probability { color: var(--pvp-compromise); font-size: 11px; text-align: right; }
+  #pvp-compact-probability-text { font: inherit; }
+  .pvp-probability-row { display: none; }
+}
+
+@media (min-width: 820px) and (min-height: 650px) {
+  #pvp-compact-probability { display: none; }
+  body { font-size: 16px; }
+  main { width: min(100% - 48px, 960px); margin: 24px auto; }
+  :root .pvp-heading { gap: 12px; margin-bottom: 14px; }
+  .pvp-heading h1 { font-size: 26px; line-height: 1.3; }
+  .pvp-history { gap: 8px; }
+  .pvp-history button { width: 38px; height: 38px; font-size: 24px; }
+  .pvp-panel { padding: 20px; border-radius: 12px; }
+  .pvp-route-panel { margin-top: 14px; }
+
+  .pvp-input-row { justify-content: flex-start; gap: 20px; }
+  .pvp-input-row label { gap: 7px; font-size: 16px; }
+  .pvp-current-rank { gap: 7px; font-size: 16px; }
+  #pvp-goal { min-height: 40px; padding: 4px 8px; font-size: 18px; }
+  .pvp-input-row input { width: 88px; min-height: 40px; padding: 4px 6px; font-size: 20px; }
+  .pvp-input-row button { min-width: 36px; min-height: 40px; }
+  .pvp-slider { margin: 10px 0 12px; }
+  .pvp-slider > span { display: flex; }
+  #pvp-minimum { margin: 0 0 10px; font-size: 17px; }
+
+  .pvp-results { gap: 12px; }
+  .pvp-card { gap: 6px; padding: 12px 14px; }
+  .pvp-card > span:first-child { font-size: 15px; }
+  .pvp-card strong, #pvp-target { font-size: 26px; line-height: 1.3; }
+  #pvp-target { min-height: 34px; text-decoration: underline; text-underline-offset: 3px; }
+  .pvp-gain { gap: 3px; margin-left: 6px; font-size: 14px; }
+  .pvp-gain img { width: 18px; height: 18px; }
+  .pvp-probability-row { margin-top: 10px; padding: 7px 10px; font-size: 14px; }
+  #pvp-probability { font-size: 16px; }
+
+  .pvp-guide-heading, .pvp-route-heading h2 { font-size: 20px; }
+  .pvp-guide-heading { margin: 18px 0 6px; }
+  .pvp-route-table, .pvp-guide-table button { font-size: 16px; }
+  .pvp-route-table th { font-size: 14px; }
+  .pvp-route-table th, .pvp-route-table td { padding: 6px 8px; }
+  .pvp-guide-table th br { display: none; }
+  .pvp-guide-table button { min-height: 32px; }
+  .pvp-panel details { margin-top: 12px; padding-top: 8px; font-size: 14px; }
+  .pvp-route-heading label, .pvp-one-day, #pvp-one-day-result, .pvp-route-note { font-size: 14px; }
+}

@@ -43,6 +43,7 @@
     ['preference.asideOverviewSort', 'localStorage', 'trickcal_manager_sort_aside_overview_v1', 'display', 'user-preference', 'stat-prototype.js'],
     ['research.materialInventory', 'localStorage', 'trickcal_research_inventory_v1', 'research', 'user-working-settings', 'stat-prototype.js'],
     ['calc.settings', 'localStorage', 'trickcal_formation_damage_settings_v1', 'calculation', 'user-working-settings', 'formation-damage-calc.js'],
+    ['tool.pvpSettings', 'localStorage', 'trickcal_tool_pvp_v1', 'calculation', 'user-working-settings', 'public/pvp-range.js'],
     ['tool.criticalSettings', 'localStorage', 'trickcal_tool_critical_settings_v1', 'calculation', 'user-working-settings', 'public/critical.js'],
     ['calc.resultSaves', 'localStorage', 'trickcal_formation_damage_result_saves_v1', 'calculation', 'named-user-snapshots', 'formation-damage-calc.js'],
     ['calc.enemyPresets', 'localStorage', 'trickcal_formation_damage_enemy_presets_v1', 'enemy', 'user-authored-data', 'formation-damage-calc.js'],

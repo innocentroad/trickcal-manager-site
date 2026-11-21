@@ -24,7 +24,7 @@
   let damageSaveWriteMessage = '';
   let seasonRuleRefreshTimer = null;
   let statDraftSaveTimer = null;
-  const DAMAGE_CALCULATION_VERSION = 113;
+  const DAMAGE_CALCULATION_VERSION = 114;
   let enemyHitRuntime = null;
                                                                                          
   const SEASON_RULE_LABELS = {
@@ -11350,7 +11350,9 @@
     const critDmgResP = defender.critDmgResP - defender.critDmgResDownP;
     const combatMath = typeof TRICKCAL_DPS_SIMULATOR !== 'undefined' ? TRICKCAL_DPS_SIMULATOR : null;
     const combatStat = combatMath?.resolveCombatStat || ((base, percent, minimum = 0) => Math.max(minimum, base * (1 + percent / 100)));
-    const finalAtk = combatStat(baseAtk, attackP, 1);
+    const finalAtk = combatMath?.resolveCombatAttack
+      ? combatMath.resolveCombatAttack(baseAtk, attackP, 1)
+      : Math.max(1, baseAtk * Math.max(0.2, 1 + attackP / 100));
     const finalCrit = combatStat(baseCrit, attacker.critP);
     const finalCritDmg = combatStat(baseCritDmg, attacker.critDmgP);
     const finalHp = baseHp * (1 + hpP / 100);

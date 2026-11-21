@@ -66,6 +66,12 @@
 
   const elements = {
     apostle: document.getElementById('board-preview-apostle'),
+    apostleOpen: document.getElementById('board-preview-apostle-open'),
+    apostleDialog: document.getElementById('board-preview-apostle-dialog'),
+    apostleGrid: document.getElementById('board-preview-apostle-grid'),
+    filterSpecies: document.getElementById('board-preview-filter-species'),
+    filterBoard: document.getElementById('board-preview-filter-board'),
+    apostleEmpty: document.getElementById('board-preview-apostle-empty'),
     species: document.getElementById('board-preview-species'),
     specialType: document.getElementById('board-preview-special-type'),
     attackType: document.getElementById('board-preview-attack-type'),
@@ -111,6 +117,9 @@
     ].join('');
     const species = Array.from(new Set(basicRows.map(row => String(normalizeSpeciesName(row.種族 || ''))).filter(Boolean)));
     elements.species.innerHTML = species.map(value => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join('');
+    elements.filterSpecies.insertAdjacentHTML('beforeend', elements.species.innerHTML);
+    elements.filterBoard.insertAdjacentHTML('beforeend', SPECIAL_TYPES.map(({ key }) =>
+      `<option value="${key}">タイプ${key}</option>`).join(''));
     const tierOptions = Array.from({ length: 5 }, (_, index) => `<option value="${index + 1}">Tier ${index + 1}</option>`).join('');
     elements.tierSelects.forEach(select => {
       select.innerHTML = tierOptions;
@@ -131,6 +140,36 @@
 
   function bindEvents() {
     elements.apostle.addEventListener('change', syncFromApostle);
+    elements.apostleOpen.addEventListener('click', () => {
+      if (!elements.apostleGrid.hasChildNodes()) {
+        elements.apostleGrid.innerHTML = basicRows.map(row => {
+          const name = escapeHtml(row.使徒名 || row.id);
+          const species = normalizeSpeciesName(row.種族 || '');
+          const speciesIcon = window.TRICKCAL_SPECIES?.iconPath(species);
+          const boardType = inferSpecialType(DATA.getById('board', row.id) || []);
+          const badge = speciesIcon
+            ? `<img class="board-apostle-species" src="${escapeHtml(boardAssetPath(speciesIcon))}" alt="" loading="lazy">`
+            : '';
+          const label = speciesIcon ? `${name}（${escapeHtml(species)}）` : name;
+          return `<button type="button" class="board-apostle-card" data-board-apostle="${escapeHtml(row.id)}" data-species="${escapeHtml(species)}" data-board-type="${boardType}" data-personality="${escapeHtml(row.性格 || '')}" aria-label="${label}" title="${label}"><img class="board-apostle-portrait" src="${escapeHtml(boardAssetPath(getApostleImagePath(row.id)))}" alt="" loading="lazy">${badge}</button>`;
+        }).join('');
+        filterApostles();
+      }
+      elements.apostleDialog.querySelectorAll('[data-board-apostle]').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.boardApostle === elements.apostle.value));
+      });
+      elements.apostleDialog.showModal();
+      elements.apostleDialog.querySelector('[aria-pressed="true"]:not([hidden])')?.focus();
+    });
+    elements.filterSpecies.addEventListener('change', filterApostles);
+    elements.filterBoard.addEventListener('change', filterApostles);
+    elements.apostleDialog.addEventListener('click', event => {
+      const button = event.target.closest('[data-board-apostle]');
+      if (!button) return;
+      elements.apostle.value = button.dataset.boardApostle;
+      syncFromApostle();
+      elements.apostleDialog.close();
+    });
     elements.species.addEventListener('change', () => {
       markCustomSelection();
       updateSpecialTypeOptions();
@@ -196,7 +235,7 @@
       closeTilePopover();
     });
     document.addEventListener('keydown', event => {
-      if (event.key !== 'Escape') return;
+      if (event.key !== 'Escape' || elements.apostleDialog.open) return;
       if (elements.detailSettings?.dataset.templateDetailsOpen === 'true') {
         setDetailSettingsOpen(false, { restoreFocus: true });
         event.preventDefault();
@@ -204,6 +243,18 @@
       }
       closeTilePopover();
     });
+  }
+
+  function filterApostles() {
+    const species = elements.filterSpecies.value;
+    const boardType = elements.filterBoard.value;
+    let hasMatch = false;
+    for (const card of elements.apostleGrid.children) {
+      card.hidden = !!((species && card.dataset.species !== species)
+        || (boardType && card.dataset.boardType !== boardType));
+      hasMatch ||= !card.hidden;
+    }
+    elements.apostleEmpty.hidden = hasMatch;
   }
 
   function setDetailSettingsOpen(open, { restoreFocus = false } = {}) {

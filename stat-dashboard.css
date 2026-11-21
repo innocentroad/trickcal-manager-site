@@ -11649,7 +11649,8 @@ button.apostle-picker-card[class*="personality-"]:not(.is-resonance) .apostle-pi
   background: color-mix(in srgb, var(--apostle-personality-color) 22%, white) !important;
 }
 
-button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong {
+button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong,
+button.apostle-picker-card.is-resonance > strong {
   position: relative;
   z-index: 2;
   display: block;
@@ -11664,7 +11665,8 @@ button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong {
   text-shadow: none !important;
 }
 
-button.apostle-picker-card[class*="personality-"]:not(.is-resonance) .apostle-picker-stars {
+button.apostle-picker-card[class*="personality-"]:not(.is-resonance) .apostle-picker-stars,
+button.apostle-picker-card.is-resonance .apostle-picker-stars {
   z-index: 3;
   transform: translateY(-8px);
   margin-bottom: -5px;
@@ -11684,7 +11686,8 @@ button.apostle-picker-card[class*="personality-"]:not(.is-resonance) .apostle-pi
   background: color-mix(in srgb, var(--apostle-personality-color) 34%, white) !important;
 }
 
-:root[data-theme="dark"] button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong {
+:root[data-theme="dark"] button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong,
+:root[data-theme="dark"] button.apostle-picker-card.is-resonance > strong {
   position: relative;
   z-index: 2;
   display: block;
@@ -11706,7 +11709,9 @@ button.apostle-picker-card[class*="personality-"]:not(.is-resonance) .apostle-pi
 }
 
 button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong.has-sort-value,
-:root[data-theme="dark"] button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong.has-sort-value {
+:root[data-theme="dark"] button.apostle-picker-card[class*="personality-"]:not(.is-resonance) > strong.has-sort-value,
+button.apostle-picker-card.is-resonance > strong.has-sort-value,
+:root[data-theme="dark"] button.apostle-picker-card.is-resonance > strong.has-sort-value {
   margin-top: -5px;
   padding-bottom: 7px;
   line-height: 0.98;

@@ -62,6 +62,10 @@
     const requiredComponents = requiredKeys.map(key => Object.freeze({
       key, label: COMPONENTS[key].label, status: statuses[key]
     }));
+    if (id === 'speakimaid' && !timing) {
+      return unsupported({ id, label, asideRank, favoriteLevels, implementationStatuses: statuses, requiredComponents,
+        reason: 'スピッキー(メイド)は、低学年の切り替えと複数ヒットの処理が未対応のため、DPSを表示できません。' });
+    }
     if (!statusRecord) {
       return unsupported({ id, label, asideRank, favoriteLevels, implementationStatuses: statuses, requiredComponents,
         reason: `${label}のDPS対応状況が未登録です。` });
@@ -169,6 +173,9 @@
     ] : [];
     const enemySourceMode = snapshot.scenario?.actors?.enemy?.sourceMode
       ?? snapshot.scenario?.battleConditions?.enemySourceMode;
+    if (id === 'speakimaid') {
+      warnings.push('単体向けの暫定計算です。強化攻撃は総倍率を3等分し、攻撃間隔とかぼちゃ・高学年の命中時刻は暫定値を使います。');
+    }
     if (id === 'tig' && enemySourceMode === 'apostle') {
       provisionalComponents.push(Object.freeze({ key: 'heroHp', label: 'HP追加分未計上', status: '暫定' }));
       warnings.push('ティグの使徒相手への最大HP追加ダメージは未計上です。攻撃力由来のダメージだけで暫定比較します。');
